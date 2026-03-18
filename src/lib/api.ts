@@ -1,0 +1,1032 @@
+// API utilities for external services
+import type { VaultResponse, VaultDocument, DriveFile } from '@/types/vault';
+import { normalizeDriveFile as normalizeFile } from '@/types/vault';
+import { supabase, getCurrentUserEmail } from '@/lib/supabase';
+import type {
+  ResearchSession,
+  ResearchReport,
+  TextSectionKey,
+  CreateResearchSessionInput,
+  CreateSessionDocumentInput,
+  SessionDocument,
+  PromptTemplate,
+} from '@/types/database';
+
+const N8N_BASE_URL = 'https://n8n.tikonacapital.com';
+
+/**
+ * Triggers the financial model generation script via n8n webhook.
+ * The webhook runs the Python financial model script server-side and uploads
+ * the resulting Excel file to the given Google Drive folder.
+ *
+ * @param ticker - NSE stock symbol (e.g., "TATAMOTORS")
+ * @param companyName - Full company name (e.g., "Tata Motors Ltd")
+ * @param sector - Company sector (e.g., "Automobile")
+ * @param folderId - Google Drive folder ID to upload the model into
+ * @returns Promise with the drive file ID of the generated model (or null if unavailable)
+ */
+export async function generateFinancialModel(
+  ticker: string,
+  companyName: string,
+  sector: string,
+  folderId: string
+): Promise<{ fileId: string | null; fileUrl: string | null; fileName: string }> {
+  const requestBody = {
+    nse_symbol: ticker.toUpperCase(),
+    company_name: companyName,
+    sector: sector,
+    folder_id: folderId,
+  };
+
+  console.log('[API] Generating financial model with:', requestBody);
+
+  const response = await fetch(`${N8N_BASE_URL}/webhook/generate-financial-model`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(requestBody),
+  });
+
+  const fileName = `${ticker.toUpperCase()}_model.xlsx`;
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('[API] Financial model error:', errorText);
+    throw new Error(`Financial model generation failed: ${response.status} ${response.statusText}`);
+  }
+
+  const responseText = await response.text();
+  if (!responseText) {
+    // Webhook may be fire-and-forget — return gracefully
+    console.warn('[API] Financial model webhook returned empty response (may be async)');
+    return { fileId: null, fileUrl: null, fileName };
+  }
+
+  let data: Record<string, unknown>;
+  try {
+    data = JSON.parse(responseText);
+  } catch {
+    console.warn('[API] Financial model response not JSON:', responseText.slice(0, 200));
+    return { fileId: null, fileUrl: null, fileName };
+  }
+
+  const fileId = (data.file_id as string) || (data.id as string) || null;
+  const fileUrl = fileId
+    ? `https://drive.google.com/file/d/${fileId}/view`
+    : (data.file_url as string) || null;
+
+  return { fileId, fileUrl, fileName };
+}
+
+/**
+ * Creates a research vault (Google Drive folder) for the given stock ticker
+ * @param ticker - NSE stock symbol (e.g., "TATAMOTORS")
+ * @param sector - Company sector (e.g., "Automobile")
+ * @returns Promise with folder link, folder ID, and files array
+ */
+export async function createVault(ticker: string, sector: string): Promise<VaultResponse> {
+  const requestBody = {
+    nse_symbol: ticker.toUpperCase(),
+    sector: sector,
+  };
+
+  console.log('[API] Creating vault with:', requestBody);
+
+  const response = await fetch(`${N8N_BASE_URL}/webhook/create-folder`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(requestBody),
+  });
+
+  console.log('[API] Response status:', response.status);
+  console.log('[API] Response headers:', Object.fromEntries(response.headers.entries()));
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('[API] Error response:', errorText);
+    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+  }
+
+  // First get the text to see what we're actually receiving
+  const responseText = await response.text();
+  console.log('[API] Response text:', responseText);
+  console.log('[API] Response text length:', responseText.length);
+
+  // Try to parse as JSON
+  let data;
+  try {
+    data = responseText ? JSON.parse(responseText) : null;
+    console.log('[API] Parsed data:', JSON.stringify(data, null, 2));
+  } catch (parseError) {
+    console.error('[API] JSON parse error:', parseError);
+    console.error('[API] Raw response text:', responseText);
+    throw new Error(`Invalid JSON response from server: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`);
+  }
+
+  if (!data) {
+    throw new Error('Empty response from server. The n8n workflow may still be processing. Please check your n8n workflow configuration.');
+  }
+
+  // Handle different response formats from n8n
+  let normalizedResponse: VaultResponse;
+
+  // Case 0: n8n workflow started asynchronously (not waiting for completion)
+  if (data.message === 'Workflow was started' || data.message?.includes('started')) {
+    console.error('[API] n8n workflow is configured to respond immediately, not waiting for completion!');
+    console.error('[API] Configure your webhook node with: Respond = "When Last Node Finishes"');
+    throw new Error(
+      'n8n workflow is not configured correctly. The webhook must wait for the workflow to complete before responding. ' +
+      'Set your Webhook node\'s "Respond" setting to "When Last Node Finishes" and add a "Respond to Webhook" node at the end.'
+    );
+  }
+
+  // Case 1: n8n returns nested array [[file1, file2]] (double-nested format)
+  if (Array.isArray(data) && data.length > 0 && Array.isArray(data[0])) {
+    console.log('[API] ✓ Case 1: Received nested array [[files]]');
+    const files = data[0]; // Extract the inner array
+    console.log('[API] Flattened to', files.length, 'files');
+    const firstFile = files[0];
+    console.log('[API] First file:', firstFile);
+    const folderId = firstFile?.parents?.[0] || 'unknown';
+    console.log('[API] Extracted folder ID:', folderId);
+
+    normalizedResponse = {
+      status: 'success',
+      folder_link: `https://drive.google.com/drive/folders/${folderId}`,
+      folder_id: folderId,
+      files: files,
+    };
+    console.log('[API] Created normalized response with folder_link:', normalizedResponse.folder_link);
+  }
+  // Case 2: n8n returns array of files directly [file1, file2] (legacy format)
+  else if (Array.isArray(data)) {
+    console.log('[API] ✓ Case 2: Received flat array [files]');
+    const firstFile = data[0];
+    console.log('[API] First file:', firstFile);
+    const folderId = firstFile?.parents?.[0] || 'unknown';
+    console.log('[API] Extracted folder ID:', folderId);
+
+    normalizedResponse = {
+      status: 'success',
+      folder_link: `https://drive.google.com/drive/folders/${folderId}`,
+      folder_id: folderId,
+      files: data,
+    };
+    console.log('[API] Created normalized response with folder_link:', normalizedResponse.folder_link);
+  }
+  // Case 3: n8n returns proper structure with status, folder_link, files
+  else if (data.status === 'success' || data.folder_link) {
+    console.log('[API] ✓ Case 3: Received object with status/folder_link');
+    console.log('[API] data.status:', data.status);
+    console.log('[API] data.folder_link:', data.folder_link);
+    console.log('[API] data.folder_id:', data.folder_id);
+    console.log('[API] data.files length:', data.files?.length);
+
+    // Extract folder_id (from data or from first file's parents)
+    const folderId = data.folder_id || data.files?.[0]?.parents?.[0] || 'unknown';
+
+    // Generate folder_link if not provided
+    const folderLink = data.folder_link || `https://drive.google.com/drive/folders/${folderId}`;
+
+    normalizedResponse = {
+      status: data.status || 'success',
+      folder_link: folderLink,
+      folder_id: folderId,
+      files: data.files || [],
+    };
+    console.log('[API] Created normalized response with folder_link:', normalizedResponse.folder_link);
+  }
+  // Case 4: Error response
+  else if (data.status === 'error') {
+    throw new Error(data.message || 'Failed to create vault');
+  }
+  // Case 5: Unknown format
+  else {
+    console.error('[API] Unknown response format:', data);
+    throw new Error('Unexpected response format from server');
+  }
+
+  // Validate normalized response
+  if (!normalizedResponse.folder_link) {
+    console.error('[API] ❌ Validation failed: folder_link is missing or empty');
+    console.error('[API] normalizedResponse:', normalizedResponse);
+    throw new Error('Response missing folder_link. Please check the browser console for details.');
+  }
+
+  if (!normalizedResponse.folder_id) {
+    console.warn('[API] Missing folder_id, using fallback from first file');
+  }
+
+  if (!normalizedResponse.files || !Array.isArray(normalizedResponse.files)) {
+    console.warn('[API] No files array in response');
+    normalizedResponse.files = [];
+  }
+
+  console.log('[API] Normalized response:', {
+    status: normalizedResponse.status,
+    folder_id: normalizedResponse.folder_id,
+    filesCount: normalizedResponse.files.length,
+  });
+
+  return normalizedResponse;
+}
+
+/**
+ * Processes the vault response from n8n and normalizes the files
+ * @param response - Raw response from n8n webhook
+ * @returns Normalized data with folder info and documents
+ */
+export function processVaultResponse(response: VaultResponse): {
+  folderId: string;
+  folderUrl: string;
+  documents: VaultDocument[];
+} {
+  // Filter out invalid files (normalizeDriveFile returns null for invalid entries)
+  const documents = (response.files || [])
+    .map(normalizeFile)
+    .filter((doc): doc is VaultDocument => doc !== null);
+
+  if (documents.length < (response.files || []).length) {
+    console.warn(`[API] ${(response.files || []).length - documents.length} files were invalid and filtered out`);
+  }
+
+  return {
+    folderId: response.folder_id,
+    folderUrl: response.folder_link,
+    documents,
+  };
+}
+
+/**
+ * Deletes a file from Google Drive
+ * @param fileId - Google Drive file ID
+ * @returns Promise<void>
+ */
+export async function deleteDocument(fileId: string): Promise<void> {
+  console.log('[API] Deleting document:', fileId);
+
+  const response = await fetch(`${N8N_BASE_URL}/webhook/delete-file`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ file_id: fileId }),
+  });
+
+  console.log('[API] Delete response status:', response.status);
+
+  // Read body ONCE before checking response.ok
+  const responseText = await response.text();
+  console.log('[API] Delete response:', responseText);
+
+  if (!response.ok) {
+    console.error('[API] Delete error:', responseText);
+    throw new Error(`Failed to delete file: ${response.statusText}`);
+  }
+
+  // Parse response if any
+  if (responseText) {
+    try {
+      const data = JSON.parse(responseText);
+      if (data.status === 'error') {
+        throw new Error(data.message || 'Failed to delete file');
+      }
+    } catch {
+      // If response is not JSON or parsing fails, that's okay
+      console.log('[API] Delete completed (non-JSON response)');
+    }
+  }
+}
+
+// ========================
+// Document Upload
+// ========================
+
+/**
+ * Uploads a document to Google Drive via n8n webhook
+ * @param folderId - Google Drive folder ID to upload into
+ * @param fileName - Desired file name
+ * @param fileBase64 - Base64-encoded file content
+ * @returns The uploaded file as a VaultDocument
+ */
+export async function uploadDocument(
+  folderId: string,
+  fileName: string,
+  fileBase64: string
+): Promise<VaultDocument> {
+  console.log('[API] Uploading document:', { folderId, fileName });
+
+  const response = await fetch(`${N8N_BASE_URL}/webhook/upload-document`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      folder_id: folderId,
+      file_name: fileName,
+      file_base64: fileBase64,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('[API] Upload error:', errorText);
+    throw new Error(`Failed to upload document: ${response.statusText}`);
+  }
+
+  const responseText = await response.text();
+  if (!responseText) {
+    throw new Error('Empty response from upload webhook');
+  }
+
+  const data = JSON.parse(responseText);
+
+  if (data.status === 'error') {
+    throw new Error(data.message || 'Upload failed');
+  }
+
+  // The webhook returns the file object in data.file or data directly
+  const driveFile: DriveFile = data.file || data;
+  const normalizedDoc = normalizeFile(driveFile);
+
+  if (!normalizedDoc) {
+    throw new Error('Upload succeeded but returned invalid file data (missing ID)');
+  }
+
+  return normalizedDoc;
+}
+
+// ========================
+// Research Session CRUD
+// ========================
+
+/**
+ * Creates a new research session in the database
+ */
+export async function saveResearchSession(
+  input: CreateResearchSessionInput
+): Promise<ResearchSession> {
+  const { data, error } = await supabase
+    .from('research_sessions')
+    .insert({
+      company_id: input.company_id,
+      user_email: input.user_email,
+      vault_url: input.vault_url,
+      vault_id: input.vault_id,
+      nse_symbol: input.nse_symbol,
+      company_name: input.company_name,
+      sector: input.sector,
+      status: input.status || 'document_review',
+    })
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to save research session: ${error.message}`);
+  }
+
+  return data;
+}
+
+/**
+ * Lists research sessions with optional filters
+ */
+export async function listResearchSessions(options?: {
+  userEmail?: string;
+  status?: ResearchSession['status'];
+  page?: number;
+  pageSize?: number;
+}): Promise<{ data: ResearchSession[]; count: number }> {
+  const page = options?.page ?? 0;
+  const pageSize = options?.pageSize ?? 25;
+  const from = page * pageSize;
+  const to = from + pageSize - 1;
+
+  let query = supabase
+    .from('research_sessions')
+    .select('*', { count: 'exact' });
+
+  if (options?.userEmail) {
+    query = query.eq('user_email', options.userEmail);
+  }
+  if (options?.status) {
+    query = query.eq('status', options.status);
+  }
+
+  query = query.order('created_at', { ascending: false }).range(from, to);
+
+  const { data, error, count } = await query;
+
+  if (error) {
+    throw new Error(`Failed to list research sessions: ${error.message}`);
+  }
+
+  return { data: data ?? [], count: count ?? 0 };
+}
+
+/**
+ * Gets a single research session by ID
+ */
+export async function getResearchSession(
+  sessionId: string
+): Promise<ResearchSession | null> {
+  const { data, error } = await supabase
+    .from('research_sessions')
+    .select('*')
+    .eq('session_id', sessionId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Failed to fetch research session: ${error.message}`);
+  }
+
+  return data;
+}
+
+/**
+ * Updates the status of a research session
+ */
+export async function updateSessionStatus(
+  sessionId: string,
+  status: ResearchSession['status']
+): Promise<ResearchSession> {
+  const { data, error } = await supabase
+    .from('research_sessions')
+    .update({ status, updated_at: new Date().toISOString() })
+    .eq('session_id', sessionId)
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to update session status: ${error.message}`);
+  }
+
+  return data;
+}
+
+/**
+ * Updates the selected document IDs for a research session
+ */
+export async function updateSessionDocuments(
+  sessionId: string,
+  selectedDocumentIds: string[]
+): Promise<ResearchSession> {
+  const { data, error } = await supabase
+    .from('research_sessions')
+    .update({
+      selected_document_ids: selectedDocumentIds,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('session_id', sessionId)
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to update session documents: ${error.message}`);
+  }
+
+  return data;
+}
+
+/**
+ * Deletes a research session and its associated documents
+ */
+export async function deleteResearchSession(
+  sessionId: string
+): Promise<void> {
+  // Delete session documents first (FK constraint)
+  const { error: docError } = await supabase
+    .from('session_documents')
+    .delete()
+    .eq('session_id', sessionId);
+
+  if (docError) {
+    throw new Error(`Failed to delete session documents: ${docError.message}`);
+  }
+
+  // Delete the session
+  const { error } = await supabase
+    .from('research_sessions')
+    .delete()
+    .eq('session_id', sessionId);
+
+  if (error) {
+    throw new Error(`Failed to delete research session: ${error.message}`);
+  }
+}
+
+// ========================
+// Session Documents CRUD
+// ========================
+
+/**
+ * Saves documents for a research session
+ * Maps drive_file_id → document_id and file_name → document_name
+ * for backward compatibility with existing table columns
+ */
+export async function saveSessionDocuments(
+  documents: CreateSessionDocumentInput[]
+): Promise<SessionDocument[]> {
+  if (documents.length === 0) return [];
+
+  // Map to include both old (document_id, document_name) and new (drive_file_id, file_name) columns
+  const rows = documents.map((doc) => ({
+    ...doc,
+    document_id: doc.drive_file_id,
+    document_name: doc.file_name,
+  }));
+
+  const { data, error } = await supabase
+    .from('session_documents')
+    .insert(rows)
+    .select();
+
+  if (error) {
+    throw new Error(`Failed to save session documents: ${error.message}`);
+  }
+
+  return data ?? [];
+}
+
+/**
+ * Gets documents for a research session
+ */
+export async function getSessionDocuments(
+  sessionId: string
+): Promise<SessionDocument[]> {
+  const { data, error } = await supabase
+    .from('session_documents')
+    .select('*')
+    .eq('session_id', sessionId)
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    throw new Error(`Failed to fetch session documents: ${error.message}`);
+  }
+
+  return data ?? [];
+}
+
+// ========================
+// Research Reports CRUD
+// ========================
+
+/**
+ * Creates a new research report record
+ */
+export async function createResearchReport(input: {
+  session_id: string;
+  user_email: string;
+  company_name: string;
+  nse_symbol: string;
+}): Promise<ResearchReport> {
+  const { data, error } = await supabase
+    .from('research_reports')
+    .insert({
+      session_id: input.session_id,
+      user_email: input.user_email,
+      company_name: input.company_name,
+      nse_symbol: input.nse_symbol,
+      status: 'generating',
+    })
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to create report: ${error.message}`);
+  }
+
+  return data;
+}
+
+/**
+ * Updates a report section after generation
+ */
+export async function updateReportSection(
+  reportId: string,
+  sectionKey: TextSectionKey,
+  content: string
+): Promise<void> {
+  const { error } = await supabase
+    .from('research_reports')
+    .update({
+      [sectionKey]: content,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('report_id', reportId);
+
+  if (error) {
+    throw new Error(`Failed to update report section: ${error.message}`);
+  }
+}
+
+// ========================
+// Dynamic Section Columns (cs_ prefixed)
+// ========================
+
+/**
+ * Creates a new column in research_reports for a custom section.
+ * Column will be named cs_{sectionKey} (e.g., cs_valuation_analysis).
+ */
+export async function addReportSectionColumn(sectionKey: string): Promise<void> {
+  // Create content column (cs_<key>)
+  const { error } = await supabase.rpc('add_report_section_column', {
+    col_name: sectionKey,
+  });
+
+  if (error) {
+    throw new Error(`Failed to create section column: ${error.message}`);
+  }
+
+  // Create heading column (cs_<key>_h)
+  const { error: hError } = await supabase.rpc('add_report_section_column', {
+    col_name: `${sectionKey}_h`,
+  });
+
+  if (hError) {
+    console.warn(`[API] Failed to create heading column cs_${sectionKey}_h:`, hError.message);
+  }
+}
+
+/**
+ * Drops a custom section column from research_reports.
+ * Only cs_ prefixed columns can be dropped (safety guard in RPC).
+ */
+export async function dropReportSectionColumn(sectionKey: string): Promise<void> {
+  const { error } = await supabase.rpc('drop_report_section_column', {
+    col_name: sectionKey,
+  });
+
+  if (error) {
+    // Column may not exist if it was never created — that's OK
+    console.warn(`[API] Failed to drop section column cs_${sectionKey}:`, error.message);
+  }
+}
+
+/**
+ * Updates a custom section column (cs_ prefixed) in research_reports.
+ */
+export async function updateCustomSection(
+  reportId: string,
+  sectionKey: string,
+  content: string
+): Promise<void> {
+  const colName = `cs_${sectionKey}`;
+  const { error } = await supabase
+    .from('research_reports')
+    .update({
+      [colName]: content,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('report_id', reportId);
+
+  if (error) {
+    throw new Error(`Failed to update custom section cs_${sectionKey}: ${error.message}`);
+  }
+}
+
+/**
+ * Updates the generated heading for a section in research_reports.
+ * Default sections use `<key>_h`, custom sections use `cs_<key>_h`.
+ */
+export async function updateSectionHeading(
+  reportId: string,
+  sectionKey: string,
+  heading: string,
+  isCustom: boolean
+): Promise<void> {
+  const colName = isCustom ? `cs_${sectionKey}_h` : `${sectionKey}_h`;
+  const { error } = await supabase
+    .from('research_reports')
+    .update({
+      [colName]: heading,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('report_id', reportId);
+
+  if (error) {
+    throw new Error(`Failed to update section heading ${colName}: ${error.message}`);
+  }
+}
+
+/**
+ * Finalizes a report with metadata
+ */
+export async function finalizeReport(
+  reportId: string,
+  tokensUsed: number,
+  generationTimeSeconds: number
+): Promise<void> {
+  const { error } = await supabase
+    .from('research_reports')
+    .update({
+      status: 'draft',
+      tokens_used: tokensUsed,
+      generation_time_seconds: generationTimeSeconds,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('report_id', reportId);
+
+  if (error) {
+    throw new Error(`Failed to finalize report: ${error.message}`);
+  }
+}
+
+/**
+ * Gets a report by session ID
+ */
+export async function getReportBySession(
+  sessionId: string
+): Promise<ResearchReport | null> {
+  const { data, error } = await supabase
+    .from('research_reports')
+    .select('*')
+    .eq('session_id', sessionId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Failed to fetch report: ${error.message}`);
+  }
+
+  return data;
+}
+
+// ============================================================
+// Prompt Template Management
+// ============================================================
+
+/**
+ * List all prompt templates (default + user's custom templates)
+ */
+export async function listPromptTemplates(userEmail?: string): Promise<PromptTemplate[]> {
+  const userEmailValue = userEmail || (await getCurrentUserEmail());
+
+  let query = supabase
+    .from('prompt_templates')
+    .select('*')
+    .order('sort_order', { ascending: true })
+    .order('section_key', { ascending: true });
+
+  // Get default templates OR user's custom templates
+  if (userEmailValue) {
+    query = query.or(`is_default.eq.true,user_email.eq.${userEmailValue}`);
+  } else {
+    query = query.eq('is_default', true);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    throw new Error(`Failed to list prompt templates: ${error.message}`);
+  }
+
+  return (data || []) as unknown as PromptTemplate[];
+}
+
+/**
+ * Create a new custom prompt template
+ */
+export async function createPromptTemplate(input: {
+  section_key: string;
+  title: string;
+  heading_prompt?: string;
+  prompt_text: string;
+  search_keywords: string[];
+}) {
+  const userEmail = await getCurrentUserEmail();
+
+  const { data, error } = await supabase
+    .from('prompt_templates')
+    .insert({
+      ...input,
+      user_email: userEmail,
+      is_default: false,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to create prompt template: ${error.message}`);
+  }
+
+  return data;
+}
+
+/**
+ * Update an existing prompt template
+ */
+export async function updatePromptTemplate(
+  id: string,
+  updates: {
+    title?: string;
+    heading_prompt?: string;
+    prompt_text?: string;
+    search_keywords?: string[];
+    section_key?: string;
+  }
+) {
+  const { data, error } = await supabase
+    .from('prompt_templates')
+    .update({
+      ...updates,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to update prompt template: ${error.message}`);
+  }
+
+  return data;
+}
+
+/**
+ * Delete a prompt template
+ */
+export async function deletePromptTemplate(id: string) {
+  const { error } = await supabase
+    .from('prompt_templates')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    throw new Error(`Failed to delete prompt template: ${error.message}`);
+  }
+}
+
+/**
+ * Batch-update sort_order for multiple prompt templates
+ */
+export async function reorderPromptTemplates(
+  updates: { id: string; sort_order: number }[]
+): Promise<void> {
+  // Supabase doesn't support batch update by ID natively, so update one by one
+  for (const { id, sort_order } of updates) {
+    const { error } = await supabase
+      .from('prompt_templates')
+      .update({ sort_order })
+      .eq('id', id);
+
+    if (error) {
+      throw new Error(`Failed to reorder prompt template: ${error.message}`);
+    }
+  }
+}
+
+// ========================
+// Report Publishing
+// ========================
+
+/**
+ * Publishes a report so it's visible to customers
+ */
+export async function publishReport(reportId: string): Promise<void> {
+  const { error } = await supabase
+    .from('research_reports')
+    .update({
+      is_published: true,
+      published_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('report_id', reportId);
+
+  if (error) {
+    throw new Error(`Failed to publish report: ${error.message}`);
+  }
+}
+
+/**
+ * Unpublishes a report (hides from customers)
+ */
+export async function unpublishReport(reportId: string): Promise<void> {
+  const { error } = await supabase
+    .from('research_reports')
+    .update({
+      is_published: false,
+      published_at: null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('report_id', reportId);
+
+  if (error) {
+    throw new Error(`Failed to unpublish report: ${error.message}`);
+  }
+}
+
+// ========================
+// Customer Portfolio CRUD
+// ========================
+
+/**
+ * Gets or creates a default portfolio for the given user
+ */
+export async function getOrCreatePortfolio(userId: string): Promise<{ id: string; name: string }> {
+  // Try to find existing portfolio
+  const { data: existing, error: fetchError } = await supabase
+    .from('customer_portfolios')
+    .select('id, name')
+    .eq('user_id', userId)
+    .limit(1)
+    .maybeSingle();
+
+  if (fetchError) {
+    throw new Error(`Failed to fetch portfolio: ${fetchError.message}`);
+  }
+
+  if (existing) return existing;
+
+  // Create default portfolio
+  const { data: created, error: createError } = await supabase
+    .from('customer_portfolios')
+    .insert({ user_id: userId, name: 'My Portfolio' })
+    .select('id, name')
+    .single();
+
+  if (createError) {
+    throw new Error(`Failed to create portfolio: ${createError.message}`);
+  }
+
+  return created;
+}
+
+/**
+ * Lists holdings for a portfolio
+ */
+export async function getPortfolioHoldings(portfolioId: string) {
+  const { data, error } = await supabase
+    .from('portfolio_holdings')
+    .select('*')
+    .eq('portfolio_id', portfolioId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    throw new Error(`Failed to fetch holdings: ${error.message}`);
+  }
+
+  return data ?? [];
+}
+
+/**
+ * Adds a single holding to a portfolio
+ */
+export async function addHolding(input: {
+  portfolio_id: string;
+  nse_symbol: string;
+  company_name?: string;
+  quantity: number;
+  buy_price: number;
+  buy_date?: string;
+  notes?: string;
+}) {
+  const { data, error } = await supabase
+    .from('portfolio_holdings')
+    .insert(input)
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to add holding: ${error.message}`);
+  }
+
+  return data;
+}
+
+/**
+ * Deletes a holding from a portfolio
+ */
+export async function deleteHolding(holdingId: string): Promise<void> {
+  const { error } = await supabase
+    .from('portfolio_holdings')
+    .delete()
+    .eq('id', holdingId);
+
+  if (error) {
+    throw new Error(`Failed to delete holding: ${error.message}`);
+  }
+}
+
+/**
+ * Batch adds holdings (for CSV import)
+ */
+export async function batchAddHoldings(holdings: {
+  portfolio_id: string;
+  nse_symbol: string;
+  company_name?: string;
+  quantity: number;
+  buy_price: number;
+  buy_date?: string;
+}[]) {
+  const { data, error } = await supabase
+    .from('portfolio_holdings')
+    .insert(holdings)
+    .select();
+
+  if (error) {
+    throw new Error(`Failed to batch add holdings: ${error.message}`);
+  }
+
+  return data ?? [];
+}

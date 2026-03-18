@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc:*)",
+      "Bash(ls -la \"c:\\\\Users\\\\pratik\\\\tikona-research-os\\\\src\\\\assets\"\" 2>&1 && echo \"---\" && ls -la \"c:Userspratiktikona-research-osserver\"\")",
+      "Bash(powershell -ExecutionPolicy Bypass -File:*)",
+      "Bash(git -C \"c:\\\\Users\\\\pratik\\\\tikona-research-os\" diff --stat)",
+      "Bash(powershell -Command:*)",
+      "Bash(\"c:\\\\Users\\\\pratik\\\\tikona-research-os\\\\temp_replace.ps1\" << 'PSEOF'\n$files = @\\(\n  'c:\\\\Users\\\\pratik\\\\tikona-research-os\\\\src\\\\pages\\\\GenerateResearch.tsx',\n  'c:\\\\Users\\\\pratik\\\\tikona-research-os\\\\src\\\\components\\\\ui\\\\sheet.tsx',\n  'c:\\\\Users\\\\pratik\\\\tikona-research-os\\\\src\\\\components\\\\ui\\\\tabs.tsx',\n  'c:\\\\Users\\\\pratik\\\\tikona-research-os\\\\src\\\\components\\\\ui\\\\select.tsx',\n  'c:\\\\Users\\\\pratik\\\\tikona-research-os\\\\src\\\\components\\\\ui\\\\sonner.tsx',\n  'c:\\\\Users\\\\pratik\\\\tikona-research-os\\\\src\\\\components\\\\ui\\\\alert-dialog.tsx',\n  'c:\\\\Users\\\\pratik\\\\tikona-research-os\\\\src\\\\components\\\\ui\\\\dropdown-menu.tsx',\n  'c:\\\\Users\\\\pratik\\\\tikona-research-os\\\\src\\\\components\\\\ui\\\\dialog.tsx'\n\\)\n\nforeach \\($file in $files\\) {\n  $content = [System.IO.File]::ReadAllText\\($file\\)\n  $content = $content -replace 'slate-950', 'neutral-950'\n  $content = $content -replace 'slate-900', 'neutral-900'\n  $content = $content -replace 'slate-800', 'neutral-800'\n  $content = $content -replace 'slate-700', 'neutral-700'\n  $content = $content -replace 'slate-600', 'neutral-600'\n  $content = $content -replace 'slate-500', 'neutral-500'\n  $content = $content -replace 'slate-400', 'neutral-400'\n  $content = $content -replace 'slate-300', 'neutral-300'\n  $content = $content -replace 'slate-200', 'neutral-200'\n  $content = $content -replace 'slate-100', 'neutral-100'\n  $content = $content -replace 'slate-50', 'neutral-50'\n  $content = $content -replace 'bg-blue-700', 'bg-neutral-900'\n  $content = $content -replace 'hover:bg-blue-800', 'hover:bg-neutral-800'\n  $content = $content -replace 'text-blue-700', 'text-neutral-700'\n  $content = $content -replace 'bg-blue-50', 'bg-neutral-100'\n  $content = $content -replace 'bg-blue-100', 'bg-neutral-200'\n  $content = $content -replace 'ring-blue-600', 'ring-neutral-400'\n  $content = $content -replace 'ring-blue-100', 'ring-neutral-200'\n  $content = $content -replace 'focus:ring-blue-500', 'focus:ring-neutral-400'\n  $content = $content -replace 'focus:ring-blue-600', 'focus:ring-neutral-400'\n  $content = $content -replace 'focus:border-blue-500', 'focus:border-neutral-400'\n  $content = $content -replace 'text-blue-600', 'text-neutral-600'\n  $content = $content -replace 'hover:text-blue-800', 'hover:text-neutral-800'\n  $content = $content -replace 'border-blue-200', 'border-neutral-200'\n  $content = $content -replace 'border-blue-100', 'border-neutral-200'\n  [System.IO.File]::WriteAllText\\($file, $content\\)\n  Write-Host \"Done: $file\"\n}\nPSEOF)",
+      "Bash(npm run build:*)",
+      "Bash(ls -la /c/Users/pratik/tikona-research-os/src/components/*.tsx)",
+      "Bash(npx vite:*)",
+      "Bash(find /c/Users/pratik/tikona-research-os -name *.py -not -path */node_modules/*)",
+      "Read(//c/Users/pratik/**)"
+    ]
+  }
+}
