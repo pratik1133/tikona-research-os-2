@@ -6,35 +6,41 @@
 // ========================
 
 export type PipelineStatus =
+  | 'company_selected'        // Company + model chosen, user decides financial model or vault
   | 'financial_model_generating'
+  | 'financial_model_done'
   | 'vault_creating'
+  | 'vault_ready'             // Vault created, documents listed
   | 'documents_ingesting'
-  | 'documents_ready'
-  | 'stage0_generating'
+  | 'documents_ready'         // Embeddings created
+  | 'stage0_generating'       // Sector framework generation
   | 'stage0_review'
   | 'stage0_approved'
-  | 'stage1_generating'
+  | 'stage1_generating'       // Thesis generation (single call)
   | 'stage1_review'
   | 'stage1_approved'
-  | 'stage2_generating'
+  | 'stage2_generating'       // Report content generation
   | 'stage2_review'
   | 'stage2_approved'
   | 'published';
 
 // Valid state transitions
 export const PIPELINE_TRANSITIONS: Record<PipelineStatus, PipelineStatus[]> = {
-  financial_model_generating: ['vault_creating', 'documents_ready'], // vault_creating on success, documents_ready on model skip
-  vault_creating: ['documents_ready'],
+  company_selected: ['financial_model_generating', 'vault_creating'],
+  financial_model_generating: ['financial_model_done'],
+  financial_model_done: ['vault_creating'],
+  vault_creating: ['vault_ready'],
+  vault_ready: ['documents_ingesting'],
   documents_ingesting: ['documents_ready'],
   documents_ready: ['stage0_generating'],
   stage0_generating: ['stage0_review'],
-  stage0_review: ['stage0_approved', 'stage0_generating'], // can regenerate
+  stage0_review: ['stage0_approved', 'stage0_generating'],
   stage0_approved: ['stage1_generating'],
   stage1_generating: ['stage1_review'],
-  stage1_review: ['stage1_approved', 'stage1_generating'], // can regenerate
+  stage1_review: ['stage1_approved', 'stage1_generating'],
   stage1_approved: ['stage2_generating'],
   stage2_generating: ['stage2_review'],
-  stage2_review: ['stage2_approved', 'stage2_generating'], // can regenerate
+  stage2_review: ['stage2_approved', 'stage2_generating'],
   stage2_approved: ['published'],
   published: [],
 };
@@ -46,13 +52,6 @@ export function canTransition(from: PipelineStatus, to: PipelineStatus): boolean
 // ========================
 // Pipeline Session — matches actual research_sessions table
 // ========================
-// Actual columns: id, session_id, company_name, company_nse_code, sector,
-// sub_sector, current_state, sector_playbook_original, sector_playbook_approved,
-// stage0_analyst_notes, condensed_briefing, thesis_original, thesis_approved,
-// stage1_analyst_notes, coherence_changelog, final_report_raw, final_report_approved,
-// created_by, created_at, updated_at, pipeline_status, sector_framework,
-// thesis_condensed, thesis_output, report_content, selected_model,
-// total_tokens_used, generation_time_seconds
 
 export interface PipelineSession {
   id: string;
@@ -75,7 +74,7 @@ export interface PipelineSession {
   // Stage 2 — native table columns
   final_report_raw: string | null;
   final_report_approved: string | null;
-  // Pipeline columns (from migration)
+  // Pipeline columns
   pipeline_status: PipelineStatus | null;
   sector_framework: SectorFramework | null;
   thesis_condensed: string | null;
@@ -91,7 +90,40 @@ export interface PipelineSession {
 }
 
 // ========================
-// Stage 0: Sector Framework
+// Sector Playbook — matches sector_playbooks table
+// ========================
+
+export interface SectorPlaybook {
+  id: string;
+  sector_name: string;
+  sector_slug: string;
+  sector_description: string;
+  market_size: Record<string, unknown>;
+  value_chain: Record<string, unknown>;
+  industry_structure: Record<string, unknown>;
+  regulatory_framework: Record<string, unknown>;
+  business_model_archetypes: Record<string, unknown>[];
+  cycle_position: string;
+  cycle_description: string;
+  sector_sentiment: string;
+  consensus_view: string;
+  macro_factors: Record<string, unknown>[];
+  recent_developments: Record<string, unknown>[];
+  contrarian_angles: Record<string, unknown>[];
+  ai_writing_instructions: Record<string, unknown>;
+  key_metrics_to_track: string[];
+  valuation_rules: Record<string, unknown>;
+  red_flags: string[];
+  green_flags: string[];
+  version: number;
+  last_updated: string;
+  created_at: string;
+  updated_at: string;
+  created_by: string | null;
+}
+
+// ========================
+// Sector Framework (derived from playbook or AI-generated)
 // ========================
 
 export interface SectorFramework {
@@ -109,11 +141,12 @@ export interface SectorFramework {
 
 export interface SectorKnowledge {
   id: string;
-  sector_name: string;
+  sector_id: string;
   category: string;
   title: string;
   content: string;
   source: string | null;
+  sort_order: number;
   created_at: string;
   updated_at: string;
 }
@@ -176,7 +209,7 @@ export interface ResearchSection {
 export interface SkbSuggestedUpdate {
   id: string;
   session_id: string;
-  sector_name: string;
+  sector_id: string;
   category: string;
   title: string;
   suggested_content: string;
@@ -197,30 +230,34 @@ export interface PipelineProgress {
 
 // Stage labels for UI
 export const PIPELINE_STAGE_LABELS: Record<PipelineStatus, string> = {
+  company_selected: 'Company Selected',
   financial_model_generating: 'Generating Financial Model',
+  financial_model_done: 'Financial Model Ready',
   vault_creating: 'Creating Drive Vault',
+  vault_ready: 'Vault Ready',
   documents_ingesting: 'Ingesting Documents',
   documents_ready: 'Documents Ready',
   stage0_generating: 'Generating Sector Framework',
   stage0_review: 'Review Sector Framework',
   stage0_approved: 'Sector Framework Approved',
-  stage1_generating: 'Generating Thesis',
-  stage1_review: 'Review Thesis',
-  stage1_approved: 'Thesis Approved',
-  stage2_generating: 'Generating Report',
-  stage2_review: 'Review Report',
-  stage2_approved: 'Report Approved',
+  stage1_generating: 'Generating Investment Thesis',
+  stage1_review: 'Review Investment Thesis',
+  stage1_approved: 'Investment Thesis Approved',
+  stage2_generating: 'Generating Report Content',
+  stage2_review: 'Review Report Content',
+  stage2_approved: 'Report Content Approved',
   published: 'Published',
 };
 
 // Stage step numbers for progress bar
 export function getStageNumber(status: PipelineStatus): number {
-  if (status === 'financial_model_generating' || status === 'vault_creating') return 0;
-  if (status.startsWith('documents')) return 0;
-  if (status.startsWith('stage0')) return 1;
-  if (status.startsWith('stage1')) return 2;
-  if (status.startsWith('stage2')) return 3;
-  if (status === 'published') return 4;
+  if (['company_selected', 'financial_model_generating', 'financial_model_done'].includes(status)) return 0;
+  if (['vault_creating', 'vault_ready'].includes(status)) return 1;
+  if (['documents_ingesting', 'documents_ready'].includes(status)) return 2;
+  if (status.startsWith('stage0')) return 3;
+  if (status.startsWith('stage1')) return 4;
+  if (status.startsWith('stage2')) return 5;
+  if (status === 'published') return 6;
   return 0;
 }
 

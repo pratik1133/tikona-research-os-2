@@ -1,19 +1,12 @@
-// Pipeline API layer — CRUD for pipeline sessions, sectors, research sections
+// Pipeline API layer — CRUD for pipeline sessions, sector playbooks, research sections
 // Maps to the ACTUAL research_sessions table schema in Supabase
-//
-// Actual columns: id, session_id, company_name, company_nse_code, sector,
-// sub_sector, current_state, sector_playbook_original, sector_playbook_approved,
-// stage0_analyst_notes, condensed_briefing, thesis_original, thesis_approved,
-// stage1_analyst_notes, coherence_changelog, final_report_raw, final_report_approved,
-// created_by, created_at, updated_at, pipeline_status, sector_framework,
-// thesis_condensed, thesis_output, report_content, selected_model,
-// total_tokens_used, generation_time_seconds
 
 import { supabase } from '@/lib/supabase';
 import type {
   PipelineSession,
   PipelineStatus,
   SectorKnowledge,
+  SectorPlaybook,
   ResearchSection,
   SectorFramework,
   SkbSuggestedUpdate,
@@ -34,7 +27,6 @@ export async function createPipelineSession(input: {
   created_by: string;
   selected_model?: string;
 }): Promise<PipelineSession> {
-  // Generate a unique session_id (table column is text NOT NULL, no default)
   const sessionId = crypto.randomUUID();
 
   const { data, error } = await supabase
@@ -44,8 +36,8 @@ export async function createPipelineSession(input: {
       company_name: input.company_name,
       company_nse_code: input.company_nse_code,
       sector: input.sector || null,
-      current_state: 'document_review',
-      pipeline_status: 'documents_ready',
+      current_state: 'company_selected',
+      pipeline_status: 'company_selected',
       selected_model: input.selected_model || null,
       created_by: input.created_by,
       total_tokens_used: 0,
@@ -59,7 +51,7 @@ export async function createPipelineSession(input: {
 }
 
 /**
- * Gets a pipeline session by ID
+ * Gets a pipeline session by session_id
  */
 export async function getPipelineSession(sessionId: string): Promise<PipelineSession | null> {
   const { data, error } = await supabase
@@ -103,7 +95,6 @@ export async function listPipelineSessions(options?: {
   const { data, error, count } = await query;
 
   if (error) {
-    // Fallback: list all sessions without pipeline_status filter
     console.warn('[Pipeline] Listing sessions fallback:', error.message);
     let fallbackQuery = supabase
       .from('research_sessions')
@@ -131,7 +122,6 @@ export async function transitionPipelineStatus(
   newStatus: PipelineStatus,
   currentStatus?: PipelineStatus
 ): Promise<PipelineSession> {
-  // If currentStatus provided, validate transition
   if (currentStatus && !canTransition(currentStatus, newStatus)) {
     throw new Error(`Invalid transition: ${currentStatus} → ${newStatus}`);
   }
@@ -183,11 +173,8 @@ export async function updatePipelineOutput(
  * Deletes a pipeline session and its related records
  */
 export async function deletePipelineSession(sessionId: string): Promise<void> {
-  // Delete research sections first (may not exist if table not created)
   await supabase.from('research_sections').delete().eq('session_id', sessionId).then(() => {});
-  // Delete skb suggestions
   await supabase.from('skb_suggested_updates').delete().eq('session_id', sessionId).then(() => {});
-  // Delete the session
   const { error } = await supabase
     .from('research_sessions')
     .delete()
@@ -197,16 +184,138 @@ export async function deletePipelineSession(sessionId: string): Promise<void> {
 }
 
 // ========================
-// Sector Knowledge CRUD
+// Sector Playbook CRUD
 // ========================
 
 /**
- * Lists all sectors
+ * Gets a sector playbook by sector name.
+ * Returns null if no playbook exists for this sector.
  */
-export async function listSectors(): Promise<{ sector_name: string; description: string }[]> {
+export async function getSectorPlaybook(sectorName: string): Promise<SectorPlaybook | null> {
+  const { data, error } = await supabase
+    .from('sector_playbooks')
+    .select('*')
+    .ilike('sector_name', sectorName)
+    .order('version', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    console.warn('[Pipeline] Could not load sector playbook:', error.message);
+    return null;
+  }
+  return data;
+}
+
+/**
+ * Creates a new sector playbook (for a sector that doesn't have one yet).
+ */
+export async function createSectorPlaybook(input: {
+  sector_name: string;
+  sector_description: string;
+  framework_content: string; // The full AI-generated markdown framework
+  created_by: string;
+}): Promise<SectorPlaybook> {
+  const slug = input.sector_name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+  const { data, error } = await supabase
+    .from('sector_playbooks')
+    .insert({
+      sector_name: input.sector_name,
+      sector_slug: slug,
+      sector_description: input.sector_description,
+      // Store the full framework as ai_writing_instructions for retrieval
+      ai_writing_instructions: { framework_markdown: input.framework_content },
+      version: 1,
+      last_updated: new Date().toISOString().split('T')[0],
+      created_by: input.created_by,
+    })
+    .select()
+    .single();
+
+  if (error) throw new Error(`Failed to create sector playbook: ${error.message}`);
+  return data;
+}
+
+/**
+ * Updates an existing sector playbook with new/updated framework content.
+ * Increments the version number.
+ */
+export async function updateSectorPlaybook(
+  playbookId: string,
+  updates: {
+    framework_content?: string;
+    sector_description?: string;
+  }
+): Promise<SectorPlaybook> {
+  const updatePayload: Record<string, unknown> = {
+    updated_at: new Date().toISOString(),
+    last_updated: new Date().toISOString().split('T')[0],
+  };
+
+  if (updates.framework_content) {
+    updatePayload.ai_writing_instructions = { framework_markdown: updates.framework_content };
+  }
+  if (updates.sector_description) {
+    updatePayload.sector_description = updates.sector_description;
+  }
+
+  // Increment version
+  const { data: current } = await supabase
+    .from('sector_playbooks')
+    .select('version')
+    .eq('id', playbookId)
+    .single();
+
+  if (current) {
+    updatePayload.version = (current.version || 1) + 1;
+  }
+
+  const { data, error } = await supabase
+    .from('sector_playbooks')
+    .update(updatePayload)
+    .eq('id', playbookId)
+    .select()
+    .single();
+
+  if (error) throw new Error(`Failed to update sector playbook: ${error.message}`);
+  return data;
+}
+
+/**
+ * Extracts the framework markdown content from a sector playbook.
+ */
+export function getFrameworkFromPlaybook(playbook: SectorPlaybook): string {
+  const instructions = playbook.ai_writing_instructions as Record<string, unknown> | null;
+  if (instructions?.framework_markdown && typeof instructions.framework_markdown === 'string') {
+    return instructions.framework_markdown;
+  }
+  // Fallback: build a summary from the structured fields
+  const parts: string[] = [];
+  if (playbook.sector_description) parts.push(`## Sector Overview\n${playbook.sector_description}`);
+  if (playbook.key_metrics_to_track?.length) {
+    parts.push(`## Key Metrics\n${playbook.key_metrics_to_track.map(m => `- ${m}`).join('\n')}`);
+  }
+  if (playbook.red_flags?.length) {
+    parts.push(`## Red Flags\n${playbook.red_flags.map(f => `- ${f}`).join('\n')}`);
+  }
+  if (playbook.green_flags?.length) {
+    parts.push(`## Green Flags\n${playbook.green_flags.map(f => `- ${f}`).join('\n')}`);
+  }
+  return parts.join('\n\n') || 'No sector framework content available.';
+}
+
+// ========================
+// Sector Knowledge CRUD (uses sector_id FK)
+// ========================
+
+/**
+ * Lists all sectors from the sectors table
+ */
+export async function listSectors(): Promise<{ id: string; sector_name: string; description: string }[]> {
   const { data, error } = await supabase
     .from('sectors')
-    .select('sector_name, description')
+    .select('id, sector_name, description')
     .order('sector_name');
 
   if (error) {
@@ -217,13 +326,13 @@ export async function listSectors(): Promise<{ sector_name: string; description:
 }
 
 /**
- * Gets sector knowledge entries for a sector
+ * Gets sector knowledge entries by sector_id
  */
-export async function getSectorKnowledge(sectorName: string): Promise<SectorKnowledge[]> {
+export async function getSectorKnowledge(sectorId: string): Promise<SectorKnowledge[]> {
   const { data, error } = await supabase
     .from('sector_knowledge')
     .select('*')
-    .eq('sector_name', sectorName)
+    .eq('sector_id', sectorId)
     .order('category')
     .order('sort_order');
 
@@ -235,67 +344,18 @@ export async function getSectorKnowledge(sectorName: string): Promise<SectorKnow
 }
 
 /**
- * Builds a SectorFramework from sector knowledge entries
+ * Gets sector ID by name from sectors table
  */
-export function buildSectorFramework(
-  sectorName: string,
-  knowledge: SectorKnowledge[]
-): SectorFramework {
-  const byCategory = new Map<string, SectorKnowledge[]>();
-  for (const k of knowledge) {
-    const existing = byCategory.get(k.category) || [];
-    existing.push(k);
-    byCategory.set(k.category, existing);
-  }
-
-  const getContent = (cat: string) =>
-    (byCategory.get(cat) || []).map(k => k.content).join('\n\n') || '';
-
-  const getList = (cat: string) =>
-    (byCategory.get(cat) || []).map(k => k.content);
-
-  return {
-    sector_name: sectorName,
-    overview: getContent('overview'),
-    key_metrics: getList('key_metrics'),
-    value_chain: getContent('value_chain'),
-    competitive_dynamics: getContent('competitive_dynamics'),
-    regulatory_landscape: getContent('regulatory'),
-    growth_drivers: getList('growth_drivers'),
-    risk_factors: getList('risks'),
-    valuation_methodology: getContent('valuation'),
-    relevant_questions: getList('questions'),
-  };
-}
-
-/**
- * Upserts sector knowledge entry
- */
-export async function upsertSectorKnowledge(input: {
-  sector_name: string;
-  category: string;
-  title: string;
-  content: string;
-  source?: string;
-}): Promise<SectorKnowledge> {
+export async function getSectorIdByName(sectorName: string): Promise<string | null> {
   const { data, error } = await supabase
-    .from('sector_knowledge')
-    .upsert(
-      {
-        sector_name: input.sector_name,
-        category: input.category,
-        title: input.title,
-        content: input.content,
-        source: input.source || null,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: 'id' }
-    )
-    .select()
-    .single();
+    .from('sectors')
+    .select('id')
+    .ilike('sector_name', sectorName)
+    .limit(1)
+    .maybeSingle();
 
-  if (error) throw new Error(`Failed to upsert sector knowledge: ${error.message}`);
-  return data;
+  if (error || !data) return null;
+  return data.id;
 }
 
 // ========================
@@ -406,7 +466,7 @@ export async function clearResearchSections(
  */
 export async function createSkbSuggestion(input: {
   session_id: string;
-  sector_name: string;
+  sector_id: string;
   category: string;
   title: string;
   suggested_content: string;
@@ -425,7 +485,7 @@ export async function createSkbSuggestion(input: {
  * Lists pending SKB suggestions
  */
 export async function listSkbSuggestions(options?: {
-  sectorName?: string;
+  sectorId?: string;
   status?: 'pending' | 'approved' | 'rejected';
 }): Promise<SkbSuggestedUpdate[]> {
   let query = supabase
@@ -433,8 +493,8 @@ export async function listSkbSuggestions(options?: {
     .select('*')
     .order('created_at', { ascending: false });
 
-  if (options?.sectorName) {
-    query = query.eq('sector_name', options.sectorName);
+  if (options?.sectorId) {
+    query = query.eq('sector_id', options.sectorId);
   }
   if (options?.status) {
     query = query.eq('status', options.status);
@@ -466,23 +526,4 @@ export async function reviewSkbSuggestion(
     .eq('id', suggestionId);
 
   if (error) throw new Error(`Failed to review SKB suggestion: ${error.message}`);
-
-  // If approved, also add to sector_knowledge
-  if (status === 'approved') {
-    const { data: suggestion } = await supabase
-      .from('skb_suggested_updates')
-      .select('*')
-      .eq('id', suggestionId)
-      .single();
-
-    if (suggestion) {
-      await upsertSectorKnowledge({
-        sector_name: suggestion.sector_name,
-        category: suggestion.category,
-        title: suggestion.title,
-        content: suggestion.suggested_content,
-        source: `Pipeline suggestion (session: ${suggestion.session_id})`,
-      });
-    }
-  }
 }

@@ -368,14 +368,14 @@ export async function saveResearchSession(
   const { data, error } = await supabase
     .from('research_sessions')
     .insert({
-      company_id: input.company_id,
-      user_email: input.user_email,
-      vault_url: input.vault_url,
-      vault_id: input.vault_id,
-      nse_symbol: input.nse_symbol,
+      session_id: crypto.randomUUID(),
       company_name: input.company_name,
-      sector: input.sector,
-      status: input.status || 'document_review',
+      company_nse_code: input.nse_symbol,
+      sector: input.sector || null,
+      current_state: input.status || 'document_review',
+      created_by: input.user_email,
+      total_tokens_used: 0,
+      generation_time_seconds: 0,
     })
     .select()
     .single();
@@ -406,10 +406,10 @@ export async function listResearchSessions(options?: {
     .select('*', { count: 'exact' });
 
   if (options?.userEmail) {
-    query = query.eq('user_email', options.userEmail);
+    query = query.eq('created_by', options.userEmail);
   }
   if (options?.status) {
-    query = query.eq('status', options.status);
+    query = query.eq('current_state', options.status);
   }
 
   query = query.order('created_at', { ascending: false }).range(from, to);
@@ -451,7 +451,7 @@ export async function updateSessionStatus(
 ): Promise<ResearchSession> {
   const { data, error } = await supabase
     .from('research_sessions')
-    .update({ status, updated_at: new Date().toISOString() })
+    .update({ current_state: status, updated_at: new Date().toISOString() })
     .eq('session_id', sessionId)
     .select()
     .single();
@@ -464,20 +464,33 @@ export async function updateSessionStatus(
 }
 
 /**
- * Updates the selected document IDs for a research session
+ * Updates the selected_for_ai flag on session_documents for a research session.
+ * Marks documents in selectedDocumentIds as selected, rest as unselected.
  */
 export async function updateSessionDocuments(
   sessionId: string,
   selectedDocumentIds: string[]
 ): Promise<ResearchSession> {
+  // Unselect all documents for this session first
+  await supabase
+    .from('session_documents')
+    .update({ selected_for_ai: false })
+    .eq('session_id', sessionId);
+
+  // Select the chosen documents
+  if (selectedDocumentIds.length > 0) {
+    await supabase
+      .from('session_documents')
+      .update({ selected_for_ai: true })
+      .eq('session_id', sessionId)
+      .in('document_id', selectedDocumentIds);
+  }
+
+  // Return the updated session
   const { data, error } = await supabase
     .from('research_sessions')
-    .update({
-      selected_document_ids: selectedDocumentIds,
-      updated_at: new Date().toISOString(),
-    })
+    .select('*')
     .eq('session_id', sessionId)
-    .select()
     .single();
 
   if (error) {
@@ -643,7 +656,7 @@ export async function addReportSectionColumn(sectionKey: string): Promise<void> 
   });
 
   if (hError) {
-    console.warn(`[API] Failed to create heading column cs_${sectionKey}_h:`, hError.message);
+    throw new Error(`Failed to create heading column cs_${sectionKey}_h: ${hError.message}`);
   }
 }
 
@@ -916,117 +929,3 @@ export async function unpublishReport(reportId: string): Promise<void> {
   }
 }
 
-// ========================
-// Customer Portfolio CRUD
-// ========================
-
-/**
- * Gets or creates a default portfolio for the given user
- */
-export async function getOrCreatePortfolio(userId: string): Promise<{ id: string; name: string }> {
-  // Try to find existing portfolio
-  const { data: existing, error: fetchError } = await supabase
-    .from('customer_portfolios')
-    .select('id, name')
-    .eq('user_id', userId)
-    .limit(1)
-    .maybeSingle();
-
-  if (fetchError) {
-    throw new Error(`Failed to fetch portfolio: ${fetchError.message}`);
-  }
-
-  if (existing) return existing;
-
-  // Create default portfolio
-  const { data: created, error: createError } = await supabase
-    .from('customer_portfolios')
-    .insert({ user_id: userId, name: 'My Portfolio' })
-    .select('id, name')
-    .single();
-
-  if (createError) {
-    throw new Error(`Failed to create portfolio: ${createError.message}`);
-  }
-
-  return created;
-}
-
-/**
- * Lists holdings for a portfolio
- */
-export async function getPortfolioHoldings(portfolioId: string) {
-  const { data, error } = await supabase
-    .from('portfolio_holdings')
-    .select('*')
-    .eq('portfolio_id', portfolioId)
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    throw new Error(`Failed to fetch holdings: ${error.message}`);
-  }
-
-  return data ?? [];
-}
-
-/**
- * Adds a single holding to a portfolio
- */
-export async function addHolding(input: {
-  portfolio_id: string;
-  nse_symbol: string;
-  company_name?: string;
-  quantity: number;
-  buy_price: number;
-  buy_date?: string;
-  notes?: string;
-}) {
-  const { data, error } = await supabase
-    .from('portfolio_holdings')
-    .insert(input)
-    .select()
-    .single();
-
-  if (error) {
-    throw new Error(`Failed to add holding: ${error.message}`);
-  }
-
-  return data;
-}
-
-/**
- * Deletes a holding from a portfolio
- */
-export async function deleteHolding(holdingId: string): Promise<void> {
-  const { error } = await supabase
-    .from('portfolio_holdings')
-    .delete()
-    .eq('id', holdingId);
-
-  if (error) {
-    throw new Error(`Failed to delete holding: ${error.message}`);
-  }
-}
-
-/**
- * Batch adds holdings (for CSV import)
- */
-export async function batchAddHoldings(holdings: {
-  portfolio_id: string;
-  nse_symbol: string;
-  company_name?: string;
-  quantity: number;
-  buy_price: number;
-  buy_date?: string;
-}[]) {
-  const { data, error } = await supabase
-    .from('portfolio_holdings')
-    .insert(holdings)
-    .select();
-
-  if (error) {
-    throw new Error(`Failed to batch add holdings: ${error.message}`);
-  }
-
-  return data ?? [];
-}

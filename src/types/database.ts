@@ -231,11 +231,9 @@ export interface EquityUniverse {
   return_6m: number | null;
   return_12m: number | null;
 
-  // Charts
-  chart_url_1m: string | null;
-  chart_url_3m: string | null;
-  chart_url_6m: string | null;
-  chart_url_12m: string | null;
+  // Additional fields
+  dividend_yield: number | null;
+  face_value: number | null;
 
   // Timestamps
   created_at: string;
@@ -300,18 +298,20 @@ export interface CreateAuditLogInput {
 
 // Research session (matches research_sessions table)
 export interface ResearchSession {
-  session_id: string; // UUID
-  company_id: number;
-  user_email: string;
-  vault_url: string | null;
-  vault_id: string | null;
-  nse_symbol: string;
+  session_id: string;
   company_name: string;
+  company_nse_code: string | null;
   sector: string | null;
-  selected_document_ids: string[] | null; // Drive file IDs selected for RAG
-  status: 'document_review' | 'drafting' | 'completed';
+  current_state: string;
+  status: 'document_review' | 'drafting' | 'completed'; // alias for current_state used in UI
+  created_by: string;
+  pipeline_status: string | null;
+  selected_model: string | null;
+  total_tokens_used: number;
+  generation_time_seconds: number;
   created_at: string;
   updated_at: string;
+  [key: string]: unknown; // allow extra columns from DB
 }
 
 // Research session with joined master_company data
@@ -341,14 +341,11 @@ export interface SessionDocument {
 
 // Input for creating a research session
 export interface CreateResearchSessionInput {
-  company_id: number;
   user_email: string;
-  vault_url: string;
-  vault_id: string;
   nse_symbol: string;
   company_name: string;
   sector: string | null;
-  status?: ResearchSession['status'];
+  status?: string;
 }
 
 // Input for creating session documents
@@ -476,39 +473,6 @@ export interface CreatePromptTemplateInput {
   search_keywords: string[];
   user_email: string;
   is_default?: boolean;
-}
-
-// ========================
-// Customer Portfolio Types
-// ========================
-
-export interface CustomerPortfolio {
-  id: string;
-  user_id: string;
-  name: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface PortfolioHolding {
-  id: string;
-  portfolio_id: string;
-  nse_symbol: string;
-  company_name: string | null;
-  quantity: number;
-  buy_price: number;
-  buy_date: string | null;
-  notes: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface EnrichedHolding extends PortfolioHolding {
-  current_price: number | null;
-  current_value: number | null;
-  invested_value: number;
-  pnl: number | null;
-  pnl_pct: number | null;
 }
 
 // API response types

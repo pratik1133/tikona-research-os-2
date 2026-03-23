@@ -13,11 +13,7 @@ import {
 import PipelineProgressBar from '@/components/pipeline/PipelineProgressBar';
 import StageReview from '@/components/pipeline/StageReview';
 import { useCompanySearch, useCompanyFinancials } from '@/hooks/useCompanySearch';
-import {
-  usePipelineSession,
-  useSectors,
-  useResearchSections,
-} from '@/hooks/usePipelineSession';
+import { useSectors } from '@/hooks/usePipelineSession';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   createPipelineSession,
@@ -27,21 +23,25 @@ import {
   clearResearchSections,
   listPipelineSessions,
   deletePipelineSession,
+  getPipelineSession,
+  getResearchSections,
+  getFrameworkFromPlaybook,
+  getSectorPlaybook,
 } from '@/lib/pipeline-api';
 import {
   createVault,
   processVaultResponse,
-  deleteDocument,
   saveSessionDocuments,
   generateFinancialModel,
 } from '@/lib/api';
 import { ingestDocument } from '@/lib/ai';
-import { runStage0, runStage1, runStage2, REPORT_SECTION_DEFS } from '@/lib/pipeline-ai';
+import { runStage0, runStage1, runStage2, DEFAULT_PROMPTS } from '@/lib/pipeline-ai';
+import type { PromptOverrides } from '@/lib/pipeline-ai';
+import PromptEditor from '@/components/pipeline/PromptEditor';
 import type { PipelineSession, PipelineProgress, PipelineStatus } from '@/types/pipeline';
 import { PIPELINE_STAGE_LABELS, PIPELINE_MODELS, DEFAULT_PIPELINE_MODEL, getStageNumber } from '@/types/pipeline';
 import type { MasterCompany, EquityUniverse } from '@/types/database';
 import type { VaultDocument } from '@/types/vault';
-import FileManager from '@/components/FileManager';
 import DocumentUploadDialog from '@/components/DocumentUploadDialog';
 import { cn } from '@/lib/utils';
 import {
@@ -49,18 +49,13 @@ import {
   Building2,
   Zap,
   FileText,
-  ChevronRight,
   ChevronDown,
   ChevronUp,
   BarChart3,
-  Cpu,
   FolderOpen,
   Upload,
   Check,
-  ArrowRight,
   Trash2,
-  Clock,
-  Plus,
   ExternalLink,
   RefreshCw,
   Loader2,
@@ -121,25 +116,29 @@ export default function ResearchPipeline() {
   const [ingestionStatus, setIngestionStatus] = useState<'idle' | 'ingesting' | 'done' | 'error'>('idle');
   const [ingestionProgress, setIngestionProgress] = useState({ current: 0, total: 0 });
 
+  // --- Financial Model State ---
+  const [financialModelStatus, setFinancialModelStatus] = useState<'idle' | 'generating' | 'success' | 'skipped'>('idle');
+  const [financialModelFileUrl, setFinancialModelFileUrl] = useState<string | null>(null);
+
   // --- Pipeline Stage State ---
-  const [pipelineStatus, setPipelineStatus] = useState<PipelineStatus>('documents_ready');
+  const [pipelineStatus, setPipelineStatus] = useState<PipelineStatus>('company_selected');
   const [isRunning, setIsRunning] = useState(false);
   const [progress, setProgress] = useState<PipelineProgress | null>(null);
 
   // --- Stage Outputs ---
   const [stage0Content, setStage0Content] = useState<string>('');
-  const [stage1Condensed, setStage1Condensed] = useState<string>('');
+  const [stage0IsExisting, setStage0IsExisting] = useState(false);
+  const [sectorFrameworkMarkdown, setSectorFrameworkMarkdown] = useState<string>('');
   const [stage1Thesis, setStage1Thesis] = useState<string>('');
   const [stage2Sections, setStage2Sections] = useState<Array<{ key: string; title: string; content: string }>>([]);
 
-  // --- Financial Model State ---
-  const [financialModelStatus, setFinancialModelStatus] = useState<'idle' | 'generating' | 'success' | 'skipped'>('idle');
-  const [financialModelFileUrl, setFinancialModelFileUrl] = useState<string | null>(null);
-
-  // --- Prompt Visibility ---
+  // --- Prompt Visibility & Overrides ---
   const [showStage0Prompt, setShowStage0Prompt] = useState(false);
   const [showStage1Prompt, setShowStage1Prompt] = useState(false);
   const [showStage2Prompt, setShowStage2Prompt] = useState(false);
+  const [stage0Prompts, setStage0Prompts] = useState<PromptOverrides>({});
+  const [stage1Prompts, setStage1Prompts] = useState<PromptOverrides>({});
+  const [stage2Prompts, setStage2Prompts] = useState<PromptOverrides>({});
 
   // --- Recent Sessions ---
   const [recentSessions, setRecentSessions] = useState<PipelineSession[]>([]);
@@ -187,26 +186,30 @@ export default function ResearchPipeline() {
   // Load session data when sessionId changes
   useEffect(() => {
     if (!sessionId) return;
-    import('@/lib/pipeline-api').then(({ getPipelineSession, getResearchSections }) => {
-      getPipelineSession(sessionId).then((s) => {
-        if (s) {
-          setSession(s);
-          setPipelineStatus((s.pipeline_status ?? 'documents_ready') as PipelineStatus);
-          setSelectedModel(s.selected_model ?? DEFAULT_PIPELINE_MODEL);
-          // Load stage outputs
-          if (s.sector_framework) {
-            const fw = s.sector_framework as any;
-            setStage0Content(typeof fw.overview === 'string' ? fw.overview : JSON.stringify(fw, null, 2));
-          }
-          if (s.thesis_condensed) setStage1Condensed(s.thesis_condensed);
-          if (s.thesis_output) setStage1Thesis(s.thesis_output);
+    getPipelineSession(sessionId).then((s) => {
+      if (s) {
+        setSession(s);
+        setPipelineStatus((s.pipeline_status ?? 'company_selected') as PipelineStatus);
+        setSelectedModel(s.selected_model ?? DEFAULT_PIPELINE_MODEL);
+        // Load stage outputs from session
+        if (s.sector_framework) {
+          const fw = s.sector_framework;
+          setStage0Content(fw.overview || JSON.stringify(fw, null, 2));
         }
-      });
-      getResearchSections(sessionId, 'stage2').then((sections) => {
-        if (sections.length > 0) {
-          setStage2Sections(sections.map(s => ({ key: s.section_key, title: s.section_title, content: s.content })));
+        if (s.thesis_output) setStage1Thesis(s.thesis_output);
+        // Try to recover sectorFrameworkMarkdown from playbook
+        const sectorName = s.sector || selectedSector;
+        if (sectorName) {
+          getSectorPlaybook(sectorName).then((pb) => {
+            if (pb) setSectorFrameworkMarkdown(getFrameworkFromPlaybook(pb));
+          });
         }
-      });
+      }
+    });
+    getResearchSections(sessionId, 'stage2').then((sections) => {
+      if (sections.length > 0) {
+        setStage2Sections(sections.map(s => ({ key: s.section_key, title: s.section_title, content: s.content })));
+      }
     });
   }, [sessionId]);
 
@@ -215,84 +218,17 @@ export default function ResearchPipeline() {
     setSelectedCompany(company);
     setSearchInput(company.company_name);
     setIsDropdownOpen(false);
-    // Auto-fill sector
-    if (company.sector) setSelectedSector(company.sector);
   }, []);
 
-  // --- Vault Creation (manual, for cases where vault wasn't auto-created) ---
-  const handleCreateVault = async (folderId?: string | null) => {
-    if (!selectedCompany?.nse_symbol) return;
-    const sector = selectedSector || financials?.sector || financials?.broad_sector || 'General';
-    setVaultStatus('loading');
-    try {
-      const response = await createVault(selectedCompany.nse_symbol, sector);
-      const { folderId: newFolderId, folderUrl, documents } = processVaultResponse(response);
-      setVaultLink(folderUrl);
-      setVaultId(newFolderId);
-      setVaultDocuments(documents);
-      setVaultStatus('success');
-      toast.success('Vault created');
-      return newFolderId;
-    } catch (err) {
-      setVaultStatus('error');
-      toast.error(`Vault creation failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
-      return null;
-    }
-  };
-
-  // --- Session Creation: Financial Model → Vault → Session ---
-  const handleStartPipeline = async () => {
+  // --- Create Session (company_selected state) ---
+  const handleCreateSession = async () => {
     if (!selectedCompany || !user?.email) return;
     const sector = selectedSector || financials?.sector || financials?.broad_sector || 'General';
     if (!selectedSector) setSelectedSector(sector);
     setIsCreatingSession(true);
     setShowRecent(false);
 
-    let createdFolderId: string | null = null;
-
     try {
-      // ── Step 1: Create vault first (we need the folder ID for financial model) ──
-      toast.info('Creating Drive vault...');
-      setVaultStatus('loading');
-      try {
-        const vaultResponse = await createVault(selectedCompany.nse_symbol ?? '', sector);
-        const { folderId, folderUrl, documents } = processVaultResponse(vaultResponse);
-        createdFolderId = folderId;
-        setVaultLink(folderUrl);
-        setVaultId(folderId);
-        setVaultDocuments(documents);
-        setVaultStatus('success');
-        toast.success('Drive vault created');
-      } catch (vaultErr) {
-        console.warn('[Pipeline] Vault creation failed — continuing without vault:', vaultErr);
-        setVaultStatus('error');
-        toast.warning('Vault creation failed — you can create it manually later');
-      }
-
-      // ── Step 2: Generate financial model (into the vault folder) ──
-      if (createdFolderId) {
-        toast.info('Generating financial model...');
-        setFinancialModelStatus('generating');
-        try {
-          const modelResult = await generateFinancialModel(
-            selectedCompany.nse_symbol ?? '',
-            selectedCompany.company_name,
-            sector,
-            createdFolderId
-          );
-          setFinancialModelStatus('success');
-          setFinancialModelFileUrl(modelResult.fileUrl);
-          toast.success(`Financial model generated: ${modelResult.fileName}`);
-        } catch (modelErr) {
-          console.warn('[Pipeline] Financial model generation failed:', modelErr);
-          setFinancialModelStatus('skipped');
-          toast.warning('Financial model generation failed — pipeline will continue');
-        }
-      } else {
-        setFinancialModelStatus('skipped');
-      }
-
-      // ── Step 3: Create Supabase pipeline session ──
       const newSession = await createPipelineSession({
         company_name: selectedCompany.company_name,
         company_nse_code: selectedCompany.nse_symbol ?? '',
@@ -302,24 +238,113 @@ export default function ResearchPipeline() {
       });
       setSessionId(newSession.session_id);
       setSession(newSession);
-      setPipelineStatus('documents_ready');
-      toast.success('Report generator session started');
+      setPipelineStatus('company_selected');
+      toast.success('Pipeline session created');
     } catch (err) {
-      toast.error(`Failed to start session: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      toast.error(`Failed to create session: ${err instanceof Error ? err.message : 'Unknown error'}`);
     } finally {
       setIsCreatingSession(false);
+    }
+  };
+
+  // --- Generate Financial Model → then Create Vault ---
+  const handleGenerateFinancialModel = async () => {
+    if (!sessionId || !selectedCompany) return;
+    const sector = selectedSector || session?.sector || 'General';
+
+    try {
+      // Transition to financial_model_generating
+      await transitionPipelineStatus(sessionId, 'financial_model_generating', pipelineStatus);
+      setPipelineStatus('financial_model_generating');
+      setFinancialModelStatus('generating');
+
+      // First create the vault (need folder for financial model)
+      toast.info('Creating Drive vault...');
+      setVaultStatus('loading');
+      const vaultResponse = await createVault(selectedCompany.nse_symbol ?? '', sector);
+      const { folderId, folderUrl, documents } = processVaultResponse(vaultResponse);
+      setVaultLink(folderUrl);
+      setVaultId(folderId);
+      setVaultDocuments(documents);
+      setVaultStatus('success');
+
+      // Now generate financial model into the vault folder
+      toast.info('Generating financial model...');
+      const modelResult = await generateFinancialModel(
+        selectedCompany.nse_symbol ?? '',
+        selectedCompany.company_name,
+        sector,
+        folderId
+      );
+      setFinancialModelStatus('success');
+      setFinancialModelFileUrl(modelResult.fileUrl);
+      toast.success(`Financial model generated: ${modelResult.fileName}`);
+
+      // Transition to financial_model_done → then vault_ready (vault was already created)
+      await transitionPipelineStatus(sessionId, 'financial_model_done', 'financial_model_generating');
+      // Since vault was created alongside, go straight to vault_ready
+      await transitionPipelineStatus(sessionId, 'vault_creating', 'financial_model_done');
+      await transitionPipelineStatus(sessionId, 'vault_ready', 'vault_creating');
+      setPipelineStatus('vault_ready');
+
+      // Refresh session
+      const updated = await getPipelineSession(sessionId);
+      if (updated) setSession(updated);
+    } catch (err) {
+      toast.error(`Financial model failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      setFinancialModelStatus('skipped');
+      // Try to recover — go back to company_selected
+      try { await transitionPipelineStatus(sessionId, 'company_selected'); } catch {}
+      setPipelineStatus('company_selected');
+    }
+  };
+
+  // --- Skip Financial Model → Create Vault directly ---
+  const handleSkipToVault = async () => {
+    if (!sessionId || !selectedCompany) return;
+    const sector = selectedSector || session?.sector || 'General';
+
+    try {
+      await transitionPipelineStatus(sessionId, 'vault_creating', pipelineStatus);
+      setPipelineStatus('vault_creating');
+      setVaultStatus('loading');
+      setFinancialModelStatus('skipped');
+
+      toast.info('Creating Drive vault...');
+      const vaultResponse = await createVault(selectedCompany.nse_symbol ?? '', sector);
+      const { folderId, folderUrl, documents } = processVaultResponse(vaultResponse);
+      setVaultLink(folderUrl);
+      setVaultId(folderId);
+      setVaultDocuments(documents);
+      setVaultStatus('success');
+      toast.success('Drive vault created');
+
+      await transitionPipelineStatus(sessionId, 'vault_ready', 'vault_creating');
+      setPipelineStatus('vault_ready');
+
+      const updated = await getPipelineSession(sessionId);
+      if (updated) setSession(updated);
+    } catch (err) {
+      toast.error(`Vault creation failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      setVaultStatus('error');
+      try { await transitionPipelineStatus(sessionId, 'company_selected'); } catch {}
+      setPipelineStatus('company_selected');
     }
   };
 
   // --- Document Ingestion ---
   const handleIngestDocuments = async () => {
     if (!sessionId || selectedDocumentIds.length === 0) return;
-    setIngestionStatus('ingesting');
-    const docsToIngest = vaultDocuments.filter(d => selectedDocumentIds.includes(d.id));
-    setIngestionProgress({ current: 0, total: docsToIngest.length });
 
     try {
-      // Save documents to session
+      await transitionPipelineStatus(sessionId, 'documents_ingesting', pipelineStatus);
+      setPipelineStatus('documents_ingesting');
+      setIngestionStatus('ingesting');
+
+      const docsToIngest = vaultDocuments.filter(d => selectedDocumentIds.includes(d.id));
+      setIngestionProgress({ current: 0, total: docsToIngest.length });
+
+      // Save documents to session_documents table
       await saveSessionDocuments(
         docsToIngest.map(d => ({
           session_id: sessionId,
@@ -334,21 +359,25 @@ export default function ResearchPipeline() {
         }))
       );
 
-      // Ingest each document
+      // Ingest each document (creates embeddings)
       for (let i = 0; i < docsToIngest.length; i++) {
         setIngestionProgress({ current: i + 1, total: docsToIngest.length });
         await ingestDocument(docsToIngest[i].id, docsToIngest[i].name, sessionId);
       }
 
       setIngestionStatus('done');
+      await transitionPipelineStatus(sessionId, 'documents_ready', 'documents_ingesting');
+      setPipelineStatus('documents_ready');
       toast.success(`${docsToIngest.length} documents ingested`);
     } catch (err) {
       setIngestionStatus('error');
       toast.error(`Ingestion failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      try { await transitionPipelineStatus(sessionId, 'vault_ready'); } catch {}
+      setPipelineStatus('vault_ready');
     }
   };
 
-  // --- Stage Runners ---
+  // --- Stage 0: Sector Framework ---
   const handleRunStage0 = useCallback(async () => {
     if (!sessionId || !session) return;
     setIsRunning(true);
@@ -356,17 +385,20 @@ export default function ResearchPipeline() {
       await transitionPipelineStatus(sessionId, 'stage0_generating', pipelineStatus);
       setPipelineStatus('stage0_generating');
 
-      const { framework, tokensUsed } = await runStage0(
+      const { framework, frameworkMarkdown, tokensUsed, isExisting } = await runStage0(
         sessionId,
         session.company_name,
         session.company_nse_code,
         selectedSector || session?.sector || '',
         selectedModel,
-        setProgress
+        setProgress,
+        stage0Prompts
       );
 
-      const content = typeof framework.overview === 'string' ? framework.overview : JSON.stringify(framework, null, 2);
+      const content = framework.overview || JSON.stringify(framework, null, 2);
       setStage0Content(content);
+      setSectorFrameworkMarkdown(frameworkMarkdown);
+      setStage0IsExisting(isExisting);
 
       await updatePipelineOutput(sessionId, {
         sector_framework: framework,
@@ -379,13 +411,13 @@ export default function ResearchPipeline() {
         section_key: 'sector_framework',
         section_title: 'Sector Framework',
         stage: 'stage0',
-        content,
+        content: frameworkMarkdown,
         tokens_used: tokensUsed,
       });
 
       await transitionPipelineStatus(sessionId, 'stage0_review', 'stage0_generating');
       setPipelineStatus('stage0_review');
-      toast.success('Sector framework generated');
+      toast.success(isExisting ? 'Existing sector framework loaded' : 'Sector framework generated');
     } catch (err) {
       toast.error(`Stage 0 failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
       setPipelineStatus('documents_ready');
@@ -394,8 +426,9 @@ export default function ResearchPipeline() {
       setIsRunning(false);
       setProgress(null);
     }
-  }, [sessionId, session, pipelineStatus, selectedSector, selectedModel]);
+  }, [sessionId, session, pipelineStatus, selectedSector, selectedModel, stage0Prompts]);
 
+  // --- Stage 1: Investment Thesis (single LLM call) ---
   const handleRunStage1 = useCallback(async () => {
     if (!sessionId || !session) return;
     setIsRunning(true);
@@ -403,24 +436,22 @@ export default function ResearchPipeline() {
       await transitionPipelineStatus(sessionId, 'stage1_generating', pipelineStatus);
       setPipelineStatus('stage1_generating');
 
-      const sectorFramework = session.sector_framework as any;
-      const { condensed, thesis, tokensUsed } = await runStage1(
+      const { thesis, tokensUsed } = await runStage1(
         sessionId,
         session.company_name,
         session.company_nse_code,
         selectedSector || session?.sector || '',
         financials ?? null,
-        sectorFramework,
+        sectorFrameworkMarkdown,
         null,
         selectedModel,
-        setProgress
+        setProgress,
+        stage1Prompts
       );
 
-      setStage1Condensed(condensed);
       setStage1Thesis(thesis);
 
       await updatePipelineOutput(sessionId, {
-        thesis_condensed: condensed,
         thesis_output: thesis,
         total_tokens_used: (session.total_tokens_used || 0) + tokensUsed,
       });
@@ -428,26 +459,17 @@ export default function ResearchPipeline() {
       await clearResearchSections(sessionId, 'stage1');
       await saveResearchSection({
         session_id: sessionId,
-        section_key: 'condensed_analysis',
-        section_title: 'Condensed Analysis',
-        stage: 'stage1',
-        content: condensed,
-        sort_order: 0,
-        tokens_used: Math.round(tokensUsed / 2),
-      });
-      await saveResearchSection({
-        session_id: sessionId,
         section_key: 'investment_thesis',
         section_title: 'Investment Thesis',
         stage: 'stage1',
         content: thesis,
-        sort_order: 1,
-        tokens_used: Math.round(tokensUsed / 2),
+        sort_order: 0,
+        tokens_used: tokensUsed,
       });
 
       await transitionPipelineStatus(sessionId, 'stage1_review', 'stage1_generating');
       setPipelineStatus('stage1_review');
-      toast.success('Thesis generated');
+      toast.success('Investment thesis generated');
     } catch (err) {
       toast.error(`Stage 1 failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
       setPipelineStatus('stage0_approved');
@@ -456,27 +478,28 @@ export default function ResearchPipeline() {
       setIsRunning(false);
       setProgress(null);
     }
-  }, [sessionId, session, pipelineStatus, financials, selectedSector, selectedModel]);
+  }, [sessionId, session, pipelineStatus, financials, selectedSector, selectedModel, sectorFrameworkMarkdown, stage1Prompts]);
 
+  // --- Stage 2: Full Report ---
   const handleRunStage2 = useCallback(async () => {
-    if (!sessionId || !session || !session.thesis_output) return;
+    if (!sessionId || !session || !stage1Thesis) return;
     setIsRunning(true);
     try {
       await transitionPipelineStatus(sessionId, 'stage2_generating', pipelineStatus);
       setPipelineStatus('stage2_generating');
 
-      const sectorFramework = session.sector_framework as any;
       const { sections: reportSections, tokensUsed } = await runStage2(
         sessionId,
         session.company_name,
         session.company_nse_code,
         selectedSector || session?.sector || '',
         financials ?? null,
-        session.thesis_output,
-        sectorFramework,
+        stage1Thesis,
+        sectorFrameworkMarkdown,
         null,
         selectedModel,
-        setProgress
+        setProgress,
+        stage2Prompts
       );
 
       setStage2Sections(reportSections);
@@ -511,7 +534,7 @@ export default function ResearchPipeline() {
       setIsRunning(false);
       setProgress(null);
     }
-  }, [sessionId, session, pipelineStatus, financials, selectedSector, selectedModel]);
+  }, [sessionId, session, pipelineStatus, financials, selectedSector, selectedModel, stage1Thesis, sectorFrameworkMarkdown, stage2Prompts]);
 
   // --- Approve Handlers ---
   const handleApprove = async (stage: 'stage0' | 'stage1' | 'stage2') => {
@@ -522,8 +545,6 @@ export default function ResearchPipeline() {
     try {
       await transitionPipelineStatus(sessionId, newStatus, pipelineStatus);
       setPipelineStatus(newStatus);
-      // Refresh session for updated data
-      const { getPipelineSession } = await import('@/lib/pipeline-api');
       const updated = await getPipelineSession(sessionId);
       if (updated) setSession(updated);
       toast.success(`${stage === 'stage0' ? 'Sector framework' : stage === 'stage1' ? 'Thesis' : 'Report'} approved`);
@@ -577,7 +598,7 @@ export default function ResearchPipeline() {
       if (sessionId === id) {
         setSessionId(null);
         setSession(null);
-        setPipelineStatus('documents_ready');
+        setPipelineStatus('company_selected');
       }
       toast.success('Session deleted');
     } catch (err) {
@@ -599,18 +620,18 @@ export default function ResearchPipeline() {
       <div className="mb-8">
         <div className="flex items-center gap-2.5 mb-1">
           <Sparkles className="h-5 w-5 text-accent-600" />
-          <h1 className="text-2xl font-bold text-neutral-900 tracking-tight">Report Generator</h1>
+          <h1 className="text-2xl font-bold text-neutral-900 tracking-tight">Research Pipeline</h1>
         </div>
         <p className="text-sm text-neutral-500">
-          AI-powered equity research report generator — Sector Framework → Investment Thesis → Full Report
+          AI-powered equity research — Sector Framework → Investment Thesis → Full Report
         </p>
       </div>
 
-      {/* ==================== STEP 1: Company Selection ==================== */}
+      {/* ==================== STEP 1: Company + Model Selection ==================== */}
       <section className="mb-8">
         <div className="flex items-center gap-2 mb-4">
           <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent-600 text-white text-xs font-bold">1</span>
-          <h2 className="text-base font-semibold text-neutral-900">Select Company</h2>
+          <h2 className="text-base font-semibold text-neutral-900">Select Company & Model</h2>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -643,9 +664,7 @@ export default function ResearchPipeline() {
                     onClick={() => handleSelectCompany(company)}
                   >
                     <span className="font-medium text-neutral-900">{company.company_name}</span>
-                    <span className="ml-2 text-xs text-neutral-400">
-                      {company.nse_symbol}
-                    </span>
+                    <span className="ml-2 text-xs text-neutral-400">{company.nse_symbol}</span>
                   </button>
                 ))}
               </div>
@@ -687,16 +706,16 @@ export default function ResearchPipeline() {
                 </div>
               </div>
               {!hasSession && (
-                <Button onClick={handleStartPipeline} disabled={isCreatingSession}>
+                <Button onClick={handleCreateSession} disabled={isCreatingSession}>
                   {isCreatingSession ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
-                      Setting up...
+                      Creating...
                     </>
                   ) : (
                     <>
                       <Sparkles className="h-4 w-4 mr-1.5" />
-                      Generate Report
+                      Start Pipeline
                     </>
                   )}
                 </Button>
@@ -720,7 +739,7 @@ export default function ResearchPipeline() {
           <h3 className="text-sm font-semibold text-neutral-700 mb-3">Recent Pipelines</h3>
           <div className="space-y-2">
             {recentSessions.map((s) => {
-              const st = (s.pipeline_status ?? 'documents_ready') as PipelineStatus;
+              const st = (s.pipeline_status ?? 'company_selected') as PipelineStatus;
               return (
                 <div
                   key={s.session_id}
@@ -783,37 +802,74 @@ export default function ResearchPipeline() {
             </div>
           )}
 
-          {/* ==================== Financial Model Status Card ==================== */}
-          {(financialModelStatus !== 'idle') && (
+          {/* ==================== STEP 2: Choose Path — Financial Model or Skip to Vault ==================== */}
+          {pipelineStatus === 'company_selected' && (
+            <section className="mb-8">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent-100 text-accent-700 text-xs font-bold">2</span>
+                <h2 className="text-base font-semibold text-neutral-900">Choose Your Path</h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Option A: Generate Financial Model */}
+                <button
+                  onClick={handleGenerateFinancialModel}
+                  className="group rounded-xl border-2 border-neutral-200 bg-white p-6 text-left hover:border-accent-400 hover:shadow-md transition-all"
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 group-hover:bg-blue-100 transition-colors">
+                      <BarChart3 className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <h3 className="text-sm font-semibold text-neutral-900">Generate Financial Model First</h3>
+                  </div>
+                  <p className="text-xs text-neutral-500 leading-relaxed">
+                    Generate an Excel financial model, save it to the Drive vault, then proceed to document ingestion.
+                    Recommended if you need financial projections for the analysis.
+                  </p>
+                </button>
+
+                {/* Option B: Skip to Vault */}
+                <button
+                  onClick={handleSkipToVault}
+                  className="group rounded-xl border-2 border-neutral-200 bg-white p-6 text-left hover:border-accent-400 hover:shadow-md transition-all"
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-50 group-hover:bg-green-100 transition-colors">
+                      <FolderOpen className="h-5 w-5 text-green-600" />
+                    </div>
+                    <h3 className="text-sm font-semibold text-neutral-900">Skip to Create Vault</h3>
+                  </div>
+                  <p className="text-xs text-neutral-500 leading-relaxed">
+                    Create a Drive vault with existing documents and proceed directly to document ingestion.
+                    Use this if financial model isn't needed or already exists.
+                  </p>
+                </button>
+              </div>
+            </section>
+          )}
+
+          {/* ==================== Financial Model In-Progress / Status ==================== */}
+          {(pipelineStatus === 'financial_model_generating' || pipelineStatus === 'financial_model_done') && (
             <div className={cn(
               'mb-6 rounded-xl border px-5 py-4 flex items-start gap-3',
-              financialModelStatus === 'generating' && 'border-blue-100 bg-blue-50',
-              financialModelStatus === 'success' && 'border-green-100 bg-green-50',
-              financialModelStatus === 'skipped' && 'border-amber-100 bg-amber-50',
+              pipelineStatus === 'financial_model_generating' ? 'border-blue-100 bg-blue-50' : 'border-green-100 bg-green-50',
             )}>
               <div className="mt-0.5">
-                {financialModelStatus === 'generating' && (
+                {pipelineStatus === 'financial_model_generating' ? (
                   <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
-                )}
-                {financialModelStatus === 'success' && (
+                ) : (
                   <Check className="h-4 w-4 text-green-600" />
-                )}
-                {financialModelStatus === 'skipped' && (
-                  <FileText className="h-4 w-4 text-amber-500" />
                 )}
               </div>
               <div className="flex-1 min-w-0">
                 <p className={cn(
                   'text-sm font-medium',
-                  financialModelStatus === 'generating' && 'text-blue-800',
-                  financialModelStatus === 'success' && 'text-green-800',
-                  financialModelStatus === 'skipped' && 'text-amber-800',
+                  pipelineStatus === 'financial_model_generating' ? 'text-blue-800' : 'text-green-800',
                 )}>
-                  {financialModelStatus === 'generating' && 'Generating financial model (Excel)...'}
-                  {financialModelStatus === 'success' && 'Financial model generated and saved to Drive vault'}
-                  {financialModelStatus === 'skipped' && 'Financial model generation skipped or failed'}
+                  {pipelineStatus === 'financial_model_generating'
+                    ? 'Generating financial model & creating vault...'
+                    : 'Financial model generated and saved to Drive vault'}
                 </p>
-                {financialModelStatus === 'success' && financialModelFileUrl && (
+                {financialModelFileUrl && (
                   <a
                     href={financialModelFileUrl}
                     target="_blank"
@@ -827,208 +883,258 @@ export default function ResearchPipeline() {
             </div>
           )}
 
-          {/* ==================== STEP 2: Documents (Vault) ==================== */}
-          <section className="mb-8">
-            <div className="flex items-center gap-2 mb-4">
-              <span className={cn(
-                'flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold',
-                vaultStatus === 'success' ? 'bg-green-100 text-green-700' : 'bg-neutral-200 text-neutral-600'
-              )}>
-                {vaultStatus === 'success' ? <Check className="h-3.5 w-3.5" /> : '2'}
-              </span>
-              <h2 className="text-base font-semibold text-neutral-900">Documents & Vault</h2>
+          {/* Financial Model status indicator (for vault_ready and beyond) */}
+          {financialModelStatus === 'success' && getStageNumber(pipelineStatus) >= 1 && (
+            <div className="mb-4 rounded-lg border border-green-100 bg-green-50 px-4 py-2.5 flex items-center gap-2">
+              <Check className="h-3.5 w-3.5 text-green-600" />
+              <span className="text-xs text-green-700 font-medium">Financial model saved to vault</span>
+              {financialModelFileUrl && (
+                <a href={financialModelFileUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-green-600 hover:underline flex items-center gap-1 ml-auto">
+                  Open <ExternalLink className="h-3 w-3" />
+                </a>
+              )}
             </div>
+          )}
+          {financialModelStatus === 'skipped' && getStageNumber(pipelineStatus) >= 1 && (
+            <div className="mb-4 rounded-lg border border-amber-100 bg-amber-50 px-4 py-2.5 flex items-center gap-2">
+              <FileText className="h-3.5 w-3.5 text-amber-500" />
+              <span className="text-xs text-amber-700 font-medium">Financial model skipped</span>
+            </div>
+          )}
 
-            {vaultStatus === 'idle' && (
-              <div className="rounded-xl border border-dashed border-neutral-200 bg-neutral-50 p-6 text-center">
-                <FolderOpen className="h-8 w-8 text-neutral-300 mx-auto mb-2" />
-                <p className="text-sm text-neutral-500 mb-1">Drive vault is created automatically when you start the generator.</p>
-                <p className="text-xs text-neutral-400 mb-3">If it failed, you can retry manually.</p>
-                <Button onClick={() => handleCreateVault()} variant="outline" size="sm">
-                  <FolderOpen className="h-3.5 w-3.5 mr-1.5" />
-                  Create Vault Manually
-                </Button>
-              </div>
-            )}
-
-            {vaultStatus === 'loading' && (
-              <div className="rounded-xl border border-neutral-200 bg-white p-6 text-center">
-                <Spinner size="sm" />
-                <p className="text-sm text-neutral-500 mt-2">Creating vault...</p>
-              </div>
-            )}
-
-            {vaultStatus === 'success' && (
-              <div className="rounded-xl border border-neutral-200 bg-white">
-                <div className="flex items-center justify-between px-5 py-3 border-b border-neutral-100">
-                  <div className="flex items-center gap-2">
-                    <FolderOpen className="h-4 w-4 text-accent-500" />
-                    <span className="text-sm font-medium text-neutral-700">Vault</span>
-                    {vaultLink && (
-                      <a href={vaultLink} target="_blank" rel="noopener noreferrer" className="text-xs text-accent-500 hover:underline flex items-center gap-1">
-                        Open <ExternalLink className="h-3 w-3" />
-                      </a>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button size="sm" variant="outline" onClick={() => setIsUploadOpen(true)}>
-                      <Upload className="h-3.5 w-3.5 mr-1" />
-                      Upload
-                    </Button>
-                    {selectedDocumentIds.length > 0 && ingestionStatus !== 'done' && (
-                      <Button
-                        size="sm"
-                        onClick={handleIngestDocuments}
-                        disabled={ingestionStatus === 'ingesting'}
-                      >
-                        {ingestionStatus === 'ingesting' ? (
-                          <>
-                            <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />
-                            {ingestionProgress.current}/{ingestionProgress.total}
-                          </>
-                        ) : (
-                          <>
-                            <Zap className="h-3.5 w-3.5 mr-1" />
-                            Ingest ({selectedDocumentIds.length})
-                          </>
-                        )}
-                      </Button>
-                    )}
-                    {ingestionStatus === 'done' && (
-                      <span className="text-xs text-green-600 flex items-center gap-1">
-                        <Check className="h-3.5 w-3.5" /> Ingested
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Document List */}
-                {vaultDocuments.length > 0 ? (
-                  <div className="p-4">
-                    <div className="space-y-1.5">
-                      {vaultDocuments.map((doc) => (
-                        <label
-                          key={doc.id}
-                          className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-neutral-50 cursor-pointer"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={selectedDocumentIds.includes(doc.id)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setSelectedDocumentIds(prev => [...prev, doc.id]);
-                              } else {
-                                setSelectedDocumentIds(prev => prev.filter(id => id !== doc.id));
-                              }
-                            }}
-                            className="rounded border-neutral-300"
-                          />
-                          <FileText className="h-4 w-4 text-neutral-400 shrink-0" />
-                          <span className="text-sm text-neutral-700 truncate flex-1">{doc.name}</span>
-                          <span className="text-xs text-neutral-400">{(doc.size / 1024).toFixed(0)} KB</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="p-6 text-center">
-                    <p className="text-xs text-neutral-400">No documents in vault. Upload files to continue.</p>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Upload Dialog */}
-            {vaultId && (
-              <DocumentUploadDialog
-                open={isUploadOpen}
-                onOpenChange={setIsUploadOpen}
-                folderId={vaultId}
-                onUploadComplete={(doc) => {
-                  setVaultDocuments(prev => [...prev, doc]);
-                  toast.success(`${doc.name} uploaded`);
-                }}
-              />
-            )}
-          </section>
-
-          {/* ==================== STAGE 0: Sector Framework ==================== */}
-          <section className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
+          {/* ==================== STEP 3: Documents & Vault ==================== */}
+          {(getStageNumber(pipelineStatus) >= 1 || pipelineStatus === 'vault_creating') && (
+            <section className="mb-8">
+              <div className="flex items-center gap-2 mb-4">
                 <span className={cn(
                   'flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold',
-                  currentStage > 1 ? 'bg-green-100 text-green-700' :
-                  currentStage === 1 ? 'bg-accent-100 text-accent-700' :
+                  getStageNumber(pipelineStatus) > 2 ? 'bg-green-100 text-green-700' :
+                  getStageNumber(pipelineStatus) >= 1 ? 'bg-accent-100 text-accent-700' :
                   'bg-neutral-200 text-neutral-600'
                 )}>
-                  {currentStage > 1 ? <Check className="h-3.5 w-3.5" /> : '3'}
+                  {getStageNumber(pipelineStatus) > 2 ? <Check className="h-3.5 w-3.5" /> : '3'}
                 </span>
-                <h2 className="text-base font-semibold text-neutral-900">Stage 0: Sector Framework</h2>
+                <h2 className="text-base font-semibold text-neutral-900">Documents & Vault</h2>
               </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowStage0Prompt(!showStage0Prompt)}
-                  className="text-neutral-500 text-xs"
-                >
-                  {showStage0Prompt ? <EyeOff className="h-3.5 w-3.5 mr-1" /> : <Eye className="h-3.5 w-3.5 mr-1" />}
-                  {showStage0Prompt ? 'Hide Prompt' : 'View Prompt'}
-                </Button>
-                {(pipelineStatus === 'documents_ready' || pipelineStatus === 'documents_ingesting') && (
-                  <Button onClick={handleRunStage0} disabled={isRunning} size="sm">
-                    <Zap className="h-3.5 w-3.5 mr-1.5" />
-                    Generate Framework
+
+              {vaultStatus === 'loading' && (
+                <div className="rounded-xl border border-neutral-200 bg-white p-6 text-center">
+                  <Spinner size="sm" />
+                  <p className="text-sm text-neutral-500 mt-2">Creating vault...</p>
+                </div>
+              )}
+
+              {vaultStatus === 'error' && (
+                <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center">
+                  <p className="text-sm text-red-600 mb-2">Vault creation failed</p>
+                  <Button onClick={handleSkipToVault} variant="outline" size="sm">
+                    <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+                    Retry
                   </Button>
-                )}
-              </div>
-            </div>
+                </div>
+              )}
 
-            {/* Prompt Viewer */}
-            {showStage0Prompt && (
-              <PromptViewer
-                title="Sector Framework Prompt"
-                systemPrompt={`You are a senior equity research analyst specializing in Indian equity markets.\nYou are building a comprehensive sector knowledge framework for the [SECTOR] sector.\nYour output will serve as the analytical foundation for all future research in this sector.\n\nCRITICAL FORMATTING RULES:\n- Output in clean markdown ONLY.\n- Do NOT use any markdown tables. Use bullet points or numbered lists instead.\n- Use headers (##, ###), bold (**text**), bullet lists (-), and numbered lists (1.) freely.\n- Every sentence must carry analytical weight — no filler.`}
-                userPrompt={`Create a comprehensive sector framework for the [SECTOR] sector covering:\n1. Sector Overview (TAM, growth phase)\n2. Key Metrics to Track (KPIs, industry-specific ratios)\n3. Value Chain (where value is created/captured)\n4. Competitive Dynamics (market structure, moats, pricing)\n5. Regulatory Landscape (key regulations, policy changes)\n6. Growth Drivers (structural, government initiatives, demand catalysts)\n7. Risk Factors (sector risks, cyclicality, disruption)\n8. Valuation Methodology (best methods, key multiples, historical ranges)\n9. Key Questions for Company Analysis (10 most important questions)\n\nBe specific to the Indian market context. Do NOT use markdown tables.`}
-              />
-            )}
+              {vaultStatus === 'success' && (
+                <div className="rounded-xl border border-neutral-200 bg-white">
+                  <div className="flex items-center justify-between px-5 py-3 border-b border-neutral-100">
+                    <div className="flex items-center gap-2">
+                      <FolderOpen className="h-4 w-4 text-accent-500" />
+                      <span className="text-sm font-medium text-neutral-700">Vault</span>
+                      {vaultLink && (
+                        <a href={vaultLink} target="_blank" rel="noopener noreferrer" className="text-xs text-accent-500 hover:underline flex items-center gap-1">
+                          Open <ExternalLink className="h-3 w-3" />
+                        </a>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button size="sm" variant="outline" onClick={() => setIsUploadOpen(true)}>
+                        <Upload className="h-3.5 w-3.5 mr-1" />
+                        Upload
+                      </Button>
+                      {selectedDocumentIds.length > 0 && ingestionStatus !== 'done' && (
+                        <Button
+                          size="sm"
+                          onClick={handleIngestDocuments}
+                          disabled={ingestionStatus === 'ingesting'}
+                        >
+                          {ingestionStatus === 'ingesting' ? (
+                            <>
+                              <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />
+                              {ingestionProgress.current}/{ingestionProgress.total}
+                            </>
+                          ) : (
+                            <>
+                              <Zap className="h-3.5 w-3.5 mr-1" />
+                              Ingest ({selectedDocumentIds.length})
+                            </>
+                          )}
+                        </Button>
+                      )}
+                      {ingestionStatus === 'done' && (
+                        <span className="text-xs text-green-600 flex items-center gap-1">
+                          <Check className="h-3.5 w-3.5" /> Ingested
+                        </span>
+                      )}
+                    </div>
+                  </div>
 
-            {pipelineStatus === 'stage0_generating' && !stage0Content && (
-              <div className="rounded-xl border border-neutral-200 bg-white p-8 text-center">
-                <Spinner size="sm" />
-                <p className="text-sm text-neutral-500 mt-2">Generating sector framework...</p>
-              </div>
-            )}
+                  {/* Document List */}
+                  {vaultDocuments.length > 0 ? (
+                    <div className="p-4">
+                      <div className="space-y-1.5">
+                        {vaultDocuments.map((doc) => (
+                          <label
+                            key={doc.id}
+                            className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-neutral-50 cursor-pointer"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={selectedDocumentIds.includes(doc.id)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedDocumentIds(prev => [...prev, doc.id]);
+                                } else {
+                                  setSelectedDocumentIds(prev => prev.filter(id => id !== doc.id));
+                                }
+                              }}
+                              className="rounded border-neutral-300"
+                              disabled={ingestionStatus === 'done'}
+                            />
+                            <FileText className="h-4 w-4 text-neutral-400 shrink-0" />
+                            <span className="text-sm text-neutral-700 truncate flex-1">{doc.name}</span>
+                            <span className="text-xs text-neutral-400">{(doc.size / 1024).toFixed(0)} KB</span>
+                          </label>
+                        ))}
+                      </div>
+                      {/* Select All / Deselect All */}
+                      {ingestionStatus !== 'done' && vaultDocuments.length > 1 && (
+                        <div className="mt-2 pt-2 border-t border-neutral-100 flex gap-2">
+                          <button
+                            onClick={() => setSelectedDocumentIds(vaultDocuments.map(d => d.id))}
+                            className="text-xs text-accent-600 hover:underline"
+                          >
+                            Select all
+                          </button>
+                          <span className="text-xs text-neutral-300">|</span>
+                          <button
+                            onClick={() => setSelectedDocumentIds([])}
+                            className="text-xs text-neutral-500 hover:underline"
+                          >
+                            Deselect all
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="p-6 text-center">
+                      <p className="text-xs text-neutral-400">No documents in vault. Upload files to continue.</p>
+                    </div>
+                  )}
+                </div>
+              )}
 
-            {stage0Content && (
-              <StageReview
-                title={`${selectedSector || session?.sector || ''} Sector Framework`}
-                content={stage0Content}
-                isApproved={currentStage > 1}
-                isGenerating={pipelineStatus === 'stage0_generating'}
-                onApprove={() => handleApprove('stage0')}
-                onRegenerate={handleRunStage0}
-                onEdit={(c) => setStage0Content(c)}
-              />
-            )}
-          </section>
+              {/* Upload Dialog */}
+              {vaultId && (
+                <DocumentUploadDialog
+                  open={isUploadOpen}
+                  onOpenChange={setIsUploadOpen}
+                  folderId={vaultId}
+                  onUploadComplete={(doc) => {
+                    setVaultDocuments(prev => [...prev, doc]);
+                    toast.success(`${doc.name} uploaded`);
+                  }}
+                />
+              )}
+            </section>
+          )}
 
-          {/* ==================== STAGE 1: Thesis ==================== */}
-          {(currentStage >= 2 || pipelineStatus === 'stage0_approved' || pipelineStatus.startsWith('stage1')) && (
+          {/* ==================== STAGE 0: Sector Framework ==================== */}
+          {getStageNumber(pipelineStatus) >= 2 && (
             <section className="mb-8">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <span className={cn(
                     'flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold',
-                    currentStage > 2 ? 'bg-green-100 text-green-700' :
-                    currentStage === 2 ? 'bg-accent-100 text-accent-700' :
+                    currentStage > 3 ? 'bg-green-100 text-green-700' :
+                    currentStage === 3 ? 'bg-accent-100 text-accent-700' :
                     'bg-neutral-200 text-neutral-600'
                   )}>
-                    {currentStage > 2 ? <Check className="h-3.5 w-3.5" /> : '4'}
+                    {currentStage > 3 ? <Check className="h-3.5 w-3.5" /> : '4'}
+                  </span>
+                  <h2 className="text-base font-semibold text-neutral-900">Stage 0: Sector Framework</h2>
+                  {stage0IsExisting && stage0Content && (
+                    <span className="text-[10px] font-medium text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded-full">
+                      Loaded from playbook
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowStage0Prompt(!showStage0Prompt)}
+                    className="text-neutral-500 text-xs"
+                  >
+                    {showStage0Prompt ? <EyeOff className="h-3.5 w-3.5 mr-1" /> : <Eye className="h-3.5 w-3.5 mr-1" />}
+                    {showStage0Prompt ? 'Hide Prompt' : 'View Prompt'}
+                  </Button>
+                  {pipelineStatus === 'documents_ready' && (
+                    <Button onClick={handleRunStage0} disabled={isRunning} size="sm">
+                      <Zap className="h-3.5 w-3.5 mr-1.5" />
+                      Generate Framework
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              {showStage0Prompt && (
+                <PromptEditor
+                  stageKey="pipeline_stage0"
+                  title="Sector Framework Prompt"
+                  defaultSystem={DEFAULT_PROMPTS.stage0.system}
+                  defaultUser={DEFAULT_PROMPTS.stage0.user}
+                  userEmail={user?.email}
+                  onChange={setStage0Prompts}
+                  className="mb-4"
+                />
+              )}
+
+              {pipelineStatus === 'stage0_generating' && !stage0Content && (
+                <div className="rounded-xl border border-neutral-200 bg-white p-8 text-center">
+                  <Spinner size="sm" />
+                  <p className="text-sm text-neutral-500 mt-2">Generating sector framework...</p>
+                </div>
+              )}
+
+              {stage0Content && (
+                <StageReview
+                  title={`${selectedSector || session?.sector || ''} Sector Framework`}
+                  content={sectorFrameworkMarkdown || stage0Content}
+                  isApproved={currentStage > 3}
+                  isGenerating={pipelineStatus === 'stage0_generating'}
+                  onApprove={() => handleApprove('stage0')}
+                  onRegenerate={handleRunStage0}
+                  onEdit={(c) => { setStage0Content(c); setSectorFrameworkMarkdown(c); }}
+                />
+              )}
+            </section>
+          )}
+
+          {/* ==================== STAGE 1: Investment Thesis ==================== */}
+          {(currentStage >= 4 || pipelineStatus === 'stage0_approved' || pipelineStatus.startsWith('stage1')) && (
+            <section className="mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <span className={cn(
+                    'flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold',
+                    currentStage > 4 ? 'bg-green-100 text-green-700' :
+                    currentStage === 4 ? 'bg-accent-100 text-accent-700' :
+                    'bg-neutral-200 text-neutral-600'
+                  )}>
+                    {currentStage > 4 ? <Check className="h-3.5 w-3.5" /> : '5'}
                   </span>
                   <h2 className="text-base font-semibold text-neutral-900">Stage 1: Investment Thesis</h2>
-                  <span className="text-xs text-neutral-400">(2 LLM calls)</span>
+                  <span className="text-xs text-neutral-400">(1 LLM call · RAG + Framework + Financials)</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Button
@@ -1049,40 +1155,30 @@ export default function ResearchPipeline() {
                 </div>
               </div>
 
-              {/* Stage 1 Prompt Viewer */}
               {showStage1Prompt && (
-                <PromptViewer
-                  title="Investment Thesis Prompt (Call 2/2)"
-                  systemPrompt={`You are the Head of Research at a leading Indian investment bank.\nYou are writing a definitive investment thesis for [COMPANY] (NSE: [SYMBOL]).\nThis thesis will be the foundation of a detailed research initiation report.\nYour thesis must be data-driven, nuanced, and actionable for institutional investors.\nTake a clear stance — BUY, SELL, or HOLD — and defend it rigorously.\n\nCRITICAL FORMATTING RULES:\n- Output in clean markdown ONLY.\n- Do NOT use any markdown tables. Use bullet points or numbered lists instead.\n- For the Recommendation Summary, use a numbered list with bold labels instead of a table.`}
-                  userPrompt={`Based on the condensed research analysis and sector framework, generate a comprehensive investment thesis covering:\n\n## Investment Thesis\nClear 3-5 paragraph thesis with BUY/SELL/HOLD recommendation and conviction level.\n\n## Bull Case\n3-5 factors driving upside with quantified potential.\n\n## Bear Case\n3-5 factors that could go wrong with downside quantification.\n\n## Key Catalysts (Next 12-18 months)\n5-8 specific, time-bound catalysts.\n\n## Key Risks\n5-8 specific risks with severity (High/Medium/Low) and mitigant.\n\n## Valuation & Target Price Rationale\nValuation methodology, peer comparison, target multiple, implied target price range.\n\n## Recommendation Summary\n- **Recommendation:** BUY / SELL / HOLD\n- **Conviction:** HIGH / MEDIUM / LOW\n- **Key Thesis:** one-line summary\n- **Primary Catalyst:** most important near-term catalyst\n- **Primary Risk:** most important risk factor\n- **Valuation Method:** method and multiple used\n\nDo NOT use markdown tables anywhere.`}
+                <PromptEditor
+                  stageKey="pipeline_stage1"
+                  title="Investment Thesis Prompt (Single Call)"
+                  defaultSystem={DEFAULT_PROMPTS.stage1.system}
+                  defaultUser={DEFAULT_PROMPTS.stage1.user}
+                  userEmail={user?.email}
+                  onChange={setStage1Prompts}
+                  className="mb-4"
                 />
               )}
 
               {pipelineStatus === 'stage1_generating' && !stage1Thesis && (
                 <div className="rounded-xl border border-neutral-200 bg-white p-8 text-center">
                   <Spinner size="sm" />
-                  <p className="text-sm text-neutral-500 mt-2">Generating thesis (2 LLM calls)...</p>
+                  <p className="text-sm text-neutral-500 mt-2">Generating investment thesis...</p>
                 </div>
-              )}
-
-              {stage1Condensed && (
-                <StageReview
-                  title="Condensed Analysis"
-                  content={stage1Condensed}
-                  isApproved={currentStage > 2}
-                  isGenerating={pipelineStatus === 'stage1_generating'}
-                  onApprove={() => {}}
-                  onRegenerate={handleRunStage1}
-                  onEdit={(c) => setStage1Condensed(c)}
-                  className="mb-3"
-                />
               )}
 
               {stage1Thesis && (
                 <StageReview
                   title="Investment Thesis"
                   content={stage1Thesis}
-                  isApproved={currentStage > 2}
+                  isApproved={currentStage > 4}
                   isGenerating={pipelineStatus === 'stage1_generating'}
                   onApprove={() => handleApprove('stage1')}
                   onRegenerate={handleRunStage1}
@@ -1093,17 +1189,17 @@ export default function ResearchPipeline() {
           )}
 
           {/* ==================== STAGE 2: Full Report ==================== */}
-          {(currentStage >= 3 || pipelineStatus === 'stage1_approved' || pipelineStatus.startsWith('stage2')) && (
+          {(currentStage >= 5 || pipelineStatus === 'stage1_approved' || pipelineStatus.startsWith('stage2')) && (
             <section className="mb-8">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <span className={cn(
                     'flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold',
-                    currentStage > 3 ? 'bg-green-100 text-green-700' :
-                    currentStage === 3 ? 'bg-accent-100 text-accent-700' :
+                    currentStage > 5 ? 'bg-green-100 text-green-700' :
+                    currentStage === 5 ? 'bg-accent-100 text-accent-700' :
                     'bg-neutral-200 text-neutral-600'
                   )}>
-                    {currentStage > 3 ? <Check className="h-3.5 w-3.5" /> : '5'}
+                    {currentStage > 5 ? <Check className="h-3.5 w-3.5" /> : '6'}
                   </span>
                   <h2 className="text-base font-semibold text-neutral-900">Stage 2: Research Report</h2>
                   <span className="text-xs text-neutral-400">(1 LLM call · 10 sections)</span>
@@ -1127,12 +1223,15 @@ export default function ResearchPipeline() {
                 </div>
               </div>
 
-              {/* Stage 2 Prompt Viewer */}
               {showStage2Prompt && (
-                <PromptViewer
+                <PromptEditor
+                  stageKey="pipeline_stage2"
                   title="Full Report Prompt (1 unified call)"
-                  systemPrompt={`You are a senior equity research analyst at a leading Indian investment bank.\nYou are writing a complete, institutional-grade research initiation report on [COMPANY] (NSE: [SYMBOL]).\nYour report must be data-driven, thorough, and written in a professional tone for institutional investors.\n\nCRITICAL FORMATTING RULES:\n- Output in clean markdown ONLY.\n- Do NOT use any markdown tables. Use bullet points or numbered lists instead.\n- Each section MUST begin with the separator: ===SECTION===\n  followed immediately by the section title on the next line.\n- Do not add any text before the first ===SECTION=== marker.`}
-                  userPrompt={`Write a complete equity research initiation report covering ALL 10 sections in one response:\n\n1. Executive Summary\n2. Company Background\n3. Business Model\n4. Management Analysis\n5. Industry Overview\n6. Key Industry Tailwinds\n7. Demand Drivers\n8. Industry Risks\n9. Financial Analysis\n10. Valuation\n\nEach section must:\n- Be preceded by "===SECTION===" separator with title on next line\n- Be 300–600 words\n- Cite specific numbers and data points\n- Maintain consistency with the investment thesis\n- Use bullet points and numbered lists (no markdown tables)\n\nContext provided: Investment thesis, sector framework, financial data, research document excerpts.`}
+                  defaultSystem={DEFAULT_PROMPTS.stage2.system}
+                  defaultUser={DEFAULT_PROMPTS.stage2.user}
+                  userEmail={user?.email}
+                  onChange={setStage2Prompts}
+                  className="mb-4"
                 />
               )}
 
@@ -1151,7 +1250,6 @@ export default function ResearchPipeline() {
                   isApproved={pipelineStatus === 'stage2_approved' || pipelineStatus === 'published'}
                   isGenerating={pipelineStatus === 'stage2_generating'}
                   onApprove={() => {
-                    // Only approve on last section
                     if (i === stage2Sections.length - 1) handleApprove('stage2');
                   }}
                   onRegenerate={handleRunStage2}
@@ -1213,55 +1311,3 @@ function MetricCard({ label, value }: { label: string; value: string }) {
   );
 }
 
-// ========================
-// Prompt Viewer Component
-// ========================
-
-function PromptViewer({
-  title,
-  systemPrompt,
-  userPrompt,
-}: {
-  title: string;
-  systemPrompt: string;
-  userPrompt: string;
-}) {
-  const [tab, setTab] = useState<'system' | 'user'>('system');
-
-  return (
-    <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-2.5 bg-amber-100 border-b border-amber-200">
-        <div className="flex items-center gap-2">
-          <TableProperties className="h-3.5 w-3.5 text-amber-700" />
-          <span className="text-xs font-semibold text-amber-800">{title}</span>
-          <span className="text-[10px] text-amber-600 bg-amber-200 px-1.5 py-0.5 rounded-full">
-            No tables · Markdown only
-          </span>
-        </div>
-        <div className="flex rounded-lg overflow-hidden border border-amber-300 text-xs">
-          <button
-            onClick={() => setTab('system')}
-            className={cn(
-              'px-3 py-1 font-medium transition-colors',
-              tab === 'system' ? 'bg-amber-700 text-white' : 'bg-white text-amber-700 hover:bg-amber-50'
-            )}
-          >
-            System
-          </button>
-          <button
-            onClick={() => setTab('user')}
-            className={cn(
-              'px-3 py-1 font-medium transition-colors',
-              tab === 'user' ? 'bg-amber-700 text-white' : 'bg-white text-amber-700 hover:bg-amber-50'
-            )}
-          >
-            User
-          </button>
-        </div>
-      </div>
-      <pre className="p-4 text-xs text-amber-900 whitespace-pre-wrap font-mono leading-relaxed max-h-80 overflow-y-auto">
-        {tab === 'system' ? systemPrompt : userPrompt}
-      </pre>
-    </div>
-  );
-}

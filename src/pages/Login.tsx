@@ -40,9 +40,9 @@ export default function Login() {
 
   useEffect(() => {
     if (user && !isLoading) {
-      navigate(role === 'admin' ? '/admin' : '/', { replace: true });
+      navigate('/admin', { replace: true });
     }
-  }, [user, role, isLoading, navigate]);
+  }, [user, isLoading, navigate]);
 
   const handleGoogleSignIn = async () => {
     try {

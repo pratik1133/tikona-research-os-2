@@ -3,9 +3,22 @@ import { supabase } from '@/lib/supabase';
 import type { EquityUniverse } from '@/types/database';
 import type { SectorFramework, PipelineProgress } from '@/types/pipeline';
 import { DEFAULT_PIPELINE_MODEL } from '@/types/pipeline';
+import {
+  getSectorPlaybook,
+  createSectorPlaybook,
+  updateSectorPlaybook,
+  getFrameworkFromPlaybook,
+} from '@/lib/pipeline-api';
+import { getCurrentUserEmail } from '@/lib/supabase';
 
 const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
+
+/** Optional prompt overrides that can be passed from the UI prompt editor */
+export interface PromptOverrides {
+  systemPrompt?: string;
+  userPrompt?: string;
+}
 
 // ========================
 // OpenRouter LLM Call
@@ -160,12 +173,177 @@ function formatChunks(chunks: DocumentChunk[]): string {
 }
 
 // ========================
-// Stage 0: Sector Framework Review
+// Default Prompts (exported for UI display & editing)
+// ========================
+
+export const DEFAULT_PROMPTS = {
+  stage0: {
+    system: `You are a senior equity research analyst specializing in Indian equity markets.
+You are building a comprehensive sector knowledge framework for the given sector.
+Your output will serve as the analytical foundation for all future research in this sector.
+
+CRITICAL FORMATTING RULES:
+- Output in clean markdown ONLY.
+- Do NOT use any markdown tables (no | pipe characters for tables). Use bullet points or numbered lists instead.
+- Use headers (##, ###), bold (**text**), bullet lists (-), and numbered lists (1.) freely.
+- Every sentence must carry analytical weight — no filler.`,
+    user: `Create a comprehensive sector framework covering:
+
+## 1. Sector Overview
+- What defines this sector? Key characteristics
+- Market size in India (estimated TAM)
+- Growth trajectory and current phase
+
+## 2. Key Metrics to Track
+- List the most important financial and operational KPIs for this sector
+- What metrics differentiate leaders from laggards?
+- Industry-specific ratios
+
+## 3. Value Chain
+- Map the complete value chain
+- Where is value created/captured?
+- Key dependencies and bottlenecks
+
+## 4. Competitive Dynamics
+- Market structure (fragmented vs. concentrated)
+- Key competitive advantages (moats)
+- Pricing dynamics and margin structure
+- Barriers to entry
+
+## 5. Regulatory Landscape
+- Key regulations governing this sector
+- Recent policy changes and their impact
+- Upcoming regulatory risks/opportunities
+
+## 6. Growth Drivers
+- What are the structural growth drivers?
+- Government initiatives (PLI, infrastructure push, etc.)
+- Technology and innovation trends
+- Demand-side catalysts
+
+## 7. Risk Factors
+- Sector-specific risks
+- Cyclicality and seasonality
+- Input cost sensitivity
+- Technology disruption threats
+
+## 8. Valuation Methodology
+- What valuation methods work best for this sector?
+- Key multiples to use (P/E, EV/EBITDA, P/B, etc.)
+- Historical valuation ranges
+
+## 9. Key Questions for Company Analysis
+- What are the 10 most important questions an analyst should answer when researching a company in this sector?
+
+Be specific to the Indian market context. Use real examples where possible.
+Do NOT use markdown tables — use bullet points and numbered lists throughout.`,
+  },
+  stage1: {
+    system: `You are the Head of Research at a leading Indian investment bank.
+You are writing a definitive, comprehensive investment thesis for the given company.
+This thesis will be the foundation of a detailed equity research initiation report.
+Your thesis must be data-driven, nuanced, and actionable for institutional investors.
+Take a clear stance — BUY, SELL, or HOLD — and defend it rigorously.
+
+CRITICAL FORMATTING RULES:
+- Output in clean markdown ONLY.
+- Do NOT use any markdown tables (no | pipe characters for tables).
+- Use headers (##, ###), bold (**text**), bullet lists (-), and numbered lists (1.) freely.`,
+    user: `Generate the following sections in your thesis:
+
+## Investment Thesis
+Write a clear, compelling 3-5 paragraph investment thesis. Start with your recommendation (BUY/SELL/HOLD) and conviction level (HIGH/MEDIUM/LOW). Explain WHY this is a good/bad investment at current levels. Reference specific data points from the documents.
+
+## Business Summary
+- Core business and segment breakdown
+- Revenue model and key customers
+- Competitive positioning and moats
+- Key differentiators
+
+## Financial Health Assessment
+- Revenue and profit trajectory (cite specific numbers)
+- Margin trends and drivers
+- Balance sheet strength (debt, cash, working capital)
+- Return ratios (ROE, ROCE, ROIC) analysis
+
+## Bull Case
+- 3-5 factors driving upside with quantified potential
+- What catalysts could trigger re-rating?
+
+## Bear Case
+- 3-5 factors that could go wrong with quantified downside
+- What would make you change your stance?
+
+## Key Catalysts (Next 12-18 months)
+List 5-8 specific, time-bound catalysts:
+1. [Catalyst] — Expected timeline — Potential impact
+
+## Key Risks
+List 5-8 specific risks:
+1. [Risk] — Severity (High/Medium/Low) — Mitigant
+
+## Valuation & Target Price Rationale
+- Valuation methodology and rationale
+- Historical valuation range analysis
+- Peer comparison
+- Target multiple and implied target price range
+
+## Recommendation Summary
+- **Recommendation:** BUY / SELL / HOLD
+- **Conviction:** HIGH / MEDIUM / LOW
+- **Key Thesis:** One-line summary
+- **Primary Catalyst:** Most important near-term catalyst
+- **Primary Risk:** Most important risk factor
+- **Valuation Method:** Method and multiple used
+
+Be specific. Use numbers from the documents. Take a clear stance. Do NOT use markdown tables.`,
+  },
+  stage2: {
+    system: `You are a senior equity research analyst at a leading Indian investment bank.
+You are writing a complete, institutional-grade research initiation report.
+Your report must be data-driven, thorough, and written in a professional tone for institutional investors.
+
+CRITICAL FORMATTING RULES:
+- Output in clean markdown ONLY.
+- Do NOT use any markdown tables (no | pipe characters for tables). Use bullet points or numbered lists instead.
+- Use headers (###), bold (**text**), bullet lists (-), and numbered lists (1.) freely.
+- Each section must begin with the EXACT separator line: ===SECTION===
+  followed immediately by the section title on the next line (no heading marker — just plain text).
+  Then the section content below that.
+- Do not add any text before the first ===SECTION=== marker.`,
+    user: `Generate ALL 10 sections in order. Each section MUST be preceded by the separator line "===SECTION===" with the section title on the next line.
+
+1. Executive Summary
+2. Company Background
+3. Business Model
+4. Management Analysis
+5. Industry Overview
+6. Key Industry Tailwinds
+7. Demand Drivers
+8. Industry Risks
+9. Financial Analysis
+10. Valuation
+
+For each section:
+- Be comprehensive (300–600 words per section)
+- Cite specific numbers and data points from the documents and financial data above
+- Maintain consistency with the investment thesis across all sections
+- Do NOT use markdown tables anywhere — use bullet points and numbered lists only
+
+Begin now. Do not include any preamble before the first ===SECTION=== marker.`,
+  },
+} as const;
+
+// ========================
+// Stage 0: Sector Framework
 // ========================
 
 /**
- * Stage 0 retrieves the sector knowledge base and builds a framework.
- * If the SKB is empty for this sector, it generates a framework using the LLM.
+ * Stage 0 checks sector_playbooks for an existing framework.
+ * - If playbook EXISTS → use it (optionally enrich with LLM if content is thin)
+ * - If playbook DOES NOT EXIST → generate fresh via LLM → save to sector_playbooks
+ *
+ * Returns the framework markdown content and whether it was newly generated.
  */
 export async function runStage0(
   sessionId: string,
@@ -173,31 +351,86 @@ export async function runStage0(
   nseSymbol: string,
   sectorName: string,
   model: string,
-  onProgress?: (p: PipelineProgress) => void
-): Promise<{ framework: SectorFramework; tokensUsed: number }> {
-  onProgress?.({ stage: 'stage0', step: 'lookup', message: 'Looking up sector knowledge base...', percent: 10 });
+  onProgress?: (p: PipelineProgress) => void,
+  promptOverrides?: PromptOverrides
+): Promise<{ framework: SectorFramework; frameworkMarkdown: string; tokensUsed: number; isExisting: boolean }> {
+  onProgress?.({ stage: 'stage0', step: 'lookup', message: 'Checking for existing sector framework...', percent: 10 });
 
-  // Check if we have sector knowledge
-  const { data: knowledge } = await supabase
-    .from('sector_knowledge')
-    .select('*')
-    .eq('sector_name', sectorName)
-    .order('category')
-    .order('sort_order');
+  // Check sector_playbooks for existing framework
+  const existingPlaybook = await getSectorPlaybook(sectorName);
 
-  if (knowledge && knowledge.length > 0) {
-    onProgress?.({ stage: 'stage0', step: 'building', message: 'Building sector framework from knowledge base...', percent: 80 });
+  if (existingPlaybook) {
+    const existingContent = getFrameworkFromPlaybook(existingPlaybook);
 
-    // Build framework from existing knowledge
-    const framework = buildFrameworkFromKnowledge(sectorName, knowledge);
-    onProgress?.({ stage: 'stage0', step: 'done', message: 'Sector framework ready', percent: 100 });
-    return { framework, tokensUsed: 0 };
+    // If the existing framework has substantial content (>500 chars), use it directly
+    if (existingContent.length > 500) {
+      onProgress?.({ stage: 'stage0', step: 'found', message: `Using existing ${sectorName} sector framework (v${existingPlaybook.version})`, percent: 80 });
+
+      const framework: SectorFramework = {
+        sector_name: sectorName,
+        overview: existingContent,
+        key_metrics: existingPlaybook.key_metrics_to_track || [],
+        value_chain: '',
+        competitive_dynamics: '',
+        regulatory_landscape: '',
+        growth_drivers: (existingPlaybook.green_flags || []),
+        risk_factors: (existingPlaybook.red_flags || []),
+        valuation_methodology: '',
+        relevant_questions: [],
+      };
+
+      onProgress?.({ stage: 'stage0', step: 'done', message: 'Sector framework loaded', percent: 100 });
+      return { framework, frameworkMarkdown: existingContent, tokensUsed: 0, isExisting: true };
+    }
+
+    // Existing playbook but thin content — enrich with LLM
+    onProgress?.({ stage: 'stage0', step: 'enriching', message: `Enriching existing ${sectorName} framework with AI...`, percent: 30 });
+    const { text, tokensUsed } = await generateSectorFramework(sectorName, companyName, nseSymbol, model, existingContent, promptOverrides);
+
+    // Update the playbook with enriched content
+    try {
+      await updateSectorPlaybook(existingPlaybook.id, { framework_content: text });
+    } catch (err) {
+      console.warn('[Pipeline AI] Failed to update sector playbook:', err);
+    }
+
+    const framework = buildFrameworkObject(sectorName, text);
+    onProgress?.({ stage: 'stage0', step: 'done', message: 'Sector framework enriched and saved', percent: 100 });
+    return { framework, frameworkMarkdown: text, tokensUsed, isExisting: true };
   }
 
-  // No existing knowledge — generate using LLM
-  onProgress?.({ stage: 'stage0', step: 'generating', message: `Generating ${sectorName} sector framework via AI...`, percent: 30 });
+  // No existing playbook — generate from scratch
+  onProgress?.({ stage: 'stage0', step: 'generating', message: `Generating ${sectorName} sector framework via AI...`, percent: 20 });
+  const { text, tokensUsed } = await generateSectorFramework(sectorName, companyName, nseSymbol, model, undefined, promptOverrides);
 
-  const systemPrompt = `You are a senior equity research analyst specializing in Indian equity markets.
+  // Save to sector_playbooks
+  try {
+    const userEmail = await getCurrentUserEmail() || 'system';
+    await createSectorPlaybook({
+      sector_name: sectorName,
+      sector_description: `AI-generated sector framework for ${sectorName}`,
+      framework_content: text,
+      created_by: userEmail,
+    });
+    console.log(`[Pipeline AI] Created new sector playbook for: ${sectorName}`);
+  } catch (err) {
+    console.warn('[Pipeline AI] Failed to save sector playbook:', err);
+  }
+
+  const framework = buildFrameworkObject(sectorName, text);
+  onProgress?.({ stage: 'stage0', step: 'done', message: 'Sector framework generated and saved', percent: 100 });
+  return { framework, frameworkMarkdown: text, tokensUsed, isExisting: false };
+}
+
+async function generateSectorFramework(
+  sectorName: string,
+  companyName: string,
+  nseSymbol: string,
+  model: string,
+  existingContent?: string,
+  promptOverrides?: PromptOverrides
+): Promise<{ text: string; tokensUsed: number }> {
+  const systemPrompt = promptOverrides?.systemPrompt || `You are a senior equity research analyst specializing in Indian equity markets.
 You are building a comprehensive sector knowledge framework for the ${sectorName} sector.
 Your output will serve as the analytical foundation for all future research in this sector.
 
@@ -207,7 +440,7 @@ CRITICAL FORMATTING RULES:
 - Use headers (##, ###), bold (**text**), bullet lists (-), and numbered lists (1.) freely.
 - Every sentence must carry analytical weight — no filler.`;
 
-  const userPrompt = `Create a comprehensive sector framework for the **${sectorName}** sector in the Indian market context.
+  let userPrompt = promptOverrides?.userPrompt || `Create a comprehensive sector framework for the **${sectorName}** sector in the Indian market context.
 This framework will be used as the foundation for analyzing ${companyName} (NSE: ${nseSymbol}) and other companies in this sector.
 
 Cover the following areas in detail:
@@ -220,7 +453,7 @@ Cover the following areas in detail:
 ## 2. Key Metrics to Track
 - List the most important financial and operational KPIs for this sector
 - What metrics differentiate leaders from laggards?
-- Industry-specific ratios (e.g., ARPU for telecom, NIM for banks, ASP for auto)
+- Industry-specific ratios
 
 ## 3. Value Chain
 - Map the complete value chain
@@ -261,16 +494,20 @@ Cover the following areas in detail:
 Be specific to the Indian market context. Use real examples where possible.
 Do NOT use markdown tables — use bullet points and numbered lists throughout.`;
 
-  const { text, tokensUsed } = await callLLM(model, systemPrompt, userPrompt, {
+  if (existingContent) {
+    userPrompt += `\n\n---\n\n## Existing Framework (enhance and update, don't replace good content — only add missing areas or update outdated information):\n\n${existingContent.slice(0, 4000)}`;
+  }
+
+  return callLLM(model, systemPrompt, userPrompt, {
     temperature: 0.4,
-    maxTokens: 6000,
+    maxTokens: 10000,
   });
+}
 
-  onProgress?.({ stage: 'stage0', step: 'parsing', message: 'Parsing framework...', percent: 90 });
-
-  const framework: SectorFramework = {
+function buildFrameworkObject(sectorName: string, markdownContent: string): SectorFramework {
+  return {
     sector_name: sectorName,
-    overview: text,
+    overview: markdownContent,
     key_metrics: [],
     value_chain: '',
     competitive_dynamics: '',
@@ -280,49 +517,15 @@ Do NOT use markdown tables — use bullet points and numbered lists throughout.`
     valuation_methodology: '',
     relevant_questions: [],
   };
-
-  onProgress?.({ stage: 'stage0', step: 'done', message: 'Sector framework ready', percent: 100 });
-  return { framework, tokensUsed };
-}
-
-function buildFrameworkFromKnowledge(
-  sectorName: string,
-  knowledge: Array<{ category: string; content: string; title: string }>
-): SectorFramework {
-  const byCategory = new Map<string, Array<{ content: string; title: string }>>();
-  for (const k of knowledge) {
-    const existing = byCategory.get(k.category) || [];
-    existing.push({ content: k.content, title: k.title });
-    byCategory.set(k.category, existing);
-  }
-
-  const getContent = (cat: string) =>
-    (byCategory.get(cat) || []).map(k => k.content).join('\n\n') || '';
-  const getList = (cat: string) =>
-    (byCategory.get(cat) || []).map(k => k.content);
-
-  return {
-    sector_name: sectorName,
-    overview: getContent('overview'),
-    key_metrics: getList('key_metrics'),
-    value_chain: getContent('value_chain'),
-    competitive_dynamics: getContent('competitive_dynamics'),
-    regulatory_landscape: getContent('regulatory'),
-    growth_drivers: getList('growth_drivers'),
-    risk_factors: getList('risks'),
-    valuation_methodology: getContent('valuation'),
-    relevant_questions: getList('questions'),
-  };
 }
 
 // ========================
-// Stage 1: Thesis Generation (2 LLM calls)
+// Stage 1: Investment Thesis (Single LLM Call)
 // ========================
 
 /**
- * Stage 1 performs two LLM calls:
- * 1. Condensation: Condenses all document chunks + financials into key insights
- * 2. Thesis: Generates investment thesis from condensed insights + sector framework
+ * Stage 1 generates a comprehensive investment thesis in a SINGLE LLM call.
+ * Uses RAG retrieval + sector framework + financial data.
  */
 export async function runStage1(
   sessionId: string,
@@ -330,184 +533,111 @@ export async function runStage1(
   nseSymbol: string,
   sectorName: string,
   financials: EquityUniverse | null,
-  sectorFramework: SectorFramework,
+  sectorFrameworkMarkdown: string,
   selectedDocumentIds: string[] | null,
   model: string,
-  onProgress?: (p: PipelineProgress) => void
-): Promise<{ condensed: string; thesis: string; tokensUsed: number }> {
-  let totalTokens = 0;
-
-  // --- Call 1: Condensation ---
-  onProgress?.({ stage: 'stage1', step: 'retrieving', message: 'Retrieving document chunks...', percent: 5 });
+  onProgress?: (p: PipelineProgress) => void,
+  promptOverrides?: PromptOverrides
+): Promise<{ thesis: string; tokensUsed: number }> {
+  // --- Retrieve document chunks via RAG ---
+  onProgress?.({ stage: 'stage1', step: 'retrieving', message: 'Retrieving document chunks via RAG...', percent: 5 });
 
   const searchKeywords = [
     companyName, nseSymbol, sectorName,
     'revenue', 'profit', 'growth', 'market', 'strategy', 'competitive',
     'management', 'guidance', 'capex', 'margin', 'outlook', 'thesis',
+    'business model', 'risk', 'valuation', 'demand', 'industry',
   ];
 
   const chunks = await getRelevantChunks(sessionId, searchKeywords, 40, selectedDocumentIds);
   const chunkText = formatChunks(chunks);
   const financialContext = formatFinancialContext(financials);
 
-  onProgress?.({ stage: 'stage1', step: 'condensing', message: 'Condensing research material (Call 1/2)...', percent: 15 });
+  onProgress?.({ stage: 'stage1', step: 'generating', message: 'Generating investment thesis...', percent: 20 });
 
-  const condensationSystem = `You are a senior equity research analyst at a top Indian brokerage.
-Your task is to read through all the provided material about ${companyName} (NSE: ${nseSymbol}) and distill it into a structured analytical summary.
-Focus on extracting KEY INSIGHTS that would be most relevant for building an investment thesis.
-Be thorough but concise — every sentence should carry analytical weight.
-
-CRITICAL FORMATTING RULES:
-- Output in clean markdown ONLY.
-- Do NOT use any markdown tables (no | pipe characters for tables). Use bullet points or numbered lists instead.
-- Use headers (##, ###), bold (**text**), bullet lists (-), and numbered lists (1.) freely.`;
-
-  const condensationUser = `Analyze all the following material about **${companyName}** (NSE: ${nseSymbol}) in the **${sectorName}** sector and create a condensed analytical summary.
-
-${financialContext}
-
----
-
-## Document Excerpts (from annual reports, investor presentations, con-call transcripts, broker reports):
-
-${chunkText}
-
----
-
-## Sector Context:
-${typeof sectorFramework.overview === 'string' && sectorFramework.overview.length > 100
-    ? sectorFramework.overview.slice(0, 3000)
-    : `Sector: ${sectorName}`}
-
----
-
-Create a condensed summary covering:
-
-### 1. Business Summary
-- Core business and segment breakdown
-- Revenue model and key customers
-- Competitive positioning and moats
-
-### 2. Financial Health Assessment
-- Revenue and profit trajectory
-- Margin trends and drivers
-- Balance sheet strength (debt, cash, working capital)
-- Return ratios (ROE, ROCE, ROIC) analysis
-- Capital allocation track record
-
-### 3. Growth Story
-- Key growth drivers and catalysts
-- Capacity expansion plans
-- New product/market opportunities
-- Management guidance and track record of delivery
-
-### 4. Key Risks
-- Business-specific risks
-- Sector risks applicable to this company
-- Financial risks
-- Management/governance concerns
-
-### 5. Competitive Advantage Analysis
-- Sustainable competitive advantages (moats)
-- Market share trends
-- Pricing power evidence
-- Technology/IP advantages
-
-### 6. Key Data Points
-- Extract specific numbers, percentages, growth rates
-- Important management quotes or guidance
-
-Be factual. Cite specific data from the documents. Avoid generic statements.`;
-
-  const condensationResult = await callLLM(model, condensationSystem, condensationUser, {
-    temperature: 0.2,
-    maxTokens: 5000,
-  });
-  totalTokens += condensationResult.tokensUsed;
-  const condensed = condensationResult.text;
-
-  // --- Call 2: Thesis Generation ---
-  onProgress?.({ stage: 'stage1', step: 'thesis', message: 'Generating investment thesis (Call 2/2)...', percent: 55 });
-
-  const thesisSystem = `You are the Head of Research at a leading Indian investment bank.
-You are writing a definitive investment thesis for ${companyName} (NSE: ${nseSymbol}).
-This thesis will be the foundation of a detailed research initiation report.
+  const systemPrompt = promptOverrides?.systemPrompt || `You are the Head of Research at a leading Indian investment bank.
+You are writing a definitive, comprehensive investment thesis for ${companyName} (NSE: ${nseSymbol}).
+This thesis will be the foundation of a detailed equity research initiation report.
 Your thesis must be data-driven, nuanced, and actionable for institutional investors.
 Take a clear stance — BUY, SELL, or HOLD — and defend it rigorously.
 
 CRITICAL FORMATTING RULES:
 - Output in clean markdown ONLY.
-- Do NOT use any markdown tables (no | pipe characters for tables). Use bullet points or numbered lists instead.
-- Use headers (##, ###), bold (**text**), bullet lists (-), and numbered lists (1.) freely.
-- For the Recommendation Summary, use a numbered list with bold labels instead of a table.`;
+- Do NOT use any markdown tables (no | pipe characters for tables).
+- Use headers (##, ###), bold (**text**), bullet lists (-), and numbered lists (1.) freely.`;
 
-  const thesisUser = `Based on the following condensed research analysis and sector framework, generate a comprehensive investment thesis for **${companyName}** (NSE: ${nseSymbol}).
-
-## Condensed Research Analysis:
-${condensed}
+  // Context data is always injected; only the instruction portion can be overridden
+  const stage1Context = `Company: **${companyName}** (NSE: ${nseSymbol}) | Sector: **${sectorName}**
 
 ## Sector Framework:
-${typeof sectorFramework.overview === 'string' && sectorFramework.overview.length > 100
-    ? sectorFramework.overview.slice(0, 2000)
-    : `Sector: ${sectorName}`}
+${sectorFrameworkMarkdown.slice(0, 3000)}
 
 ${financialContext}
 
 ---
 
-Generate the following sections:
+## Research Document Excerpts (from annual reports, investor presentations, con-call transcripts, broker reports):
+${chunkText}`;
+
+  const defaultStage1Instructions = `Generate the following sections in your thesis:
 
 ## Investment Thesis
-Write a clear, compelling 3-5 paragraph investment thesis. Start with your recommendation (BUY/SELL/HOLD) and conviction level (HIGH/MEDIUM/LOW). Explain WHY this is a good/bad investment at current levels. Reference specific data points.
+Write a clear, compelling 3-5 paragraph investment thesis. Start with your recommendation (BUY/SELL/HOLD) and conviction level (HIGH/MEDIUM/LOW). Explain WHY this is a good/bad investment at current levels. Reference specific data points from the documents.
+
+## Business Summary
+- Core business and segment breakdown
+- Revenue model and key customers
+- Competitive positioning and moats
+- Key differentiators
+
+## Financial Health Assessment
+- Revenue and profit trajectory (cite specific numbers)
+- Margin trends and drivers
+- Balance sheet strength (debt, cash, working capital)
+- Return ratios (ROE, ROCE, ROIC) analysis
 
 ## Bull Case
-- What would drive significant upside? (3-5 factors)
-- Quantify the upside potential where possible
+- 3-5 factors driving upside with quantified potential
 - What catalysts could trigger re-rating?
 
 ## Bear Case
-- What could go wrong? (3-5 factors)
-- Quantify the downside risk where possible
+- 3-5 factors that could go wrong with quantified downside
 - What would make you change your stance?
 
 ## Key Catalysts (Next 12-18 months)
-List 5-8 specific, time-bound catalysts that could drive the stock:
+List 5-8 specific, time-bound catalysts:
 1. [Catalyst] — Expected timeline — Potential impact
 
 ## Key Risks
-List 5-8 specific risks with severity assessment:
+List 5-8 specific risks:
 1. [Risk] — Severity (High/Medium/Low) — Mitigant
 
 ## Valuation & Target Price Rationale
-- What valuation methodology is most appropriate?
+- Valuation methodology and rationale
 - Historical valuation range analysis
 - Peer comparison
-- Target multiple and rationale
-- Implied target price range
+- Target multiple and implied target price range
 
 ## Recommendation Summary
 - **Recommendation:** BUY / SELL / HOLD
 - **Conviction:** HIGH / MEDIUM / LOW
-- **Key Thesis:** One-line summary of the investment case
+- **Key Thesis:** One-line summary
 - **Primary Catalyst:** Most important near-term catalyst
 - **Primary Risk:** Most important risk factor
 - **Valuation Method:** Method and multiple used
 
-Be specific. Use numbers. Take a clear stance. Do NOT use markdown tables anywhere in your response — use bullet points and numbered lists throughout.`;
+Be specific. Use numbers from the documents. Take a clear stance. Do NOT use markdown tables.`;
 
-  const thesisResult = await callLLM(model, thesisSystem, thesisUser, {
+  const userPrompt = `${stage1Context}\n\n---\n\n${promptOverrides?.userPrompt || defaultStage1Instructions}`;
+
+  const { text, tokensUsed } = await callLLM(model, systemPrompt, userPrompt, {
     temperature: 0.35,
-    maxTokens: 6000,
+    maxTokens: 14000,
   });
-  totalTokens += thesisResult.tokensUsed;
 
-  onProgress?.({ stage: 'stage1', step: 'done', message: 'Thesis generation complete', percent: 100 });
+  onProgress?.({ stage: 'stage1', step: 'done', message: 'Investment thesis generated', percent: 100 });
 
-  return {
-    condensed,
-    thesis: thesisResult.text,
-    tokensUsed: totalTokens,
-  };
+  return { thesis: text, tokensUsed };
 }
 
 // ========================
@@ -527,13 +657,11 @@ export const REPORT_SECTION_DEFS = [
   { key: 'valuation',           title: 'Valuation' },
 ];
 
-// Sentinel used to split the single LLM response into sections
 const SECTION_SEPARATOR = '===SECTION===';
 
 /**
- * Stage 2 generates the entire research report in ONE single LLM call.
- * The response uses sentinel markers (===SECTION===) to delimit sections,
- * which are then parsed into individual section objects.
+ * Stage 2 generates the entire research report in ONE LLM call.
+ * Uses vector embeddings (RAG), sector framework, thesis, and financial data.
  */
 export async function runStage2(
   sessionId: string,
@@ -542,21 +670,16 @@ export async function runStage2(
   sectorName: string,
   financials: EquityUniverse | null,
   thesis: string,
-  sectorFramework: SectorFramework,
+  sectorFrameworkMarkdown: string,
   selectedDocumentIds: string[] | null,
   model: string,
-  onProgress?: (p: PipelineProgress) => void
+  onProgress?: (p: PipelineProgress) => void,
+  promptOverrides?: PromptOverrides
 ): Promise<{ sections: Array<{ key: string; title: string; content: string }>; tokensUsed: number }> {
   const financialContext = formatFinancialContext(financials);
 
-  onProgress?.({
-    stage: 'stage2',
-    step: 'retrieving',
-    message: 'Retrieving research documents...',
-    percent: 5,
-  });
+  onProgress?.({ stage: 'stage2', step: 'retrieving', message: 'Retrieving research documents via RAG...', percent: 5 });
 
-  // Retrieve a broad set of relevant chunks for the entire report (single retrieval pass)
   const allKeywords = [
     companyName, nseSymbol, sectorName,
     'revenue', 'profit', 'growth', 'market', 'strategy', 'competitive',
@@ -566,18 +689,13 @@ export async function runStage2(
   const chunks = await getRelevantChunks(sessionId, allKeywords, 40, selectedDocumentIds);
   const chunkText = formatChunks(chunks);
 
-  onProgress?.({
-    stage: 'stage2',
-    step: 'generating',
-    message: 'Generating full report (single LLM call for all 10 sections)...',
-    percent: 15,
-  });
+  onProgress?.({ stage: 'stage2', step: 'generating', message: 'Generating full report (single LLM call)...', percent: 15 });
 
   const sectionListText = REPORT_SECTION_DEFS
     .map((s, i) => `${i + 1}. ${s.title}`)
     .join('\n');
 
-  const systemPrompt = `You are a senior equity research analyst at a leading Indian investment bank.
+  const systemPrompt = promptOverrides?.systemPrompt || `You are a senior equity research analyst at a leading Indian investment bank.
 You are writing a complete, institutional-grade research initiation report on ${companyName} (NSE: ${nseSymbol}).
 Your report must be data-driven, thorough, and written in a professional tone for institutional investors.
 
@@ -590,22 +708,21 @@ CRITICAL FORMATTING RULES:
   Then the section content below that.
 - Do not add any text before the first ${SECTION_SEPARATOR} marker.`;
 
-  const userPrompt = `Write a complete equity research initiation report on **${companyName}** (NSE: ${nseSymbol}) in the **${sectorName}** sector.
+  // Context data is always injected; only the instruction portion can be overridden
+  const contextBlock = `Company: **${companyName}** (NSE: ${nseSymbol}) | Sector: **${sectorName}**
 
 ## Investment Thesis (guiding framework — align ALL sections with this):
-${thesis.slice(0, 2500)}
+${thesis.slice(0, 3000)}
 
 ## Sector Framework:
-${typeof sectorFramework.overview === 'string' ? sectorFramework.overview.slice(0, 2000) : `Sector: ${sectorName}`}
+${sectorFrameworkMarkdown.slice(0, 2500)}
 
 ${financialContext}
 
 ## Research Document Excerpts:
-${chunkText}
+${chunkText}`;
 
----
-
-Generate ALL of the following ${REPORT_SECTION_DEFS.length} sections in order. Each section MUST be preceded by the separator line "${SECTION_SEPARATOR}" with the section title on the next line.
+  const defaultInstructions = `Generate ALL of the following ${REPORT_SECTION_DEFS.length} sections in order. Each section MUST be preceded by the separator line "${SECTION_SEPARATOR}" with the section title on the next line.
 
 ${sectionListText}
 
@@ -617,26 +734,17 @@ For each section:
 
 Begin now. Do not include any preamble before the first ${SECTION_SEPARATOR} marker.`;
 
-  onProgress?.({
-    stage: 'stage2',
-    step: 'generating',
-    message: 'LLM generating full report...',
-    percent: 20,
-  });
+  const userPrompt = `${contextBlock}\n\n---\n\n${promptOverrides?.userPrompt || defaultInstructions}`;
+
+  onProgress?.({ stage: 'stage2', step: 'generating', message: 'LLM generating full report...', percent: 20 });
 
   const { text: rawText, tokensUsed } = await callLLM(model, systemPrompt, userPrompt, {
     temperature: 0.3,
     maxTokens: 16000,
   });
 
-  onProgress?.({
-    stage: 'stage2',
-    step: 'parsing',
-    message: 'Parsing report sections...',
-    percent: 90,
-  });
+  onProgress?.({ stage: 'stage2', step: 'parsing', message: 'Parsing report sections...', percent: 90 });
 
-  // Parse the single response into individual sections
   const sections = parseSectionsFromResponse(rawText);
 
   onProgress?.({ stage: 'stage2', step: 'done', message: 'Report generation complete', percent: 100 });
@@ -645,28 +753,23 @@ Begin now. Do not include any preamble before the first ${SECTION_SEPARATOR} mar
 }
 
 /**
- * Parses the single LLM response (which contains all 10 sections separated by
- * SECTION_SEPARATOR markers) into individual section objects.
- * Falls back gracefully if the model doesn't follow the format perfectly.
+ * Parses the single LLM response into individual section objects.
  */
 function parseSectionsFromResponse(
   rawText: string
 ): Array<{ key: string; title: string; content: string }> {
   const results: Array<{ key: string; title: string; content: string }> = [];
 
-  // Split on separator
   const parts = rawText.split(SECTION_SEPARATOR).filter(p => p.trim().length > 0);
 
   for (const part of parts) {
     const lines = part.trim().split('\n');
-    // First non-empty line is the section title
     const titleLine = lines.find(l => l.trim().length > 0)?.trim() ?? '';
     const contentLines = lines.slice(lines.findIndex(l => l.trim().length > 0) + 1);
     const content = contentLines.join('\n').trim();
 
     if (!titleLine) continue;
 
-    // Match to known section defs by title similarity (case-insensitive contains)
     const matchedDef = REPORT_SECTION_DEFS.find(
       def => titleLine.toLowerCase().includes(def.title.toLowerCase()) ||
              def.title.toLowerCase().includes(titleLine.toLowerCase())
@@ -679,13 +782,12 @@ function parseSectionsFromResponse(
         content: content || `*Content for ${matchedDef.title} was not generated.*`,
       });
     } else {
-      // Unknown section — include it with a derived key
       const key = titleLine.toLowerCase().replace(/[^a-z0-9]+/g, '_').slice(0, 40);
       results.push({ key, title: titleLine, content });
     }
   }
 
-  // Fill in any missing sections from REPORT_SECTION_DEFS
+  // Fill in missing sections
   for (const def of REPORT_SECTION_DEFS) {
     if (!results.find(r => r.key === def.key)) {
       results.push({
@@ -696,7 +798,7 @@ function parseSectionsFromResponse(
     }
   }
 
-  // Sort results to match REPORT_SECTION_DEFS order
+  // Sort to match REPORT_SECTION_DEFS order
   const defOrder = REPORT_SECTION_DEFS.map(d => d.key);
   results.sort((a, b) => {
     const ai = defOrder.indexOf(a.key);

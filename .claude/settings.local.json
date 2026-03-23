@@ -11,7 +11,8 @@
       "Bash(ls -la /c/Users/pratik/tikona-research-os/src/components/*.tsx)",
       "Bash(npx vite:*)",
       "Bash(find /c/Users/pratik/tikona-research-os -name *.py -not -path */node_modules/*)",
-      "Read(//c/Users/pratik/**)"
+      "Read(//c/Users/pratik/**)",
+      "Bash(grep -r \"role === ''customer''\\\\|role === ''admin''\" /c/Users/pratik/tikona-research-os-2/src --include=\"*.ts\" --include=\"*.tsx\")"
     ]
   }
 }

@@ -62,6 +62,7 @@ import {
   createPromptTemplate,
   deletePromptTemplate,
   publishReport,
+  finalizeReport,
 } from '@/lib/api';
 import {
   ingestDocument,
@@ -394,13 +395,12 @@ export default function GenerateResearch() {
         // Auto-save session to database
         try {
           const userEmail = await getCurrentUserEmail();
-          if (userEmail) {
+          if (!userEmail) {
+            throw new Error('Not logged in. Please sign in and try again.');
+          }
             const session = await saveResearchSession({
-              company_id: selectedCompany.company_id,
               user_email: userEmail,
-              vault_url: folderUrl,
-              vault_id: folderId,
-              nse_symbol: selectedCompany.nse_symbol,
+              nse_symbol: selectedCompany.nse_symbol ?? '',
               company_name: selectedCompany.company_name,
               sector,
               status: 'document_review',
@@ -438,7 +438,6 @@ export default function GenerateResearch() {
             }
 
             toast.success('Session saved automatically');
-          }
         } catch (saveError) {
           console.error('[GenerateResearch] Failed to auto-save session:', saveError);
           toast.error(
@@ -781,10 +780,24 @@ export default function GenerateResearch() {
   }, [selectedCompany]);
 
   const handleGenerateAll = useCallback(async () => {
+    const startTime = Date.now();
+    let totalTokens = 0;
     const currentSections = sectionsRef.current;
     for (const section of currentSections) {
-      if (section.status === 'idle' || section.status === 'generated') {
+      if (section.status === 'idle') {
         await handleGenerateSection(section.key);
+        totalTokens += sectionsRef.current.find(s => s.key === section.key)?.tokensUsed ?? 0;
+      }
+    }
+
+    // Finalize report with tokens and timing
+    const currentReportId = reportIdRef.current;
+    if (currentReportId) {
+      const elapsedSeconds = Math.round((Date.now() - startTime) / 1000);
+      try {
+        await finalizeReport(currentReportId, totalTokens, elapsedSeconds);
+      } catch (err) {
+        console.error('[GenerateResearch] Failed to finalize report:', err);
       }
     }
   }, [handleGenerateSection]);
@@ -965,6 +978,16 @@ export default function GenerateResearch() {
     );
   }, []);
 
+  const handleConfirmAll = useCallback(async () => {
+    const currentSections = sectionsRef.current;
+    const unconfirmed = currentSections.filter(s => s.output && s.status !== 'confirmed');
+    if (unconfirmed.length === 0) return;
+    for (const section of unconfirmed) {
+      await handleConfirmSection(section.key);
+    }
+    toast.success(`${unconfirmed.length} sections confirmed`);
+  }, [handleConfirmSection]);
+
   const handleAddSection = useCallback(async () => {
     if (!newSectionTitle || !newSectionPrompt) {
       toast.error('Please provide both title and prompt');
@@ -1034,8 +1057,10 @@ export default function GenerateResearch() {
   const handleDeleteSection = useCallback(async (key: string) => {
     const section = sectionsRef.current.find((s) => s.key === key);
 
+    if (!section) return;
+
     // Protect the 7 default sections from deletion
-    if (section && !section.isCustom) {
+    if (!section.isCustom) {
       toast.error('Default sections cannot be deleted');
       return;
     }
@@ -1231,12 +1256,16 @@ export default function GenerateResearch() {
     maxAttempts = 20,
     intervalMs = 5000,
   ): Promise<string | null> => {
+    if (!reportId) {
+      console.error('[Poll] No reportId available');
+      return null;
+    }
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       console.log(`[Podcast] Polling ${column} — attempt ${attempt}/${maxAttempts}`);
       const { data, error } = await supabase
         .from('research_reports')
         .select(column)
-        .eq('report_id', reportId!)
+        .eq('report_id', reportId)
         .single();
 
       const record = data as Record<string, unknown> | null;
@@ -1836,6 +1865,17 @@ export default function GenerateResearch() {
                                   </>
                                 )}
                               </Button>
+                              {sections.some(s => s.output && s.status !== 'confirmed') && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={handleConfirmAll}
+                                  className="bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
+                                >
+                                  <Check className="h-3.5 w-3.5 mr-1.5" />
+                                  Confirm All
+                                </Button>
+                              )}
                               <Button
                                 size="sm"
                                 variant="outline"

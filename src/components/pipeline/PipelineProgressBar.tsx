@@ -4,11 +4,13 @@ import { getStageNumber, PIPELINE_STAGE_LABELS } from '@/types/pipeline';
 import { Check } from 'lucide-react';
 
 const STEPS = [
-  { label: 'Documents', stage: 0 },
-  { label: 'Sector Framework', stage: 1 },
-  { label: 'Thesis', stage: 2 },
-  { label: 'Report', stage: 3 },
-  { label: 'Published', stage: 4 },
+  { label: 'Company', stage: 0 },
+  { label: 'Vault', stage: 1 },
+  { label: 'Documents', stage: 2 },
+  { label: 'Framework', stage: 3 },
+  { label: 'Thesis', stage: 4 },
+  { label: 'Report', stage: 5 },
+  { label: 'Published', stage: 6 },
 ];
 
 interface PipelineProgressBarProps {
@@ -39,17 +41,17 @@ export default function PipelineProgressBar({ status, className }: PipelineProgr
               <div className="flex flex-col items-center">
                 <div
                   className={cn(
-                    'flex h-8 w-8 items-center justify-center rounded-full border-2 text-xs font-semibold transition-all',
+                    'flex h-7 w-7 items-center justify-center rounded-full border-2 text-[10px] font-semibold transition-all',
                     isCompleted && 'border-accent-600 bg-accent-600 text-white',
                     isCurrent && 'border-accent-600 bg-white text-accent-600 ring-4 ring-accent-100',
                     !isCompleted && !isCurrent && 'border-neutral-200 bg-white text-neutral-400'
                   )}
                 >
-                  {isCompleted ? <Check className="h-4 w-4" /> : step.stage}
+                  {isCompleted ? <Check className="h-3.5 w-3.5" /> : step.stage}
                 </div>
                 <span
                   className={cn(
-                    'mt-1.5 text-[10px] font-medium whitespace-nowrap',
+                    'mt-1.5 text-[9px] font-medium whitespace-nowrap',
                     isCurrent ? 'text-accent-700' : isCompleted ? 'text-neutral-600' : 'text-neutral-400'
                   )}
                 >
@@ -59,7 +61,7 @@ export default function PipelineProgressBar({ status, className }: PipelineProgr
 
               {/* Connector line */}
               {!isLast && (
-                <div className="flex-1 mx-1">
+                <div className="flex-1 mx-0.5">
                   <div
                     className={cn(
                       'h-0.5 w-full transition-colors',

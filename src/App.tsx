@@ -5,7 +5,6 @@ import { Toaster } from '@/components/ui/sonner';
 import { AuthProvider } from '@/contexts/AuthContext';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import AdminLayout from '@/components/AdminLayout';
-import CustomerLayout from '@/components/CustomerLayout';
 import Login from '@/pages/Login';
 
 // Admin pages
@@ -16,13 +15,6 @@ import GenerateResearch from '@/pages/GenerateResearch';
 import ResearchReports from '@/pages/ResearchReports';
 import PromptLibrary from '@/pages/PromptLibrary';
 import ResearchPipeline from '@/pages/ResearchPipeline';
-
-// Customer pages
-import CustomerDashboard from '@/pages/customer/CustomerDashboard';
-import PublishedReports from '@/pages/customer/PublishedReports';
-import ReportDetail from '@/pages/customer/ReportDetail';
-import Portfolio from '@/pages/customer/Portfolio';
-import StockDetail from '@/pages/customer/StockDetail';
 
 // Only load devtools in development
 const ReactQueryDevtools = import.meta.env.DEV
@@ -58,7 +50,7 @@ function App() {
             <Route path="/login" element={<Login />} />
 
             {/* Admin Routes */}
-            <Route element={<ProtectedLayout requiredRole="admin" />}>
+            <Route element={<ProtectedLayout />}>
               <Route element={<AdminLayout />}>
                 <Route path="/admin" element={<Dashboard />} />
                 <Route path="/admin/equity-database" element={<MasterDatabase />} />
@@ -70,19 +62,8 @@ function App() {
               </Route>
             </Route>
 
-            {/* Customer Routes */}
-            <Route element={<ProtectedLayout requiredRole="customer" />}>
-              <Route element={<CustomerLayout />}>
-                <Route path="/" element={<CustomerDashboard />} />
-                <Route path="/reports" element={<PublishedReports />} />
-                <Route path="/reports/:reportId" element={<ReportDetail />} />
-                <Route path="/portfolio" element={<Portfolio />} />
-                <Route path="/stock/:nseSymbol" element={<StockDetail />} />
-              </Route>
-            </Route>
-
             {/* Catch-all redirect */}
-            <Route path="*" element={<Navigate to="/login" replace />} />
+            <Route path="*" element={<Navigate to="/admin" replace />} />
           </Routes>
 
           {/* Toast notifications */}

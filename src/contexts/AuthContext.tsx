@@ -10,7 +10,7 @@ import type { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { AUDIT_ACTIONS, ADMIN_EMAILS } from '@/lib/constants';
 
-export type UserRole = 'admin' | 'customer';
+export type UserRole = 'admin';
 
 interface AuthContextType {
   user: User | null;
@@ -49,10 +49,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, []);
 
-  // Determine role from email
-  const determineRole = useCallback((email: string | undefined): UserRole => {
-    const normalized = email?.toLowerCase() || '';
-    return (ADMIN_EMAILS as readonly string[]).includes(normalized) ? 'admin' : 'customer';
+  // All users are admin (admin-only app)
+  const determineRole = useCallback((_email: string | undefined): UserRole => {
+    return 'admin';
   }, []);
 
   // Handle session changes

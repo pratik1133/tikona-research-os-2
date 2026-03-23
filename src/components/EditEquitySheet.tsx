@@ -329,21 +329,6 @@ const TABS: { id: string; label: string; sections: SectionDef[] }[] = [
       },
     ],
   },
-  {
-    id: 'charts',
-    label: 'Charts',
-    sections: [
-      {
-        title: 'Chart URLs',
-        fields: [
-          { key: 'chart_url_1m', label: '1M Chart URL', type: 'text' },
-          { key: 'chart_url_3m', label: '3M Chart URL', type: 'text' },
-          { key: 'chart_url_6m', label: '6M Chart URL', type: 'text' },
-          { key: 'chart_url_12m', label: '12M Chart URL', type: 'text' },
-        ],
-      },
-    ],
-  },
 ];
 
 // Build a flat list of all field keys for form state

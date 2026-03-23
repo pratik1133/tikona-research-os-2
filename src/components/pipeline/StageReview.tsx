@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Check, RotateCcw, ChevronDown, ChevronUp, Edit3, Save } from 'lucide-react';
+import { Check, RotateCcw, ChevronDown, ChevronUp, Edit3, Save, Maximize2, Minimize2 } from 'lucide-react';
 
 interface StageReviewProps {
   title: string;
@@ -12,6 +12,8 @@ interface StageReviewProps {
   onRegenerate: () => void;
   onEdit?: (content: string) => void;
   className?: string;
+  /** Max height of the scrollable content area in pixels. Default 400. */
+  maxHeight?: number;
 }
 
 export default function StageReview({
@@ -23,10 +25,17 @@ export default function StageReview({
   onRegenerate,
   onEdit,
   className,
+  maxHeight = 400,
 }: StageReviewProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(content);
+  const [isFullHeight, setIsFullHeight] = useState(false);
+
+  // Sync edit content when content prop changes
+  useEffect(() => {
+    setEditContent(content);
+  }, [content]);
 
   const handleSave = () => {
     onEdit?.(editContent);
@@ -37,10 +46,10 @@ export default function StageReview({
     <div className={cn('rounded-xl border border-neutral-200 bg-white overflow-hidden', className)}>
       {/* Header */}
       <div
-        className="flex items-center justify-between px-5 py-3 bg-neutral-50 border-b border-neutral-100 cursor-pointer"
+        className="flex items-center justify-between px-4 py-2.5 bg-neutral-50 border-b border-neutral-100 cursor-pointer"
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
           {isApproved && (
             <div className="flex h-5 w-5 items-center justify-center rounded-full bg-green-100">
               <Check className="h-3 w-3 text-green-600" />
@@ -53,18 +62,29 @@ export default function StageReview({
             </span>
           )}
         </div>
-        {isExpanded ? (
-          <ChevronUp className="h-4 w-4 text-neutral-400" />
-        ) : (
-          <ChevronDown className="h-4 w-4 text-neutral-400" />
-        )}
+        <div className="flex items-center gap-1.5">
+          {isExpanded && !isEditing && !isGenerating && (
+            <button
+              onClick={(e) => { e.stopPropagation(); setIsFullHeight(!isFullHeight); }}
+              className="p-1 rounded hover:bg-neutral-100 text-neutral-400 hover:text-neutral-600 transition-colors"
+              title={isFullHeight ? 'Collapse' : 'Expand full'}
+            >
+              {isFullHeight ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+            </button>
+          )}
+          {isExpanded ? (
+            <ChevronUp className="h-4 w-4 text-neutral-400" />
+          ) : (
+            <ChevronDown className="h-4 w-4 text-neutral-400" />
+          )}
+        </div>
       </div>
 
       {/* Content */}
       {isExpanded && (
-        <div className="p-5">
+        <div className="px-4 py-3">
           {isGenerating ? (
-            <div className="flex items-center gap-3 py-8 justify-center">
+            <div className="flex items-center gap-3 py-6 justify-center">
               <div className="h-5 w-5 animate-spin rounded-full border-2 border-accent-200 border-t-accent-600" />
               <span className="text-sm text-neutral-500">Generating...</span>
             </div>
@@ -73,9 +93,9 @@ export default function StageReview({
               <textarea
                 value={editContent}
                 onChange={(e) => setEditContent(e.target.value)}
-                className="w-full min-h-[300px] rounded-lg border border-neutral-200 p-3 text-sm font-mono text-neutral-800 focus:outline-none focus:ring-2 focus:ring-accent-500/40 focus:border-accent-400"
+                className="w-full min-h-[300px] max-h-[500px] rounded-lg border border-neutral-200 p-3 text-sm font-mono text-neutral-800 focus:outline-none focus:ring-2 focus:ring-accent-500/40 focus:border-accent-400"
               />
-              <div className="flex gap-2 mt-3">
+              <div className="flex gap-2 mt-2">
                 <Button size="sm" onClick={handleSave}>
                   <Save className="h-3.5 w-3.5 mr-1.5" />
                   Save
@@ -88,13 +108,17 @@ export default function StageReview({
           ) : (
             <>
               <div
-                className="prose prose-sm prose-neutral max-w-none text-neutral-700 leading-relaxed"
+                className={cn(
+                  'prose prose-sm prose-neutral max-w-none text-neutral-700 leading-relaxed overflow-y-auto',
+                  !isFullHeight && 'scrollbar-thin'
+                )}
+                style={isFullHeight ? undefined : { maxHeight: `${maxHeight}px` }}
                 dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }}
               />
 
               {/* Actions */}
               {!isApproved && (
-                <div className="flex items-center gap-2 mt-5 pt-4 border-t border-neutral-100">
+                <div className="flex items-center gap-2 mt-3 pt-3 border-t border-neutral-100">
                   <Button onClick={onApprove} size="sm">
                     <Check className="h-3.5 w-3.5 mr-1.5" />
                     Approve
