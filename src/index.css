@@ -77,6 +77,12 @@ body {
   to { transform: rotate(360deg); }
 }
 
+@keyframes loading {
+  0% { transform: translateX(-100%); }
+  50% { transform: translateX(200%); }
+  100% { transform: translateX(-100%); }
+}
+
 .animate-spin {
   animation: spin 1s linear infinite;
 }

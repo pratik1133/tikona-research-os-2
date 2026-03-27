@@ -1,76 +1,120 @@
 import { cn } from '@/lib/utils';
 import type { PipelineStatus } from '@/types/pipeline';
-import { getStageNumber, PIPELINE_STAGE_LABELS } from '@/types/pipeline';
-import { Check } from 'lucide-react';
+import { getStageNumber } from '@/types/pipeline';
+import { Check, Building2, FolderOpen, Compass, Lightbulb, FileText, Rocket } from 'lucide-react';
 
 const STEPS = [
-  { label: 'Company', stage: 0 },
-  { label: 'Vault', stage: 1 },
-  { label: 'Documents', stage: 2 },
-  { label: 'Framework', stage: 3 },
-  { label: 'Thesis', stage: 4 },
-  { label: 'Report', stage: 5 },
-  { label: 'Published', stage: 6 },
+  { label: 'Setup', icon: Building2, stage: 0 },
+  { label: 'Vault', icon: FolderOpen, stage: 1 },
+  { label: 'Sector', icon: Compass, stage: 2 },
+  { label: 'Thesis', icon: Lightbulb, stage: 3 },
+  { label: 'Report', icon: FileText, stage: 4 },
+  { label: 'Published', icon: Rocket, stage: 5 },
 ];
 
 interface PipelineProgressBarProps {
   status: PipelineStatus;
   className?: string;
+  /** If provided, clicking a completed/active step calls this */
+  onStepClick?: (stage: number) => void;
 }
 
-export default function PipelineProgressBar({ status, className }: PipelineProgressBarProps) {
+export default function PipelineProgressBar({ status, className, onStepClick }: PipelineProgressBarProps) {
   const currentStage = getStageNumber(status);
 
   return (
     <div className={cn('w-full', className)}>
-      {/* Status label */}
-      <p className="text-xs font-medium text-neutral-500 mb-3">
-        {PIPELINE_STAGE_LABELS[status]}
-      </p>
-
-      {/* Progress steps */}
-      <div className="flex items-center gap-0">
+      {/* Desktop: horizontal stepper */}
+      <div className="hidden sm:flex items-center">
         {STEPS.map((step, i) => {
           const isCompleted = currentStage > step.stage;
           const isCurrent = currentStage === step.stage;
           const isLast = i === STEPS.length - 1;
+          const isClickable = (isCompleted || isCurrent) && !!onStepClick;
+          const Icon = step.icon;
 
           return (
             <div key={step.label} className="flex items-center flex-1 last:flex-none">
-              {/* Step circle */}
-              <div className="flex flex-col items-center">
+              <button
+                type="button"
+                onClick={() => isClickable && onStepClick?.(step.stage)}
+                disabled={!isClickable}
+                className={cn(
+                  'flex flex-col items-center gap-1.5 group transition-all',
+                  isClickable && 'cursor-pointer',
+                  !isClickable && 'cursor-default',
+                )}
+              >
                 <div
                   className={cn(
-                    'flex h-7 w-7 items-center justify-center rounded-full border-2 text-[10px] font-semibold transition-all',
-                    isCompleted && 'border-accent-600 bg-accent-600 text-white',
-                    isCurrent && 'border-accent-600 bg-white text-accent-600 ring-4 ring-accent-100',
-                    !isCompleted && !isCurrent && 'border-neutral-200 bg-white text-neutral-400'
+                    'relative flex h-9 w-9 items-center justify-center rounded-xl transition-all duration-300',
+                    isCompleted && 'bg-accent-600 text-white shadow-sm shadow-accent-200',
+                    isCurrent && 'bg-accent-50 text-accent-700 ring-2 ring-accent-500/30',
+                    !isCompleted && !isCurrent && 'bg-neutral-100 text-neutral-400',
+                    isClickable && !isCompleted && 'group-hover:bg-accent-100 group-hover:text-accent-600',
+                    isClickable && isCompleted && 'group-hover:bg-accent-700',
                   )}
                 >
-                  {isCompleted ? <Check className="h-3.5 w-3.5" /> : step.stage}
+                  {isCompleted ? (
+                    <Check className="h-4 w-4" strokeWidth={2.5} />
+                  ) : (
+                    <Icon className="h-4 w-4" />
+                  )}
+                  {isCurrent && (
+                    <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 h-1 w-4 rounded-full bg-accent-500" />
+                  )}
                 </div>
                 <span
                   className={cn(
-                    'mt-1.5 text-[9px] font-medium whitespace-nowrap',
-                    isCurrent ? 'text-accent-700' : isCompleted ? 'text-neutral-600' : 'text-neutral-400'
+                    'text-[10px] font-semibold tracking-wide uppercase transition-colors',
+                    isCurrent && 'text-accent-700',
+                    isCompleted && 'text-neutral-600',
+                    !isCompleted && !isCurrent && 'text-neutral-400',
                   )}
                 >
                   {step.label}
                 </span>
-              </div>
+              </button>
 
-              {/* Connector line */}
               {!isLast && (
-                <div className="flex-1 mx-0.5">
-                  <div
-                    className={cn(
-                      'h-0.5 w-full transition-colors',
-                      isCompleted ? 'bg-accent-500' : 'bg-neutral-200'
-                    )}
-                  />
+                <div className="flex-1 mx-1.5 mb-5">
+                  <div className={cn(
+                    'h-[2px] w-full rounded-full transition-colors duration-500',
+                    isCompleted ? 'bg-accent-400' : 'bg-neutral-200',
+                  )} />
                 </div>
               )}
             </div>
+          );
+        })}
+      </div>
+
+      {/* Mobile: compact pill stepper */}
+      <div className="flex sm:hidden items-center gap-1.5 overflow-x-auto pb-1">
+        {STEPS.map((step) => {
+          const isCompleted = currentStage > step.stage;
+          const isCurrent = currentStage === step.stage;
+          const Icon = step.icon;
+
+          return (
+            <button
+              key={step.label}
+              type="button"
+              onClick={() => (isCompleted || isCurrent) && onStepClick?.(step.stage)}
+              className={cn(
+                'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold uppercase tracking-wide whitespace-nowrap transition-all',
+                isCompleted && 'bg-accent-50 text-accent-700',
+                isCurrent && 'bg-accent-600 text-white shadow-sm',
+                !isCompleted && !isCurrent && 'bg-neutral-100 text-neutral-400',
+              )}
+            >
+              {isCompleted ? (
+                <Check className="h-3 w-3" strokeWidth={2.5} />
+              ) : (
+                <Icon className="h-3 w-3" />
+              )}
+              {step.label}
+            </button>
           );
         })}
       </div>

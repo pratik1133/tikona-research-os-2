@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs head:*)",
+      "Bash(npm install:*)",
+      "Bash(grep -E \"\\\\.\\(tsx?|json\\)$\")",
+      "Bash(find c:Userspratiktikona-research-os-2/scripts -type f -name *.py)",
+      "Bash(xargs wc:*)",
+      "Bash(find c:Userspratiktikona-research-os-2/src c:Userspratiktikona-research-os-2/scripts -type f \\\\\\(-name *.ts -o -name *.tsx -o -name *.js -o -name *.jsx -o -name *.py \\\\\\))",
+      "Bash(xargs grep:*)",
+      "Bash(grep -r \"N8N_BASE_URL\\\\|VITE_N8N\" c:Userspratiktikona-research-os-2src --include=*.ts --include=*.tsx -l)"
+    ]
+  }
+}

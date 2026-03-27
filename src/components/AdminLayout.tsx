@@ -6,6 +6,7 @@ import {
   Sparkles,
   LayoutDashboard,
   GitBranch,
+  Send,
 } from 'lucide-react';
 import SidebarLayout, { type NavItemConfig } from '@/components/Layout';
 
@@ -17,6 +18,7 @@ const adminNavItems: NavItemConfig[] = [
   { label: 'Generate Research', path: '/admin/generate-research', icon: Sparkles,        group: 'Research' },
   { label: 'Report Generator',  path: '/admin/pipeline',          icon: GitBranch,       group: 'Research' },
   { label: 'Prompt Library',    path: '/admin/prompts',           icon: BookOpen,        group: 'Research' },
+  { label: 'Recommendations',   path: '/admin/recommendations',   icon: Send,            group: 'Distribution' },
 ];
 
 export default function AdminLayout() {

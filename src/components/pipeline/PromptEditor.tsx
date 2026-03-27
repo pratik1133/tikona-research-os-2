@@ -2,24 +2,22 @@ import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import { Save, RotateCcw, BookOpen, TableProperties } from 'lucide-react';
-import { listPromptTemplates, createPromptTemplate, updatePromptTemplate } from '@/lib/api';
-import type { PromptTemplate } from '@/types/database';
+import { Save, RotateCcw, Check, AlertCircle, Code2, MessageSquare, ChevronDown, ChevronUp } from 'lucide-react';
+import { getPipelinePrompt, savePipelinePrompt } from '@/lib/pipeline-api';
+import type { PipelineStage } from '@/lib/pipeline-api';
 
 interface PromptEditorProps {
-  /** Unique key for this stage's prompt (e.g. 'pipeline_stage0') */
-  stageKey: string;
+  stage: PipelineStage;
   title: string;
   defaultSystem: string;
   defaultUser: string;
   userEmail?: string;
-  /** Called whenever prompts change so parent can pass to stage runner */
   onChange: (prompts: { systemPrompt: string; userPrompt: string }) => void;
   className?: string;
 }
 
 export default function PromptEditor({
-  stageKey,
+  stage,
   title,
   defaultSystem,
   defaultUser,
@@ -27,27 +25,24 @@ export default function PromptEditor({
   onChange,
   className,
 }: PromptEditorProps) {
-  const [tab, setTab] = useState<'system' | 'user'>('system');
   const [systemPrompt, setSystemPrompt] = useState(defaultSystem);
   const [userPrompt, setUserPrompt] = useState(defaultUser);
-  const [savedTemplate, setSavedTemplate] = useState<PromptTemplate | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isModified, setIsModified] = useState(false);
+  const [isCustom, setIsCustom] = useState(false);
+  const [expandedSection, setExpandedSection] = useState<'system' | 'user' | null>('system');
 
-  // Load saved template on mount
+  // Load saved custom prompt on mount
   useEffect(() => {
     if (!userEmail) return;
-    listPromptTemplates(userEmail).then((templates) => {
-      const match = templates.find(t => t.section_key === stageKey);
-      if (match) {
-        setSavedTemplate(match);
-        // Parse stored prompt — we store system|user separated by a delimiter
-        const parts = parseStoredPrompt(match.prompt_text);
-        if (parts.systemPrompt) setSystemPrompt(parts.systemPrompt);
-        if (parts.userPrompt) setUserPrompt(parts.userPrompt);
+    getPipelinePrompt(stage, userEmail).then((saved) => {
+      if (saved) {
+        setSystemPrompt(saved.system_prompt);
+        setUserPrompt(saved.user_prompt);
+        setIsCustom(true);
       }
     }).catch(() => {});
-  }, [stageKey, userEmail]);
+  }, [stage, userEmail]);
 
   // Notify parent when prompts change
   useEffect(() => {
@@ -68,36 +63,26 @@ export default function PromptEditor({
     setSystemPrompt(defaultSystem);
     setUserPrompt(defaultUser);
     setIsModified(true);
+    setIsCustom(false);
   };
 
-  const handleSaveToLibrary = async () => {
+  const handleSave = async () => {
     if (!userEmail) {
       toast.error('Must be logged in to save prompts');
       return;
     }
     setIsSaving(true);
     try {
-      const storedText = formatStoredPrompt(systemPrompt, userPrompt);
-      if (savedTemplate) {
-        // Update existing
-        const updated = await updatePromptTemplate(savedTemplate.id, {
-          prompt_text: storedText,
-          title: title,
-        });
-        setSavedTemplate(updated as unknown as PromptTemplate);
-        toast.success('Prompt updated in library');
-      } else {
-        // Create new
-        const created = await createPromptTemplate({
-          section_key: stageKey,
-          title: title,
-          prompt_text: storedText,
-          search_keywords: [stageKey],
-        });
-        setSavedTemplate(created as unknown as PromptTemplate);
-        toast.success('Prompt saved to library');
-      }
+      await savePipelinePrompt({
+        stage,
+        label: title,
+        system_prompt: systemPrompt,
+        user_prompt: userPrompt,
+        user_email: userEmail,
+      });
       setIsModified(false);
+      setIsCustom(true);
+      toast.success('Prompt saved to library');
     } catch (err) {
       toast.error(`Failed to save: ${err instanceof Error ? err.message : 'Unknown error'}`);
     } finally {
@@ -105,97 +90,150 @@ export default function PromptEditor({
     }
   };
 
+  const toggleSection = (section: 'system' | 'user') => {
+    setExpandedSection(prev => prev === section ? null : section);
+  };
+
   return (
-    <div className={cn('rounded-xl border border-amber-200 bg-amber-50 overflow-hidden', className)}>
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2 bg-amber-100 border-b border-amber-200">
+    <div className={cn('bg-neutral-50/80', className)}>
+      {/* Toolbar */}
+      <div className="flex items-center justify-between px-4 py-2 border-b border-neutral-100">
         <div className="flex items-center gap-2">
-          <TableProperties className="h-3.5 w-3.5 text-amber-700" />
-          <span className="text-xs font-semibold text-amber-800">{title}</span>
-          {savedTemplate && (
-            <span className="text-[10px] text-amber-600 bg-amber-200 px-1.5 py-0.5 rounded-full flex items-center gap-1">
-              <BookOpen className="h-2.5 w-2.5" /> Saved
-            </span>
-          )}
-          {isModified && (
-            <span className="text-[10px] text-orange-600 bg-orange-100 px-1.5 py-0.5 rounded-full">Modified</span>
-          )}
+          <Code2 className="h-3.5 w-3.5 text-neutral-400" />
+          <span className="text-[11px] font-semibold text-neutral-500">{title}</span>
+          <StatusBadge isModified={isModified} isCustom={isCustom} />
         </div>
         <div className="flex items-center gap-1.5">
-          {/* Tab buttons */}
-          <div className="flex rounded-md overflow-hidden border border-amber-300 text-[11px]">
-            <button
-              onClick={() => setTab('system')}
-              className={cn(
-                'px-2.5 py-1 font-medium transition-colors',
-                tab === 'system' ? 'bg-amber-700 text-white' : 'bg-white text-amber-700 hover:bg-amber-50'
-              )}
-            >
-              System
-            </button>
-            <button
-              onClick={() => setTab('user')}
-              className={cn(
-                'px-2.5 py-1 font-medium transition-colors',
-                tab === 'user' ? 'bg-amber-700 text-white' : 'bg-white text-amber-700 hover:bg-amber-50'
-              )}
-            >
-              User
-            </button>
-          </div>
           <Button
             size="sm"
             variant="ghost"
             onClick={handleReset}
-            className="h-6 px-2 text-[10px] text-amber-700 hover:text-amber-900"
-            title="Reset to defaults"
+            className="h-6 px-2 text-[10px] text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100"
           >
-            <RotateCcw className="h-3 w-3" />
+            <RotateCcw className="h-3 w-3 mr-1" />
+            Reset
           </Button>
           <Button
             size="sm"
-            variant="ghost"
-            onClick={handleSaveToLibrary}
-            disabled={isSaving}
-            className="h-6 px-2 text-[10px] text-amber-700 hover:text-amber-900"
-            title="Save to prompt library"
+            onClick={handleSave}
+            disabled={isSaving || !isModified}
+            className={cn(
+              'h-6 px-2.5 text-[10px] font-medium rounded-md transition-all',
+              isModified
+                ? 'bg-accent-600 hover:bg-accent-700 text-white'
+                : 'bg-neutral-200 text-neutral-400 cursor-not-allowed'
+            )}
           >
             <Save className="h-3 w-3 mr-1" />
-            {isSaving ? '...' : 'Save'}
+            {isSaving ? 'Saving...' : 'Save'}
           </Button>
         </div>
       </div>
 
-      {/* Editable textarea */}
-      <textarea
-        value={tab === 'system' ? systemPrompt : userPrompt}
-        onChange={(e) => tab === 'system' ? handleSystemChange(e.target.value) : handleUserChange(e.target.value)}
-        className="w-full p-3 text-xs text-amber-900 bg-amber-50 font-mono leading-relaxed resize-y focus:outline-none focus:bg-white focus:ring-1 focus:ring-amber-300 transition-colors"
-        style={{ minHeight: '120px', maxHeight: '320px' }}
-        spellCheck={false}
+      {/* System Prompt */}
+      <PromptSection
+        label="System Prompt"
+        icon={<Code2 className="h-3 w-3" />}
+        value={systemPrompt}
+        onChange={handleSystemChange}
+        isExpanded={expandedSection === 'system'}
+        onToggle={() => toggleSection('system')}
       />
+
+      <div className="border-t border-neutral-100" />
+
+      {/* User Prompt */}
+      <PromptSection
+        label="User Prompt"
+        icon={<MessageSquare className="h-3 w-3" />}
+        value={userPrompt}
+        onChange={handleUserChange}
+        isExpanded={expandedSection === 'user'}
+        onToggle={() => toggleSection('user')}
+      />
+
+      {/* Variables hint */}
+      <div className="px-4 py-1.5 border-t border-neutral-100 bg-neutral-50">
+        <p className="text-[9px] text-neutral-400">
+          <span className="font-medium">Variables:</span>{' '}
+          <code className="px-1 bg-neutral-100 rounded text-[9px]">{'{{COMPANY}}'}</code>{' '}
+          <code className="px-1 bg-neutral-100 rounded text-[9px]">{'{{NSE_SYMBOL}}'}</code>{' '}
+          <code className="px-1 bg-neutral-100 rounded text-[9px]">{'{{SECTOR}}'}</code>
+        </p>
+      </div>
     </div>
   );
 }
 
 // ========================
-// Prompt storage helpers
+// Sub-components
 // ========================
 
-const PROMPT_DELIMITER = '\n===SYSTEM_USER_SEPARATOR===\n';
+function StatusBadge({ isModified, isCustom }: { isModified: boolean; isCustom: boolean }) {
+  if (isModified) {
+    return (
+      <span className="inline-flex items-center gap-0.5 text-[9px] font-medium text-amber-600 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-full">
+        <AlertCircle className="h-2.5 w-2.5" /> Unsaved
+      </span>
+    );
+  }
 
-function formatStoredPrompt(system: string, user: string): string {
-  return `${system}${PROMPT_DELIMITER}${user}`;
+  if (isCustom) {
+    return (
+      <span className="inline-flex items-center gap-0.5 text-[9px] font-medium text-accent-600 bg-accent-50 border border-accent-200 px-1.5 py-0.5 rounded-full">
+        <Check className="h-2.5 w-2.5" /> Custom
+      </span>
+    );
+  }
+
+  return (
+    <span className="text-[9px] font-medium text-neutral-400 bg-neutral-100 px-1.5 py-0.5 rounded-full">
+      Default
+    </span>
+  );
 }
 
-function parseStoredPrompt(stored: string): { systemPrompt: string; userPrompt: string } {
-  const idx = stored.indexOf(PROMPT_DELIMITER);
-  if (idx === -1) {
-    // Legacy single prompt — treat as user prompt
-    return { systemPrompt: '', userPrompt: stored };
-  }
-  return {
-    systemPrompt: stored.slice(0, idx),
-    userPrompt: stored.slice(idx + PROMPT_DELIMITER.length),
-  };
+interface PromptSectionProps {
+  label: string;
+  icon: React.ReactNode;
+  value: string;
+  onChange: (value: string) => void;
+  isExpanded: boolean;
+  onToggle: () => void;
+}
+
+function PromptSection({ label, icon, value, onChange, isExpanded, onToggle }: PromptSectionProps) {
+  const lineCount = value.split('\n').length;
+
+  return (
+    <div>
+      <button
+        onClick={onToggle}
+        className="w-full flex items-center justify-between px-4 py-2 hover:bg-neutral-100/50 transition-colors text-left"
+      >
+        <div className="flex items-center gap-1.5">
+          <div className="text-neutral-400">{icon}</div>
+          <span className="text-[11px] font-medium text-neutral-600">{label}</span>
+          <span className="text-[9px] text-neutral-400">{lineCount} lines</span>
+        </div>
+        {isExpanded ? (
+          <ChevronUp className="h-3 w-3 text-neutral-400" />
+        ) : (
+          <ChevronDown className="h-3 w-3 text-neutral-400" />
+        )}
+      </button>
+
+      {isExpanded && (
+        <div className="px-4 pb-2.5">
+          <textarea
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            className="w-full rounded-lg border border-neutral-200 bg-white p-3 text-[11px] text-neutral-800 font-mono leading-relaxed resize-y focus:outline-none focus:ring-2 focus:ring-accent-500/20 focus:border-accent-400 transition-all"
+            style={{ minHeight: '120px', maxHeight: '350px' }}
+            spellCheck={false}
+          />
+        </div>
+      )}
+    </div>
+  );
 }

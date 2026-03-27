@@ -56,30 +56,6 @@ export function useMasterCompanyList(
   });
 }
 
-// Fetch single master company record
-export function useMasterCompanyDetail(companyId: number) {
-  return useQuery({
-    queryKey: masterCompanyKeys.detail(companyId),
-    queryFn: async (): Promise<MasterCompany | null> => {
-      const { data, error } = await supabase
-        .from('master_company')
-        .select('*')
-        .eq('company_id', companyId)
-        .single();
-
-      if (error) {
-        if (error.code === 'PGRST116') {
-          return null;
-        }
-        throw new Error(`Failed to fetch company: ${error.message}`);
-      }
-
-      return data;
-    },
-    enabled: !!companyId,
-  });
-}
-
 // Create audit log helper
 async function createAuditLog(log: CreateAuditLogInput) {
   try {

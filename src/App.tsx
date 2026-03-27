@@ -15,6 +15,7 @@ import GenerateResearch from '@/pages/GenerateResearch';
 import ResearchReports from '@/pages/ResearchReports';
 import PromptLibrary from '@/pages/PromptLibrary';
 import ResearchPipeline from '@/pages/ResearchPipeline';
+import Recommendations from '@/pages/Recommendations';
 
 // Only load devtools in development
 const ReactQueryDevtools = import.meta.env.DEV
@@ -59,6 +60,7 @@ function App() {
                 <Route path="/admin/generate-research" element={<GenerateResearch />} />
                 <Route path="/admin/pipeline" element={<ResearchPipeline />} />
                 <Route path="/admin/prompts" element={<PromptLibrary />} />
+                <Route path="/admin/recommendations" element={<Recommendations />} />
               </Route>
             </Route>
 

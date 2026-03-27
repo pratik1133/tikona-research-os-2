@@ -1,38 +1,33 @@
-// Pipeline types for the 3-stage research pipeline
+// Pipeline types for the research pipeline
 // Maps to the ACTUAL research_sessions table in Supabase
+// v2: Anthropic SDK + Web Search architecture (no vector embeddings)
 
 // ========================
 // State Machine
 // ========================
 
 export type PipelineStatus =
-  | 'company_selected'        // Company + model chosen, user decides financial model or vault
-  | 'financial_model_generating'
-  | 'financial_model_done'
-  | 'vault_creating'
-  | 'vault_ready'             // Vault created, documents listed
-  | 'documents_ingesting'
-  | 'documents_ready'         // Embeddings created
-  | 'stage0_generating'       // Sector framework generation
+  | 'company_selected'           // Company chosen, user decides financial model or vault
+  | 'financial_model_generating' // Financial model being generated
+  | 'vault_creating'             // Creating Google Drive vault + fetching docs
+  | 'vault_ready'                // Vault created, documents listed, user confirms
+  | 'stage0_generating'          // Sector framework generation (Anthropic + web search)
   | 'stage0_review'
   | 'stage0_approved'
-  | 'stage1_generating'       // Thesis generation (single call)
+  | 'stage1_generating'          // Thesis generation (Anthropic + web search)
   | 'stage1_review'
   | 'stage1_approved'
-  | 'stage2_generating'       // Report content generation
+  | 'stage2_generating'          // Report generation (Anthropic + web search)
   | 'stage2_review'
   | 'stage2_approved'
   | 'published';
 
 // Valid state transitions
 export const PIPELINE_TRANSITIONS: Record<PipelineStatus, PipelineStatus[]> = {
-  company_selected: ['financial_model_generating', 'vault_creating'],
-  financial_model_generating: ['financial_model_done'],
-  financial_model_done: ['vault_creating'],
+  company_selected: ['vault_creating'],
+  financial_model_generating: ['vault_ready'],       // Model done → back to vault_ready
   vault_creating: ['vault_ready'],
-  vault_ready: ['documents_ingesting'],
-  documents_ingesting: ['documents_ready'],
-  documents_ready: ['stage0_generating'],
+  vault_ready: ['financial_model_generating', 'stage0_generating'],  // Choose model or skip
   stage0_generating: ['stage0_review'],
   stage0_review: ['stage0_approved', 'stage0_generating'],
   stage0_approved: ['stage1_generating'],
@@ -123,20 +118,18 @@ export interface SectorPlaybook {
 }
 
 // ========================
-// Sector Framework (derived from playbook or AI-generated)
+// Sector Framework — the AI-generated sector analysis markdown
+// Stored in sector_playbooks and copied to research_sessions.sector_framework
 // ========================
 
 export interface SectorFramework {
   sector_name: string;
-  overview: string;
-  key_metrics: string[];
-  value_chain: string;
-  competitive_dynamics: string;
-  regulatory_landscape: string;
-  growth_drivers: string[];
-  risk_factors: string[];
-  valuation_methodology: string;
-  relevant_questions: string[];
+  /** The full AI-generated markdown content */
+  markdown: string;
+  /** Playbook version (increments on regeneration) */
+  version: number;
+  /** ISO date string of last update */
+  last_updated: string;
 }
 
 export interface SectorKnowledge {
@@ -155,6 +148,8 @@ export interface SectorKnowledge {
 // Stage 1: Thesis Generation
 // ========================
 
+export type SaarthiRating = 'STRONG BUY' | 'BUY' | 'ACCUMULATE' | 'HOLD' | 'UNDERPERFORM' | 'SELL';
+
 export interface ThesisOutput {
   investment_thesis: string;
   bull_case: string;
@@ -162,8 +157,8 @@ export interface ThesisOutput {
   key_catalysts: string[];
   key_risks: string[];
   target_price_rationale: string;
-  recommendation: 'BUY' | 'SELL' | 'HOLD' | 'NEUTRAL';
-  conviction_level: 'HIGH' | 'MEDIUM' | 'LOW';
+  saarthi_score: number;
+  saarthi_rating: SaarthiRating;
 }
 
 // ========================
@@ -232,42 +227,35 @@ export interface PipelineProgress {
 export const PIPELINE_STAGE_LABELS: Record<PipelineStatus, string> = {
   company_selected: 'Company Selected',
   financial_model_generating: 'Generating Financial Model',
-  financial_model_done: 'Financial Model Ready',
   vault_creating: 'Creating Drive Vault',
   vault_ready: 'Vault Ready',
-  documents_ingesting: 'Ingesting Documents',
-  documents_ready: 'Documents Ready',
   stage0_generating: 'Generating Sector Framework',
   stage0_review: 'Review Sector Framework',
   stage0_approved: 'Sector Framework Approved',
   stage1_generating: 'Generating Investment Thesis',
   stage1_review: 'Review Investment Thesis',
   stage1_approved: 'Investment Thesis Approved',
-  stage2_generating: 'Generating Report Content',
-  stage2_review: 'Review Report Content',
-  stage2_approved: 'Report Content Approved',
+  stage2_generating: 'Generating Report',
+  stage2_review: 'Review Report',
+  stage2_approved: 'Report Approved',
   published: 'Published',
 };
 
 // Stage step numbers for progress bar
 export function getStageNumber(status: PipelineStatus): number {
-  if (['company_selected', 'financial_model_generating', 'financial_model_done'].includes(status)) return 0;
-  if (['vault_creating', 'vault_ready'].includes(status)) return 1;
-  if (['documents_ingesting', 'documents_ready'].includes(status)) return 2;
-  if (status.startsWith('stage0')) return 3;
-  if (status.startsWith('stage1')) return 4;
-  if (status.startsWith('stage2')) return 5;
-  if (status === 'published') return 6;
+  if (status === 'company_selected' || status === 'financial_model_generating') return 0;
+  if (status === 'vault_creating' || status === 'vault_ready') return 1;
+  if (status.startsWith('stage0')) return 2;
+  if (status.startsWith('stage1')) return 3;
+  if (status.startsWith('stage2')) return 4;
+  if (status === 'published') return 5;
   return 0;
 }
 
-// AI Model options for the pipeline
+// AI Model options — now primarily Anthropic, with OpenRouter fallback
 export const PIPELINE_MODELS = [
-  { id: 'google/gemini-2.5-pro', label: 'Gemini 2.5 Pro' },
-  { id: 'anthropic/claude-sonnet-4-6', label: 'Claude Sonnet 4.6' },
-  { id: 'anthropic/claude-opus-4-6', label: 'Claude Opus 4.6' },
-  { id: 'openai/gpt-4.1', label: 'GPT 4.1' },
-  { id: 'google/gemini-2.0-flash-001', label: 'Gemini 2.0 Flash' },
+  { id: 'claude-sonnet', label: 'Claude Sonnet 4' },
+  { id: 'claude-opus', label: 'Claude Opus 4' },
 ] as const;
 
-export const DEFAULT_PIPELINE_MODEL = 'google/gemini-2.5-pro';
+export const DEFAULT_PIPELINE_MODEL = 'claude-sonnet';

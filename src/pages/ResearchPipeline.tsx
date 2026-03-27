@@ -3,17 +3,11 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import PipelineProgressBar from '@/components/pipeline/PipelineProgressBar';
 import StageReview from '@/components/pipeline/StageReview';
+import PromptEditor from '@/components/pipeline/PromptEditor';
+import PostProductionPanel from '@/components/pipeline/PostProductionPanel';
 import { useCompanySearch, useCompanyFinancials } from '@/hooks/useCompanySearch';
-import { useSectors } from '@/hooks/usePipelineSession';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   createPipelineSession,
@@ -21,6 +15,7 @@ import {
   updatePipelineOutput,
   saveResearchSection,
   clearResearchSections,
+  updateResearchSection,
   listPipelineSessions,
   deletePipelineSession,
   getPipelineSession,
@@ -33,24 +28,20 @@ import {
   processVaultResponse,
   saveSessionDocuments,
   generateFinancialModel,
+  unpublishReport,
+  getReportBySession,
 } from '@/lib/api';
-import { ingestDocument } from '@/lib/ai';
-import { runStage0, runStage1, runStage2, DEFAULT_PROMPTS } from '@/lib/pipeline-ai';
-import type { PromptOverrides } from '@/lib/pipeline-ai';
-import PromptEditor from '@/components/pipeline/PromptEditor';
-import type { PipelineSession, PipelineProgress, PipelineStatus } from '@/types/pipeline';
+import { runStage0, runStage1, runStage2, DEFAULT_PROMPTS } from '@/lib/anthropic-pipeline';
+import type { PromptOverrides } from '@/lib/anthropic-pipeline';
+import type { PipelineSession, PipelineProgress, PipelineStatus, SectorFramework } from '@/types/pipeline';
 import { PIPELINE_STAGE_LABELS, PIPELINE_MODELS, DEFAULT_PIPELINE_MODEL, getStageNumber } from '@/types/pipeline';
-import type { MasterCompany, EquityUniverse } from '@/types/database';
+import type { MasterCompany } from '@/types/database';
 import type { VaultDocument } from '@/types/vault';
 import DocumentUploadDialog from '@/components/DocumentUploadDialog';
 import { cn } from '@/lib/utils';
 import {
   Search,
   Building2,
-  Zap,
-  FileText,
-  ChevronDown,
-  ChevronUp,
   BarChart3,
   FolderOpen,
   Upload,
@@ -61,8 +52,17 @@ import {
   Loader2,
   Eye,
   EyeOff,
-  TableProperties,
   Sparkles,
+  FileText,
+  Globe,
+  ChevronRight,
+  ArrowRight,
+  Play,
+  Zap,
+  X,
+  Clock,
+  Hash,
+  ChevronDown,
 } from 'lucide-react';
 
 // ========================
@@ -78,7 +78,7 @@ function formatCurrency(value: number | null): string {
 
 function formatPercent(value: number | null): string {
   if (value == null) return '-';
-  return `${value.toFixed(2)}%`;
+  return `${value.toFixed(1)}%`;
 }
 
 // ========================
@@ -109,12 +109,7 @@ export default function ResearchPipeline() {
   const [vaultLink, setVaultLink] = useState<string | null>(null);
   const [vaultId, setVaultId] = useState<string | null>(null);
   const [vaultDocuments, setVaultDocuments] = useState<VaultDocument[]>([]);
-  const [selectedDocumentIds, setSelectedDocumentIds] = useState<string[]>([]);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
-
-  // --- Ingestion State ---
-  const [ingestionStatus, setIngestionStatus] = useState<'idle' | 'ingesting' | 'done' | 'error'>('idle');
-  const [ingestionProgress, setIngestionProgress] = useState({ current: 0, total: 0 });
 
   // --- Financial Model State ---
   const [financialModelStatus, setFinancialModelStatus] = useState<'idle' | 'generating' | 'success' | 'skipped'>('idle');
@@ -126,30 +121,27 @@ export default function ResearchPipeline() {
   const [progress, setProgress] = useState<PipelineProgress | null>(null);
 
   // --- Stage Outputs ---
-  const [stage0Content, setStage0Content] = useState<string>('');
-  const [stage0IsExisting, setStage0IsExisting] = useState(false);
-  const [sectorFrameworkMarkdown, setSectorFrameworkMarkdown] = useState<string>('');
+  const [sectorFramework, setSectorFramework] = useState<SectorFramework | null>(null);
   const [stage1Thesis, setStage1Thesis] = useState<string>('');
-  const [stage2Sections, setStage2Sections] = useState<Array<{ key: string; title: string; content: string }>>([]);
+  const [stage2Sections, setStage2Sections] = useState<Array<{ id?: string; key: string; title: string; content: string }>>([]);
 
-  // --- Prompt Visibility & Overrides ---
-  const [showStage0Prompt, setShowStage0Prompt] = useState(false);
-  const [showStage1Prompt, setShowStage1Prompt] = useState(false);
-  const [showStage2Prompt, setShowStage2Prompt] = useState(false);
+  // --- Prompt Overrides ---
+  const [showPrompt, setShowPrompt] = useState<'stage0' | 'stage1' | 'stage2' | null>(null);
   const [stage0Prompts, setStage0Prompts] = useState<PromptOverrides>({});
   const [stage1Prompts, setStage1Prompts] = useState<PromptOverrides>({});
   const [stage2Prompts, setStage2Prompts] = useState<PromptOverrides>({});
 
   // --- Recent Sessions ---
   const [recentSessions, setRecentSessions] = useState<PipelineSession[]>([]);
-  const [showRecent, setShowRecent] = useState(true);
+
+  // --- Report Section Tabs ---
+  const [activeReportTab, setActiveReportTab] = useState(0);
 
   // --- Data Queries ---
   const { data: companies } = useCompanySearch(debouncedSearch);
   const { data: financials } = useCompanyFinancials(selectedCompany);
-  const { data: sectors } = useSectors();
 
-  // Auto-fill sector from financials when available
+  // Auto-fill sector from financials
   useEffect(() => {
     if (financials && !selectedSector) {
       const sector = financials.sector || financials.broad_sector || '';
@@ -191,24 +183,29 @@ export default function ResearchPipeline() {
         setSession(s);
         setPipelineStatus((s.pipeline_status ?? 'company_selected') as PipelineStatus);
         setSelectedModel(s.selected_model ?? DEFAULT_PIPELINE_MODEL);
-        // Load stage outputs from session
         if (s.sector_framework) {
-          const fw = s.sector_framework;
-          setStage0Content(fw.overview || JSON.stringify(fw, null, 2));
+          setSectorFramework(s.sector_framework);
+        } else {
+          const sectorName = s.sector || selectedSector;
+          if (sectorName) {
+            getSectorPlaybook(sectorName).then((pb) => {
+              if (pb) {
+                setSectorFramework({
+                  sector_name: sectorName,
+                  markdown: getFrameworkFromPlaybook(pb),
+                  version: pb.version,
+                  last_updated: pb.last_updated,
+                });
+              }
+            });
+          }
         }
         if (s.thesis_output) setStage1Thesis(s.thesis_output);
-        // Try to recover sectorFrameworkMarkdown from playbook
-        const sectorName = s.sector || selectedSector;
-        if (sectorName) {
-          getSectorPlaybook(sectorName).then((pb) => {
-            if (pb) setSectorFrameworkMarkdown(getFrameworkFromPlaybook(pb));
-          });
-        }
       }
     });
     getResearchSections(sessionId, 'stage2').then((sections) => {
       if (sections.length > 0) {
-        setStage2Sections(sections.map(s => ({ key: s.section_key, title: s.section_title, content: s.content })));
+        setStage2Sections(sections.map(s => ({ id: s.id, key: s.section_key, title: s.section_title, content: s.content })));
       }
     });
   }, [sessionId]);
@@ -220,13 +217,12 @@ export default function ResearchPipeline() {
     setIsDropdownOpen(false);
   }, []);
 
-  // --- Create Session (company_selected state) ---
+  // --- Create Session → auto-create vault ---
   const handleCreateSession = async () => {
     if (!selectedCompany || !user?.email) return;
     const sector = selectedSector || financials?.sector || financials?.broad_sector || 'General';
     if (!selectedSector) setSelectedSector(sector);
     setIsCreatingSession(true);
-    setShowRecent(false);
 
     try {
       const newSession = await createPipelineSession({
@@ -239,114 +235,77 @@ export default function ResearchPipeline() {
       setSessionId(newSession.session_id);
       setSession(newSession);
       setPipelineStatus('company_selected');
-      toast.success('Pipeline session created');
+
+      // Auto-create vault immediately after session
+      setVaultStatus('loading');
+      await transitionPipelineStatus(newSession.session_id, 'vault_creating', 'company_selected');
+      setPipelineStatus('vault_creating');
+
+      const vaultResponse = await createVault(selectedCompany.nse_symbol ?? '', sector);
+      const { folderId, folderUrl, documents } = processVaultResponse(vaultResponse);
+      setVaultLink(folderUrl);
+      setVaultId(folderId);
+      setVaultDocuments(documents);
+      setVaultStatus('success');
+
+      await transitionPipelineStatus(newSession.session_id, 'vault_ready', 'vault_creating');
+      setPipelineStatus('vault_ready');
+      toast.success('Vault created — choose your next step');
     } catch (err) {
-      toast.error(`Failed to create session: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      toast.error(`Failed to start pipeline: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      setVaultStatus('error');
     } finally {
       setIsCreatingSession(false);
     }
   };
 
-  // --- Generate Financial Model → then Create Vault ---
+  // --- Generate Financial Model (vault already exists) ---
   const handleGenerateFinancialModel = async () => {
-    if (!sessionId || !selectedCompany) return;
+    if (!sessionId || !selectedCompany || !vaultId) return;
     const sector = selectedSector || session?.sector || 'General';
 
     try {
-      // Transition to financial_model_generating
-      await transitionPipelineStatus(sessionId, 'financial_model_generating', pipelineStatus);
+      await transitionPipelineStatus(sessionId, 'financial_model_generating', 'vault_ready');
       setPipelineStatus('financial_model_generating');
       setFinancialModelStatus('generating');
 
-      // First create the vault (need folder for financial model)
-      toast.info('Creating Drive vault...');
-      setVaultStatus('loading');
-      const vaultResponse = await createVault(selectedCompany.nse_symbol ?? '', sector);
-      const { folderId, folderUrl, documents } = processVaultResponse(vaultResponse);
-      setVaultLink(folderUrl);
-      setVaultId(folderId);
-      setVaultDocuments(documents);
-      setVaultStatus('success');
-
-      // Now generate financial model into the vault folder
-      toast.info('Generating financial model...');
+      toast.info('Generating financial model — this takes ~10 min...');
       const modelResult = await generateFinancialModel(
         selectedCompany.nse_symbol ?? '',
         selectedCompany.company_name,
         sector,
-        folderId
+        vaultId
       );
       setFinancialModelStatus('success');
       setFinancialModelFileUrl(modelResult.fileUrl);
       toast.success(`Financial model generated: ${modelResult.fileName}`);
 
-      // Transition to financial_model_done → then vault_ready (vault was already created)
-      await transitionPipelineStatus(sessionId, 'financial_model_done', 'financial_model_generating');
-      // Since vault was created alongside, go straight to vault_ready
-      await transitionPipelineStatus(sessionId, 'vault_creating', 'financial_model_done');
-      await transitionPipelineStatus(sessionId, 'vault_ready', 'vault_creating');
+      await transitionPipelineStatus(sessionId, 'vault_ready', 'financial_model_generating');
       setPipelineStatus('vault_ready');
 
-      // Refresh session
       const updated = await getPipelineSession(sessionId);
       if (updated) setSession(updated);
     } catch (err) {
       toast.error(`Financial model failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
-      setFinancialModelStatus('skipped');
-      // Try to recover — go back to company_selected
-      try { await transitionPipelineStatus(sessionId, 'company_selected'); } catch {}
-      setPipelineStatus('company_selected');
-    }
-  };
-
-  // --- Skip Financial Model → Create Vault directly ---
-  const handleSkipToVault = async () => {
-    if (!sessionId || !selectedCompany) return;
-    const sector = selectedSector || session?.sector || 'General';
-
-    try {
-      await transitionPipelineStatus(sessionId, 'vault_creating', pipelineStatus);
-      setPipelineStatus('vault_creating');
-      setVaultStatus('loading');
-      setFinancialModelStatus('skipped');
-
-      toast.info('Creating Drive vault...');
-      const vaultResponse = await createVault(selectedCompany.nse_symbol ?? '', sector);
-      const { folderId, folderUrl, documents } = processVaultResponse(vaultResponse);
-      setVaultLink(folderUrl);
-      setVaultId(folderId);
-      setVaultDocuments(documents);
-      setVaultStatus('success');
-      toast.success('Drive vault created');
-
-      await transitionPipelineStatus(sessionId, 'vault_ready', 'vault_creating');
+      setFinancialModelStatus('idle');
+      try { await transitionPipelineStatus(sessionId, 'vault_ready', 'financial_model_generating'); } catch { /* ignore */ }
       setPipelineStatus('vault_ready');
-
-      const updated = await getPipelineSession(sessionId);
-      if (updated) setSession(updated);
-    } catch (err) {
-      toast.error(`Vault creation failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
-      setVaultStatus('error');
-      try { await transitionPipelineStatus(sessionId, 'company_selected'); } catch {}
-      setPipelineStatus('company_selected');
     }
   };
 
-  // --- Document Ingestion ---
-  const handleIngestDocuments = async () => {
-    if (!sessionId || selectedDocumentIds.length === 0) return;
+  // --- Skip Financial Model → go straight to sector framework ---
+  const handleSkipFinancialModel = () => {
+    setFinancialModelStatus('skipped');
+    handleRunStage0();
+  };
+
+  // --- Save documents to session ---
+  const handleConfirmDocuments = async () => {
+    if (!sessionId || vaultDocuments.length === 0) return;
 
     try {
-      await transitionPipelineStatus(sessionId, 'documents_ingesting', pipelineStatus);
-      setPipelineStatus('documents_ingesting');
-      setIngestionStatus('ingesting');
-
-      const docsToIngest = vaultDocuments.filter(d => selectedDocumentIds.includes(d.id));
-      setIngestionProgress({ current: 0, total: docsToIngest.length });
-
-      // Save documents to session_documents table
       await saveSessionDocuments(
-        docsToIngest.map(d => ({
+        vaultDocuments.map(d => ({
           session_id: sessionId,
           drive_file_id: d.id,
           file_name: d.name,
@@ -358,93 +317,68 @@ export default function ResearchPipeline() {
           category: d.category,
         }))
       );
-
-      // Ingest each document (creates embeddings)
-      for (let i = 0; i < docsToIngest.length; i++) {
-        setIngestionProgress({ current: i + 1, total: docsToIngest.length });
-        await ingestDocument(docsToIngest[i].id, docsToIngest[i].name, sessionId);
-      }
-
-      setIngestionStatus('done');
-      await transitionPipelineStatus(sessionId, 'documents_ready', 'documents_ingesting');
-      setPipelineStatus('documents_ready');
-      toast.success(`${docsToIngest.length} documents ingested`);
-    } catch (err) {
-      setIngestionStatus('error');
-      toast.error(`Ingestion failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
-      try { await transitionPipelineStatus(sessionId, 'vault_ready'); } catch {}
-      setPipelineStatus('vault_ready');
+      toast.success('Documents saved to session');
+    } catch {
+      // Documents may already be saved
     }
   };
 
   // --- Stage 0: Sector Framework ---
-  const handleRunStage0 = useCallback(async () => {
+  const handleRunStage0 = useCallback(async (forceRegenerate = false) => {
     if (!sessionId || !session) return;
+    const previousStatus = pipelineStatus;
     setIsRunning(true);
     try {
+      if (pipelineStatus === 'vault_ready') {
+        await handleConfirmDocuments();
+      }
       await transitionPipelineStatus(sessionId, 'stage0_generating', pipelineStatus);
       setPipelineStatus('stage0_generating');
 
-      const { framework, frameworkMarkdown, tokensUsed, isExisting } = await runStage0(
-        sessionId,
+      const { framework, tokensUsed, cached } = await runStage0(
         session.company_name,
         session.company_nse_code,
         selectedSector || session?.sector || '',
-        selectedModel,
         setProgress,
-        stage0Prompts
+        stage0Prompts,
+        forceRegenerate
       );
 
-      const content = framework.overview || JSON.stringify(framework, null, 2);
-      setStage0Content(content);
-      setSectorFrameworkMarkdown(frameworkMarkdown);
-      setStage0IsExisting(isExisting);
+      setSectorFramework(framework);
 
       await updatePipelineOutput(sessionId, {
         sector_framework: framework,
         total_tokens_used: (session.total_tokens_used || 0) + tokensUsed,
       });
 
-      await clearResearchSections(sessionId, 'stage0');
-      await saveResearchSection({
-        session_id: sessionId,
-        section_key: 'sector_framework',
-        section_title: 'Sector Framework',
-        stage: 'stage0',
-        content: frameworkMarkdown,
-        tokens_used: tokensUsed,
-      });
-
       await transitionPipelineStatus(sessionId, 'stage0_review', 'stage0_generating');
       setPipelineStatus('stage0_review');
-      toast.success(isExisting ? 'Existing sector framework loaded' : 'Sector framework generated');
+      toast.success(cached ? 'Existing sector framework loaded' : 'Sector framework generated');
     } catch (err) {
-      toast.error(`Stage 0 failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
-      setPipelineStatus('documents_ready');
-      try { await transitionPipelineStatus(sessionId, 'documents_ready'); } catch {}
+      toast.error(`Framework generation failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      setPipelineStatus(previousStatus);
+      try { await transitionPipelineStatus(sessionId, previousStatus); } catch { /* ignore */ }
     } finally {
       setIsRunning(false);
       setProgress(null);
     }
   }, [sessionId, session, pipelineStatus, selectedSector, selectedModel, stage0Prompts]);
 
-  // --- Stage 1: Investment Thesis (single LLM call) ---
+  // --- Stage 1: Investment Thesis ---
   const handleRunStage1 = useCallback(async () => {
     if (!sessionId || !session) return;
+    const previousStatus = pipelineStatus;
     setIsRunning(true);
     try {
       await transitionPipelineStatus(sessionId, 'stage1_generating', pipelineStatus);
       setPipelineStatus('stage1_generating');
 
       const { thesis, tokensUsed } = await runStage1(
-        sessionId,
         session.company_name,
         session.company_nse_code,
         selectedSector || session?.sector || '',
         financials ?? null,
-        sectorFrameworkMarkdown,
-        null,
-        selectedModel,
+        sectorFramework?.markdown || '',
         setProgress,
         stage1Prompts
       );
@@ -456,57 +390,43 @@ export default function ResearchPipeline() {
         total_tokens_used: (session.total_tokens_used || 0) + tokensUsed,
       });
 
-      await clearResearchSections(sessionId, 'stage1');
-      await saveResearchSection({
-        session_id: sessionId,
-        section_key: 'investment_thesis',
-        section_title: 'Investment Thesis',
-        stage: 'stage1',
-        content: thesis,
-        sort_order: 0,
-        tokens_used: tokensUsed,
-      });
-
       await transitionPipelineStatus(sessionId, 'stage1_review', 'stage1_generating');
       setPipelineStatus('stage1_review');
       toast.success('Investment thesis generated');
     } catch (err) {
-      toast.error(`Stage 1 failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
-      setPipelineStatus('stage0_approved');
-      try { await transitionPipelineStatus(sessionId, 'stage0_approved'); } catch {}
+      toast.error(`Thesis generation failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      setPipelineStatus(previousStatus);
+      try { await transitionPipelineStatus(sessionId, previousStatus); } catch { /* ignore */ }
     } finally {
       setIsRunning(false);
       setProgress(null);
     }
-  }, [sessionId, session, pipelineStatus, financials, selectedSector, selectedModel, sectorFrameworkMarkdown, stage1Prompts]);
+  }, [sessionId, session, pipelineStatus, financials, selectedSector, selectedModel, sectorFramework, stage1Prompts]);
 
   // --- Stage 2: Full Report ---
   const handleRunStage2 = useCallback(async () => {
     if (!sessionId || !session || !stage1Thesis) return;
+    const previousStatus = pipelineStatus;
     setIsRunning(true);
     try {
       await transitionPipelineStatus(sessionId, 'stage2_generating', pipelineStatus);
       setPipelineStatus('stage2_generating');
 
       const { sections: reportSections, tokensUsed } = await runStage2(
-        sessionId,
         session.company_name,
         session.company_nse_code,
         selectedSector || session?.sector || '',
         financials ?? null,
         stage1Thesis,
-        sectorFrameworkMarkdown,
-        null,
-        selectedModel,
+        sectorFramework?.markdown || '',
         setProgress,
         stage2Prompts
       );
 
-      setStage2Sections(reportSections);
-
       await clearResearchSections(sessionId, 'stage2');
+      const savedSections: Array<{ id?: string; key: string; title: string; content: string }> = [];
       for (let i = 0; i < reportSections.length; i++) {
-        await saveResearchSection({
+        const saved = await saveResearchSection({
           session_id: sessionId,
           section_key: reportSections[i].key,
           section_title: reportSections[i].title,
@@ -515,11 +435,11 @@ export default function ResearchPipeline() {
           sort_order: i,
           tokens_used: Math.round(tokensUsed / reportSections.length),
         });
+        savedSections.push({ id: saved.id, key: reportSections[i].key, title: reportSections[i].title, content: reportSections[i].content });
       }
+      setStage2Sections(savedSections);
 
-      const fullReport = reportSections.map(s => `# ${s.title}\n\n${s.content}`).join('\n\n---\n\n');
       await updatePipelineOutput(sessionId, {
-        report_content: fullReport,
         total_tokens_used: (session.total_tokens_used || 0) + tokensUsed,
       });
 
@@ -527,14 +447,14 @@ export default function ResearchPipeline() {
       setPipelineStatus('stage2_review');
       toast.success('Report generated');
     } catch (err) {
-      toast.error(`Stage 2 failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
-      setPipelineStatus('stage1_approved');
-      try { await transitionPipelineStatus(sessionId, 'stage1_approved'); } catch {}
+      toast.error(`Report generation failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      setPipelineStatus(previousStatus);
+      try { await transitionPipelineStatus(sessionId, previousStatus); } catch { /* ignore */ }
     } finally {
       setIsRunning(false);
       setProgress(null);
     }
-  }, [sessionId, session, pipelineStatus, financials, selectedSector, selectedModel, stage1Thesis, sectorFrameworkMarkdown, stage2Prompts]);
+  }, [sessionId, session, pipelineStatus, financials, selectedSector, selectedModel, stage1Thesis, sectorFramework, stage2Prompts]);
 
   // --- Approve Handlers ---
   const handleApprove = async (stage: 'stage0' | 'stage1' | 'stage2') => {
@@ -553,6 +473,42 @@ export default function ResearchPipeline() {
     }
   };
 
+  // --- Edit Handlers (persist to DB) ---
+  const handleEditFramework = async (newMarkdown: string) => {
+    setSectorFramework(prev => prev ? { ...prev, markdown: newMarkdown } : null);
+    if (!sessionId) return;
+    try {
+      await updatePipelineOutput(sessionId, {
+        sector_framework: sectorFramework ? { ...sectorFramework, markdown: newMarkdown } : null,
+      });
+    } catch {
+      toast.error('Failed to save framework edit');
+    }
+  };
+
+  const handleEditThesis = async (newContent: string) => {
+    setStage1Thesis(newContent);
+    if (!sessionId) return;
+    try {
+      await updatePipelineOutput(sessionId, { thesis_output: newContent });
+    } catch {
+      toast.error('Failed to save thesis edit');
+    }
+  };
+
+  const handleEditReportSection = async (index: number, newContent: string) => {
+    const section = stage2Sections[index];
+    if (!section) return;
+    setStage2Sections(prev => prev.map((s, i) => i === index ? { ...s, content: newContent } : s));
+    if (section.id) {
+      try {
+        await updateResearchSection(section.id, { content: newContent });
+      } catch {
+        toast.error('Failed to save section edit');
+      }
+    }
+  };
+
   const handlePublish = async () => {
     if (!sessionId) return;
     try {
@@ -561,6 +517,21 @@ export default function ResearchPipeline() {
       toast.success('Report published!');
     } catch (err) {
       toast.error(`Publish failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    }
+  };
+
+  const handleUnpublish = async () => {
+    if (!sessionId) return;
+    try {
+      const report = await getReportBySession(sessionId);
+      if (report?.report_id) {
+        await unpublishReport(report.report_id);
+      }
+      await transitionPipelineStatus(sessionId, 'stage2_approved', pipelineStatus);
+      setPipelineStatus('stage2_approved');
+      toast.success('Report reverted to draft.');
+    } catch (err) {
+      toast.error(`Unpublish failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
     }
   };
 
@@ -585,7 +556,6 @@ export default function ResearchPipeline() {
     });
     setSearchInput(s.company_name);
     setSelectedSector(s.sector ?? '');
-    setShowRecent(false);
   };
 
   // --- Delete session ---
@@ -601,12 +571,28 @@ export default function ResearchPipeline() {
         setPipelineStatus('company_selected');
       }
       toast.success('Session deleted');
-    } catch (err) {
+    } catch {
       toast.error('Failed to delete session');
     }
   };
 
-  // Determine current step number
+  // --- Reset to home ---
+  const handleBackToHome = () => {
+    setSessionId(null);
+    setSession(null);
+    setSelectedCompany(null);
+    setSearchInput('');
+    setSelectedSector('');
+    setPipelineStatus('company_selected');
+    setVaultStatus('idle');
+    setVaultDocuments([]);
+    setSectorFramework(null);
+    setStage1Thesis('');
+    setStage2Sections([]);
+    setFinancialModelStatus('idle');
+  };
+
+  // Computed
   const currentStage = getStageNumber(pipelineStatus);
   const hasSession = !!sessionId;
 
@@ -615,699 +601,813 @@ export default function ResearchPipeline() {
   // ========================
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      {/* Page Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-2.5 mb-1">
-          <Sparkles className="h-5 w-5 text-accent-600" />
-          <h1 className="text-2xl font-bold text-neutral-900 tracking-tight">Research Pipeline</h1>
-        </div>
-        <p className="text-sm text-neutral-500">
-          AI-powered equity research — Sector Framework → Investment Thesis → Full Report
-        </p>
-      </div>
-
-      {/* ==================== STEP 1: Company + Model Selection ==================== */}
-      <section className="mb-8">
-        <div className="flex items-center gap-2 mb-4">
-          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent-600 text-white text-xs font-bold">1</span>
-          <h2 className="text-base font-semibold text-neutral-900">Select Company & Model</h2>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* Company Search */}
-          <div className="lg:col-span-2 relative" ref={dropdownRef}>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
-              <Input
-                value={searchInput}
-                onChange={(e) => {
-                  setSearchInput(e.target.value);
-                  setIsDropdownOpen(true);
-                  if (selectedCompany && e.target.value !== selectedCompany.company_name) {
-                    setSelectedCompany(null);
-                  }
-                }}
-                onFocus={() => searchInput.length >= 2 && setIsDropdownOpen(true)}
-                placeholder="Search company name or NSE symbol..."
-                className="pl-9 h-11"
-                disabled={hasSession}
-              />
-            </div>
-
-            {isDropdownOpen && companies && companies.length > 0 && !hasSession && (
-              <div className="absolute z-50 w-full mt-1 bg-white border border-neutral-200 rounded-lg shadow-lg max-h-52 overflow-y-auto">
-                {companies.map((company) => (
-                  <button
-                    key={company.company_id}
-                    className="w-full text-left px-4 py-2.5 text-sm hover:bg-neutral-50 border-b border-neutral-50 last:border-0"
-                    onClick={() => handleSelectCompany(company)}
-                  >
-                    <span className="font-medium text-neutral-900">{company.company_name}</span>
-                    <span className="ml-2 text-xs text-neutral-400">{company.nse_symbol}</span>
-                  </button>
-                ))}
-              </div>
+    <div className="min-h-screen bg-[#f8f8f6]">
+      {/* ==================== HEADER ==================== */}
+      <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-sm border-b border-neutral-200/80">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            {hasSession && (
+              <button onClick={handleBackToHome} className="p-1.5 rounded-lg hover:bg-neutral-100 transition-colors text-neutral-400 hover:text-neutral-600">
+                <X className="h-4 w-4" />
+              </button>
             )}
+            <div className="flex items-center gap-2.5">
+              <div className="h-8 w-8 rounded-lg bg-accent-600 flex items-center justify-center shadow-sm shadow-accent-200">
+                <Sparkles className="h-4 w-4 text-white" />
+              </div>
+              <div>
+                <h1 className="text-sm font-semibold text-neutral-900 leading-tight">Research Pipeline</h1>
+                {!hasSession && <p className="text-[10px] text-neutral-400 leading-tight">Powered by Claude + Web Search</p>}
+              </div>
+            </div>
           </div>
 
-          {/* Model Selection */}
-          <div>
-            <Select value={selectedModel} onValueChange={setSelectedModel} disabled={hasSession}>
-              <SelectTrigger className="h-11">
-                <SelectValue placeholder="AI Model" />
-              </SelectTrigger>
-              <SelectContent>
-                {PIPELINE_MODELS.map((m) => (
-                  <SelectItem key={m.id} value={m.id}>
-                    {m.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        {/* Company Info Card + Start Button */}
-        {selectedCompany && financials && (
-          <div className="mt-4 rounded-xl border border-neutral-200 bg-white p-5">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent-50">
-                  <Building2 className="h-4 w-4 text-accent-600" />
+          {hasSession && session && (
+            <div className="flex items-center gap-4">
+              <div className="hidden md:flex items-center gap-2 text-xs">
+                <div className="flex items-center gap-1.5 text-neutral-700 font-medium">
+                  <Building2 className="h-3.5 w-3.5 text-neutral-400" />
+                  {session.company_name}
                 </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-neutral-900">{selectedCompany.company_name}</h3>
-                  <p className="text-xs text-neutral-400">
-                    {selectedCompany.nse_symbol}
-                    {selectedSector ? ` · ${selectedSector}` : ''}
-                    {financials.broad_sector && financials.broad_sector !== selectedSector ? ` · ${financials.broad_sector}` : ''}
-                  </p>
+                <span className="text-neutral-300">|</span>
+                <span className="text-neutral-500 font-mono text-[11px]">{session.company_nse_code}</span>
+                {session.sector && (
+                  <>
+                    <span className="text-neutral-300">|</span>
+                    <span className="text-neutral-500">{session.sector}</span>
+                  </>
+                )}
+              </div>
+              <StatusBadge status={pipelineStatus} />
+            </div>
+          )}
+        </div>
+      </header>
+
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
+        {/* ==================== HOME SCREEN ==================== */}
+        {!hasSession && (
+          <div className="animate-fade-up">
+            {/* Hero */}
+            <div className="text-center mb-10 pt-4">
+              <h2 className="text-2xl font-bold text-neutral-900 mb-2">Start a Research Pipeline</h2>
+              <p className="text-sm text-neutral-500 max-w-md mx-auto">
+                Generate institutional-grade equity research with Claude AI, real-time web data, and sector intelligence.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 max-w-5xl mx-auto">
+              {/* Left Column: Search + Company Info */}
+              <div className="lg:col-span-3 space-y-4">
+                {/* Company Search */}
+                <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm p-5">
+                  <label className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider mb-2 block">Search Company</label>
+                  <div className="relative" ref={dropdownRef}>
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-neutral-400" />
+                    <Input
+                      value={searchInput}
+                      onChange={(e) => {
+                        setSearchInput(e.target.value);
+                        setIsDropdownOpen(true);
+                        if (selectedCompany && e.target.value !== selectedCompany.company_name) {
+                          setSelectedCompany(null);
+                        }
+                      }}
+                      onFocus={() => searchInput.length >= 2 && setIsDropdownOpen(true)}
+                      placeholder="Search by name or NSE symbol..."
+                      className="pl-10 h-11 rounded-xl border-neutral-200 focus:border-accent-400 focus:ring-accent-100"
+                    />
+
+                    {isDropdownOpen && companies && companies.length > 0 && (
+                      <div className="absolute z-50 w-full mt-1.5 bg-white border border-neutral-200 rounded-xl shadow-xl max-h-60 overflow-y-auto">
+                        {companies.map((company) => (
+                          <button
+                            key={company.company_id}
+                            className="w-full text-left px-4 py-2.5 hover:bg-accent-50 border-b border-neutral-50 last:border-0 transition-colors"
+                            onClick={() => handleSelectCompany(company)}
+                          >
+                            <span className="font-medium text-sm text-neutral-900">{company.company_name}</span>
+                            {company.nse_symbol && (
+                              <span className="ml-2 text-[10px] text-neutral-400 bg-neutral-100 px-1.5 py-0.5 rounded font-mono">{company.nse_symbol}</span>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Model selection */}
+                  {selectedCompany && (
+                    <div className="mt-3 flex items-center gap-3">
+                      <label className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">Model</label>
+                      <div className="flex gap-1.5">
+                        {PIPELINE_MODELS.map(m => (
+                          <button
+                            key={m.id}
+                            onClick={() => setSelectedModel(m.id)}
+                            className={cn(
+                              'px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
+                              selectedModel === m.id
+                                ? 'bg-accent-600 text-white shadow-sm'
+                                : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                            )}
+                          >
+                            {m.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Company Info + Financial Snapshot */}
+                {selectedCompany && financials && (
+                  <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden animate-fade-up">
+                    <div className="p-5">
+                      <div className="flex items-start justify-between mb-4">
+                        <div>
+                          <h3 className="text-lg font-bold text-neutral-900">{selectedCompany.company_name}</h3>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-xs font-mono text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded">NSE: {selectedCompany.nse_symbol}</span>
+                            {selectedSector && (
+                              <span className="text-xs text-accent-600 bg-accent-50 px-2 py-0.5 rounded">{selectedSector}</span>
+                            )}
+                          </div>
+                        </div>
+                        <Button
+                          onClick={handleCreateSession}
+                          disabled={isCreatingSession}
+                          className="h-10 px-5 rounded-xl bg-accent-600 hover:bg-accent-700 text-white font-medium shadow-sm"
+                        >
+                          {isCreatingSession ? (
+                            <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Creating...</>
+                          ) : (
+                            <><Play className="h-4 w-4 mr-2" /> Begin Pipeline</>
+                          )}
+                        </Button>
+                      </div>
+
+                      <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                        <MetricCard label="Market Cap" value={formatCurrency(financials.market_cap)} />
+                        <MetricCard label="CMP" value={formatCurrency(financials.current_price)} />
+                        <MetricCard label="P/E (TTM)" value={financials.pe_ttm?.toFixed(1) ?? '-'} />
+                        <MetricCard label="ROE" value={formatPercent(financials.roe)} />
+                        <MetricCard label="ROCE" value={formatPercent(financials.roce)} />
+                        <MetricCard label="EBITDA M%" value={formatPercent(financials.ebitda_margin_ttm)} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Right Column: Recent Sessions */}
+              <div className="lg:col-span-2">
+                <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden">
+                  <div className="px-5 py-3 border-b border-neutral-100 flex items-center gap-2">
+                    <Clock className="h-3.5 w-3.5 text-neutral-400" />
+                    <h3 className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">Recent Pipelines</h3>
+                  </div>
+                  {recentSessions.length > 0 ? (
+                    <div className="divide-y divide-neutral-100">
+                      {recentSessions.map((s) => {
+                        const st = (s.pipeline_status ?? 'company_selected') as PipelineStatus;
+                        return (
+                          <div
+                            key={s.session_id}
+                            onClick={() => handleResumeSession(s)}
+                            className="group flex items-center justify-between px-5 py-3 hover:bg-accent-50/40 transition-all cursor-pointer"
+                          >
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-medium text-neutral-800 truncate">{s.company_name}</p>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                <span className="text-[10px] font-mono text-neutral-400">{s.company_nse_code}</span>
+                                <span className="text-[10px] text-neutral-300">{new Date(s.created_at).toLocaleDateString()}</span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0 ml-3">
+                              <StatusBadge status={st} />
+                              <button
+                                onClick={(e) => handleDeleteSession(s.session_id, e)}
+                                className="p-1 rounded text-neutral-200 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </button>
+                              <ChevronRight className="h-3.5 w-3.5 text-neutral-300 group-hover:text-accent-500 transition-colors" />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="p-8 text-center">
+                      <FileText className="h-5 w-5 text-neutral-300 mx-auto mb-2" />
+                      <p className="text-xs text-neutral-400">No recent pipelines</p>
+                    </div>
+                  )}
                 </div>
               </div>
-              {!hasSession && (
-                <Button onClick={handleCreateSession} disabled={isCreatingSession}>
-                  {isCreatingSession ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
-                      Creating...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="h-4 w-4 mr-1.5" />
-                      Start Pipeline
-                    </>
-                  )}
-                </Button>
-              )}
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
-              <MetricCard label="Market Cap" value={formatCurrency(financials.market_cap)} />
-              <MetricCard label="Price" value={formatCurrency(financials.current_price)} />
-              <MetricCard label="P/E (TTM)" value={financials.pe_ttm?.toFixed(1) ?? '-'} />
-              <MetricCard label="ROE" value={formatPercent(financials.roe)} />
-              <MetricCard label="ROCE" value={formatPercent(financials.roce)} />
-              <MetricCard label="EBITDA Margin" value={formatPercent(financials.ebitda_margin_ttm)} />
             </div>
           </div>
         )}
-      </section>
 
-      {/* ==================== Recent Sessions (before session is created) ==================== */}
-      {!hasSession && showRecent && recentSessions.length > 0 && (
-        <section className="mb-8">
-          <h3 className="text-sm font-semibold text-neutral-700 mb-3">Recent Pipelines</h3>
-          <div className="space-y-2">
-            {recentSessions.map((s) => {
-              const st = (s.pipeline_status ?? 'company_selected') as PipelineStatus;
-              return (
-                <div
-                  key={s.session_id}
-                  onClick={() => handleResumeSession(s)}
-                  className="group flex items-center justify-between rounded-lg border border-neutral-200 bg-white px-4 py-3 hover:shadow-sm hover:border-neutral-300 transition-all cursor-pointer"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <Building2 className="h-4 w-4 text-neutral-400 shrink-0" />
-                    <div className="min-w-0">
-                      <span className="text-sm font-medium text-neutral-800 truncate block">{s.company_name}</span>
-                      <span className="text-xs text-neutral-400">{s.company_nse_code} · {s.sector}</span>
+        {/* ==================== PIPELINE WORKFLOW ==================== */}
+        {hasSession && (
+          <div className="max-w-4xl mx-auto animate-fade-up space-y-5">
+            {/* Progress Bar */}
+            <PipelineProgressBar status={pipelineStatus} />
+
+            {/* Live Progress Indicator */}
+            {progress && (
+              <div className="rounded-xl border border-accent-200 bg-accent-50/50 p-4">
+                <div className="flex items-center gap-3">
+                  <Globe className="h-5 w-5 text-accent-600 animate-pulse shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-accent-800">{progress.message}</p>
+                    <div className="mt-1.5 h-1 rounded-full bg-accent-100 overflow-hidden">
+                      <div
+                        className="h-full bg-accent-500 rounded-full transition-all duration-700"
+                        style={{ width: `${progress.percent}%` }}
+                      />
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className={cn(
-                      'text-[10px] font-medium px-2 py-0.5 rounded-full',
-                      st === 'published' ? 'bg-green-50 text-green-700' :
-                      st.includes('review') ? 'bg-amber-50 text-amber-700' :
-                      st.includes('generating') ? 'bg-blue-50 text-blue-700' :
-                      'bg-neutral-100 text-neutral-600'
-                    )}>
-                      {PIPELINE_STAGE_LABELS[st]}
-                    </span>
-                    <span className="text-xs text-neutral-400">
-                      {new Date(s.created_at).toLocaleDateString()}
-                    </span>
-                    <button
-                      onClick={(e) => handleDeleteSession(s.session_id, e)}
-                      className="p-1 rounded text-neutral-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
+                  <span className="text-xs font-bold text-accent-600 tabular-nums">{progress.percent}%</span>
                 </div>
-              );
-            })}
-          </div>
-        </section>
-      )}
-
-      {/* ==================== After session is created — Pipeline workflow ==================== */}
-      {hasSession && (
-        <>
-          {/* Progress Bar */}
-          <PipelineProgressBar status={pipelineStatus} className="mb-8" />
-
-          {/* Progress indicator for running stages */}
-          {progress && (
-            <div className="mb-6 rounded-xl border border-blue-100 bg-blue-50 px-5 py-3">
-              <div className="flex items-center gap-3">
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-200 border-t-blue-600" />
-                <span className="text-sm text-blue-700">{progress.message}</span>
               </div>
-              <div className="mt-2 h-1.5 rounded-full bg-blue-100 overflow-hidden">
-                <div
-                  className="h-full bg-blue-500 rounded-full transition-all duration-500"
-                  style={{ width: `${progress.percent}%` }}
-                />
-              </div>
-            </div>
-          )}
+            )}
 
-          {/* ==================== STEP 2: Choose Path — Financial Model or Skip to Vault ==================== */}
-          {pipelineStatus === 'company_selected' && (
-            <section className="mb-8">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent-100 text-accent-700 text-xs font-bold">2</span>
-                <h2 className="text-base font-semibold text-neutral-900">Choose Your Path</h2>
+            {/* ===== STEP: Vault creating (auto, shown right after session start) ===== */}
+            {(pipelineStatus === 'company_selected' || pipelineStatus === 'vault_creating') && (
+              <div className="bg-white rounded-xl border border-neutral-200 p-8 text-center">
+                <Spinner size="sm" className="mx-auto mb-3" />
+                <p className="text-sm font-medium text-neutral-700">Creating your Drive vault...</p>
+                <p className="text-xs text-neutral-400 mt-1">Fetching documents and setting up folder structure</p>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Option A: Generate Financial Model */}
-                <button
-                  onClick={handleGenerateFinancialModel}
-                  className="group rounded-xl border-2 border-neutral-200 bg-white p-6 text-left hover:border-accent-400 hover:shadow-md transition-all"
-                >
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 group-hover:bg-blue-100 transition-colors">
-                      <BarChart3 className="h-5 w-5 text-blue-600" />
-                    </div>
-                    <h3 className="text-sm font-semibold text-neutral-900">Generate Financial Model First</h3>
-                  </div>
-                  <p className="text-xs text-neutral-500 leading-relaxed">
-                    Generate an Excel financial model, save it to the Drive vault, then proceed to document ingestion.
-                    Recommended if you need financial projections for the analysis.
-                  </p>
-                </button>
+            )}
 
-                {/* Option B: Skip to Vault */}
-                <button
-                  onClick={handleSkipToVault}
-                  className="group rounded-xl border-2 border-neutral-200 bg-white p-6 text-left hover:border-accent-400 hover:shadow-md transition-all"
-                >
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-50 group-hover:bg-green-100 transition-colors">
-                      <FolderOpen className="h-5 w-5 text-green-600" />
-                    </div>
-                    <h3 className="text-sm font-semibold text-neutral-900">Skip to Create Vault</h3>
-                  </div>
-                  <p className="text-xs text-neutral-500 leading-relaxed">
-                    Create a Drive vault with existing documents and proceed directly to document ingestion.
-                    Use this if financial model isn't needed or already exists.
-                  </p>
-                </button>
-              </div>
-            </section>
-          )}
-
-          {/* ==================== Financial Model In-Progress / Status ==================== */}
-          {(pipelineStatus === 'financial_model_generating' || pipelineStatus === 'financial_model_done') && (
-            <div className={cn(
-              'mb-6 rounded-xl border px-5 py-4 flex items-start gap-3',
-              pipelineStatus === 'financial_model_generating' ? 'border-blue-100 bg-blue-50' : 'border-green-100 bg-green-50',
-            )}>
-              <div className="mt-0.5">
-                {pipelineStatus === 'financial_model_generating' ? (
-                  <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
-                ) : (
-                  <Check className="h-4 w-4 text-green-600" />
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className={cn(
-                  'text-sm font-medium',
-                  pipelineStatus === 'financial_model_generating' ? 'text-blue-800' : 'text-green-800',
-                )}>
-                  {pipelineStatus === 'financial_model_generating'
-                    ? 'Generating financial model & creating vault...'
-                    : 'Financial model generated and saved to Drive vault'}
-                </p>
-                {financialModelFileUrl && (
-                  <a
-                    href={financialModelFileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs text-green-600 hover:underline flex items-center gap-1 mt-0.5"
-                  >
-                    Open in Drive <ExternalLink className="h-3 w-3" />
+            {/* ===== STEP: Vault & Documents ===== */}
+            {currentStage >= 1 && pipelineStatus !== 'company_selected' && pipelineStatus !== 'vault_creating' && (
+              <CollapsibleStage
+                title="Vault & Documents"
+                done={currentStage > 1}
+                defaultOpen={currentStage <= 1}
+                trailing={vaultLink ? (
+                  <a href={vaultLink} target="_blank" rel="noopener noreferrer" className="text-xs text-accent-600 hover:text-accent-700 font-medium flex items-center gap-1">
+                    Open Drive <ExternalLink className="h-3 w-3" />
                   </a>
+                ) : undefined}
+              >
+                {vaultStatus === 'error' && (
+                  <div className="text-center py-6">
+                    <p className="text-sm text-red-600 mb-3">Vault creation failed</p>
+                    <Button onClick={handleCreateSession} variant="outline" size="sm" className="rounded-lg">
+                      <RefreshCw className="h-3.5 w-3.5 mr-1.5" /> Retry
+                    </Button>
+                  </div>
                 )}
-              </div>
-            </div>
-          )}
 
-          {/* Financial Model status indicator (for vault_ready and beyond) */}
-          {financialModelStatus === 'success' && getStageNumber(pipelineStatus) >= 1 && (
-            <div className="mb-4 rounded-lg border border-green-100 bg-green-50 px-4 py-2.5 flex items-center gap-2">
-              <Check className="h-3.5 w-3.5 text-green-600" />
-              <span className="text-xs text-green-700 font-medium">Financial model saved to vault</span>
-              {financialModelFileUrl && (
-                <a href={financialModelFileUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-green-600 hover:underline flex items-center gap-1 ml-auto">
-                  Open <ExternalLink className="h-3 w-3" />
-                </a>
-              )}
-            </div>
-          )}
-          {financialModelStatus === 'skipped' && getStageNumber(pipelineStatus) >= 1 && (
-            <div className="mb-4 rounded-lg border border-amber-100 bg-amber-50 px-4 py-2.5 flex items-center gap-2">
-              <FileText className="h-3.5 w-3.5 text-amber-500" />
-              <span className="text-xs text-amber-700 font-medium">Financial model skipped</span>
-            </div>
-          )}
-
-          {/* ==================== STEP 3: Documents & Vault ==================== */}
-          {(getStageNumber(pipelineStatus) >= 1 || pipelineStatus === 'vault_creating') && (
-            <section className="mb-8">
-              <div className="flex items-center gap-2 mb-4">
-                <span className={cn(
-                  'flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold',
-                  getStageNumber(pipelineStatus) > 2 ? 'bg-green-100 text-green-700' :
-                  getStageNumber(pipelineStatus) >= 1 ? 'bg-accent-100 text-accent-700' :
-                  'bg-neutral-200 text-neutral-600'
-                )}>
-                  {getStageNumber(pipelineStatus) > 2 ? <Check className="h-3.5 w-3.5" /> : '3'}
-                </span>
-                <h2 className="text-base font-semibold text-neutral-900">Documents & Vault</h2>
-              </div>
-
-              {vaultStatus === 'loading' && (
-                <div className="rounded-xl border border-neutral-200 bg-white p-6 text-center">
-                  <Spinner size="sm" />
-                  <p className="text-sm text-neutral-500 mt-2">Creating vault...</p>
-                </div>
-              )}
-
-              {vaultStatus === 'error' && (
-                <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center">
-                  <p className="text-sm text-red-600 mb-2">Vault creation failed</p>
-                  <Button onClick={handleSkipToVault} variant="outline" size="sm">
-                    <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
-                    Retry
-                  </Button>
-                </div>
-              )}
-
-              {vaultStatus === 'success' && (
-                <div className="rounded-xl border border-neutral-200 bg-white">
-                  <div className="flex items-center justify-between px-5 py-3 border-b border-neutral-100">
-                    <div className="flex items-center gap-2">
-                      <FolderOpen className="h-4 w-4 text-accent-500" />
-                      <span className="text-sm font-medium text-neutral-700">Vault</span>
-                      {vaultLink && (
-                        <a href={vaultLink} target="_blank" rel="noopener noreferrer" className="text-xs text-accent-500 hover:underline flex items-center gap-1">
+                {vaultStatus === 'success' && (
+                  <>
+                    {/* Financial Model row — shown when generated */}
+                    {financialModelStatus === 'success' && financialModelFileUrl && (
+                      <div className="mb-3 flex items-center gap-3 rounded-lg bg-accent-50 border border-accent-100 px-4 py-2.5">
+                        <BarChart3 className="h-4 w-4 text-accent-600 shrink-0" />
+                        <span className="text-xs font-medium text-accent-800 flex-1">Financial Model — uploaded to vault</span>
+                        <a
+                          href={financialModelFileUrl.replace('/view', '/edit').replace('file/d/', 'spreadsheets/d/')}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-accent-600 hover:text-accent-700 font-medium flex items-center gap-1"
+                        >
                           Open <ExternalLink className="h-3 w-3" />
                         </a>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button size="sm" variant="outline" onClick={() => setIsUploadOpen(true)}>
-                        <Upload className="h-3.5 w-3.5 mr-1" />
-                        Upload
+                      </div>
+                    )}
+
+                    {/* Financial Model generating spinner */}
+                    {financialModelStatus === 'generating' && (
+                      <div className="mb-3 flex items-center gap-3 rounded-lg bg-neutral-50 border border-neutral-200 px-4 py-3">
+                        <Spinner size="sm" className="shrink-0" />
+                        <div>
+                          <p className="text-xs font-medium text-neutral-700">Generating financial model...</p>
+                          <p className="text-[11px] text-neutral-400 mt-0.5">This takes ~10 minutes. You can leave this tab open.</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Documents list */}
+                    {vaultDocuments.length > 0 ? (
+                      <div className="max-h-48 overflow-y-auto rounded-lg border border-neutral-100 divide-y divide-neutral-50">
+                        {vaultDocuments.map((doc) => (
+                          <div key={doc.id} className="flex items-center gap-3 px-3 py-2 hover:bg-neutral-50 transition-colors">
+                            <FileText className="h-3.5 w-3.5 text-neutral-300 shrink-0" />
+                            <span className="text-xs text-neutral-700 truncate flex-1">{doc.name}</span>
+                            <span className="text-[10px] text-neutral-400 tabular-nums">{(doc.size / 1024).toFixed(0)} KB</span>
+                            {doc.viewUrl && (
+                              <a href={doc.viewUrl} target="_blank" rel="noopener noreferrer" className="text-neutral-300 hover:text-accent-500 transition-colors">
+                                <ExternalLink className="h-3 w-3" />
+                              </a>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-4 rounded-lg border border-dashed border-neutral-200">
+                        <p className="text-xs text-neutral-400">No documents found in vault</p>
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-neutral-100">
+                      <Button variant="outline" size="sm" onClick={() => setIsUploadOpen(true)} className="rounded-lg text-xs">
+                        <Upload className="h-3.5 w-3.5 mr-1.5" /> Upload
                       </Button>
-                      {selectedDocumentIds.length > 0 && ingestionStatus !== 'done' && (
-                        <Button
-                          size="sm"
-                          onClick={handleIngestDocuments}
-                          disabled={ingestionStatus === 'ingesting'}
-                        >
-                          {ingestionStatus === 'ingesting' ? (
-                            <>
-                              <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />
-                              {ingestionProgress.current}/{ingestionProgress.total}
-                            </>
-                          ) : (
-                            <>
-                              <Zap className="h-3.5 w-3.5 mr-1" />
-                              Ingest ({selectedDocumentIds.length})
-                            </>
+
+                      {/* Two options at vault_ready */}
+                      {pipelineStatus === 'vault_ready' && financialModelStatus !== 'generating' && (
+                        <div className="flex items-center gap-2">
+                          {financialModelStatus === 'idle' && (
+                            <Button
+                              onClick={handleGenerateFinancialModel}
+                              size="sm"
+                              variant="outline"
+                              className="rounded-lg text-xs border-accent-200 text-accent-700 hover:bg-accent-50"
+                            >
+                              <BarChart3 className="h-3.5 w-3.5 mr-1.5" />
+                              Generate Financial Model
+                            </Button>
                           )}
-                        </Button>
+                          <Button
+                            onClick={financialModelStatus === 'success' || financialModelStatus === 'skipped'
+                              ? () => handleRunStage0()
+                              : handleSkipFinancialModel}
+                            disabled={isRunning}
+                            size="sm"
+                            className="rounded-lg bg-accent-600 hover:bg-accent-700 text-xs"
+                          >
+                            <Zap className="h-3.5 w-3.5 mr-1.5" />
+                            {financialModelStatus === 'success' || financialModelStatus === 'skipped'
+                              ? 'Generate Sector Framework'
+                              : 'Skip & Start Research'}
+                          </Button>
+                        </div>
                       )}
-                      {ingestionStatus === 'done' && (
-                        <span className="text-xs text-green-600 flex items-center gap-1">
-                          <Check className="h-3.5 w-3.5" /> Ingested
+
+                      {/* After model done — show start research button */}
+                      {pipelineStatus === 'vault_ready' && financialModelStatus === 'generating' && (
+                        <p className="text-xs text-neutral-400 italic">Model generating...</p>
+                      )}
+
+                      {/* Stage already past vault_ready */}
+                      {currentStage > 1 && pipelineStatus !== 'vault_ready' && (
+                        <span className="text-xs text-emerald-600 flex items-center gap-1 font-medium">
+                          <Check className="h-3.5 w-3.5" /> Vault ready
                         </span>
                       )}
                     </div>
-                  </div>
+                  </>
+                )}
+              </CollapsibleStage>
+            )}
 
-                  {/* Document List */}
-                  {vaultDocuments.length > 0 ? (
-                    <div className="p-4">
-                      <div className="space-y-1.5">
-                        {vaultDocuments.map((doc) => (
-                          <label
-                            key={doc.id}
-                            className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-neutral-50 cursor-pointer"
-                          >
-                            <input
-                              type="checkbox"
-                              checked={selectedDocumentIds.includes(doc.id)}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setSelectedDocumentIds(prev => [...prev, doc.id]);
-                                } else {
-                                  setSelectedDocumentIds(prev => prev.filter(id => id !== doc.id));
-                                }
-                              }}
-                              className="rounded border-neutral-300"
-                              disabled={ingestionStatus === 'done'}
-                            />
-                            <FileText className="h-4 w-4 text-neutral-400 shrink-0" />
-                            <span className="text-sm text-neutral-700 truncate flex-1">{doc.name}</span>
-                            <span className="text-xs text-neutral-400">{(doc.size / 1024).toFixed(0)} KB</span>
-                          </label>
-                        ))}
-                      </div>
-                      {/* Select All / Deselect All */}
-                      {ingestionStatus !== 'done' && vaultDocuments.length > 1 && (
-                        <div className="mt-2 pt-2 border-t border-neutral-100 flex gap-2">
-                          <button
-                            onClick={() => setSelectedDocumentIds(vaultDocuments.map(d => d.id))}
-                            className="text-xs text-accent-600 hover:underline"
-                          >
-                            Select all
-                          </button>
-                          <span className="text-xs text-neutral-300">|</span>
-                          <button
-                            onClick={() => setSelectedDocumentIds([])}
-                            className="text-xs text-neutral-500 hover:underline"
-                          >
-                            Deselect all
-                          </button>
+            {/* ===== STAGE 0: Sector Framework ===== */}
+            {currentStage >= 2 && (
+              <StageBlock
+                title="Sector Framework"
+                meta={sectorFramework ? [
+                  sectorFramework.version > 1 ? `v${sectorFramework.version}` : null,
+                  sectorFramework.last_updated ? `Updated ${sectorFramework.last_updated}` : null,
+                ].filter(Boolean).join(' · ') || undefined : undefined}
+                done={currentStage > 2 || pipelineStatus === 'stage0_approved'}
+                isActive={currentStage === 2}
+                showPrompt={showPrompt === 'stage0'}
+                onTogglePrompt={() => setShowPrompt(showPrompt === 'stage0' ? null : 'stage0')}
+                actions={
+                  pipelineStatus === 'stage0_review' ? (
+                    <button
+                      onClick={() => handleRunStage0(true)}
+                      disabled={isRunning}
+                      className="text-xs text-neutral-400 hover:text-accent-600 flex items-center gap-1 transition-colors"
+                    >
+                      <RefreshCw className="h-3 w-3" /> Refresh
+                    </button>
+                  ) : undefined
+                }
+                promptEditor={
+                  <PromptEditor
+                    stage="stage0"
+                    title="Sector Framework Prompt"
+                    defaultSystem={DEFAULT_PROMPTS.stage0.system}
+                    defaultUser={DEFAULT_PROMPTS.stage0.user}
+                    userEmail={user?.email}
+                    onChange={setStage0Prompts}
+                  />
+                }
+              >
+                {currentStage === 2 && (
+                  <StageReview
+                    title={`${selectedSector || session?.sector || ''} Sector Framework`}
+                    content={sectorFramework?.markdown || ''}
+                    isApproved={currentStage > 2 || pipelineStatus === 'stage0_approved'}
+                    isGenerating={pipelineStatus === 'stage0_generating'}
+                    onApprove={() => handleApprove('stage0')}
+                    onRegenerate={() => handleRunStage0(true)}
+                    onEdit={handleEditFramework}
+                    maxHeight={500}
+                  />
+                )}
+              </StageBlock>
+            )}
+
+            {/* ===== STAGE 1: Investment Thesis ===== */}
+            {(currentStage >= 3 || pipelineStatus === 'stage0_approved') && (
+              <StageBlock
+                title="Investment Thesis"
+                done={currentStage > 3 || pipelineStatus === 'stage1_approved'}
+                isActive={currentStage === 3 || pipelineStatus === 'stage0_approved' || pipelineStatus === 'stage1_approved'}
+                showPrompt={showPrompt === 'stage1'}
+                onTogglePrompt={() => setShowPrompt(showPrompt === 'stage1' ? null : 'stage1')}
+                actions={
+                  pipelineStatus === 'stage0_approved' ? (
+                    <Button onClick={handleRunStage1} disabled={isRunning} size="sm" className="rounded-lg bg-accent-600 hover:bg-accent-700">
+                      <Zap className="h-3.5 w-3.5 mr-1.5" /> Generate
+                    </Button>
+                  ) : undefined
+                }
+                promptEditor={
+                  <PromptEditor
+                    stage="stage1"
+                    title="Investment Thesis Prompt"
+                    defaultSystem={DEFAULT_PROMPTS.stage1.system}
+                    defaultUser={DEFAULT_PROMPTS.stage1.user}
+                    userEmail={user?.email}
+                    onChange={setStage1Prompts}
+                  />
+                }
+              >
+                {(currentStage === 3 || pipelineStatus === 'stage0_approved') && (
+                  <StageReview
+                    title="Investment Thesis"
+                    content={stage1Thesis}
+                    isApproved={currentStage > 3 || pipelineStatus === 'stage1_approved'}
+                    isGenerating={pipelineStatus === 'stage1_generating'}
+                    onApprove={() => handleApprove('stage1')}
+                    onRegenerate={handleRunStage1}
+                    onEdit={handleEditThesis}
+                    maxHeight={500}
+                  />
+                )}
+              </StageBlock>
+            )}
+
+            {/* ===== STAGE 2: Research Report ===== */}
+            {(currentStage >= 4 || pipelineStatus === 'stage1_approved') && (
+              <StageBlock
+                title="Research Report"
+                meta={stage2Sections.length > 0 ? `${stage2Sections.length} sections` : undefined}
+                done={pipelineStatus === 'stage2_approved' || pipelineStatus === 'published'}
+                isActive={true}
+                showPrompt={showPrompt === 'stage2'}
+                onTogglePrompt={() => setShowPrompt(showPrompt === 'stage2' ? null : 'stage2')}
+                actions={
+                  pipelineStatus === 'stage1_approved' ? (
+                    <Button onClick={handleRunStage2} disabled={isRunning} size="sm" className="rounded-lg bg-accent-600 hover:bg-accent-700">
+                      <Zap className="h-3.5 w-3.5 mr-1.5" /> Generate Report
+                    </Button>
+                  ) : undefined
+                }
+                promptEditor={
+                  <PromptEditor
+                    stage="stage2"
+                    title="Full Report Prompt"
+                    defaultSystem={DEFAULT_PROMPTS.stage2.system}
+                    defaultUser={DEFAULT_PROMPTS.stage2.user}
+                    userEmail={user?.email}
+                    onChange={setStage2Prompts}
+                  />
+                }
+              >
+                {/* Loading state */}
+                {pipelineStatus === 'stage2_generating' && stage2Sections.length === 0 && (
+                  <StageReview
+                    title="Research Report"
+                    content=""
+                    isApproved={false}
+                    isGenerating={true}
+                    onApprove={() => {}}
+                    onRegenerate={() => {}}
+                  />
+                )}
+
+                {/* Report sections with sidebar navigation */}
+                {stage2Sections.length > 0 && (
+                  <div className="flex flex-col md:flex-row">
+                    {/* Section sidebar */}
+                    <div className="md:w-52 shrink-0 border-b md:border-b-0 md:border-r border-neutral-100 bg-neutral-50/50">
+                      <div className="md:sticky md:top-20 p-2 md:p-2.5">
+                        <p className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wider px-2 py-1.5 hidden md:block">Sections</p>
+                        <div className="flex md:flex-col gap-0.5 overflow-x-auto md:overflow-x-visible">
+                          {stage2Sections.map((section, i) => (
+                            <button
+                              key={section.key}
+                              onClick={() => setActiveReportTab(i)}
+                              className={cn(
+                                'flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[11px] font-medium whitespace-nowrap transition-all text-left w-full',
+                                activeReportTab === i
+                                  ? 'bg-accent-50 text-accent-700'
+                                  : 'text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100'
+                              )}
+                            >
+                              <Hash className="h-3 w-3 shrink-0 opacity-40" />
+                              <span className="truncate">{section.title}</span>
+                            </button>
+                          ))}
                         </div>
+                      </div>
+                    </div>
+
+                    {/* Active section content */}
+                    <div className="flex-1 min-w-0">
+                      {stage2Sections[activeReportTab] && (
+                        <StageReview
+                          title={stage2Sections[activeReportTab].title}
+                          content={stage2Sections[activeReportTab].content}
+                          isApproved={pipelineStatus === 'stage2_approved' || pipelineStatus === 'published'}
+                          isGenerating={pipelineStatus === 'stage2_generating'}
+                          onApprove={() => handleApprove('stage2')}
+                          onRegenerate={handleRunStage2}
+                          onEdit={(c) => handleEditReportSection(activeReportTab, c)}
+                          maxHeight={600}
+                        />
                       )}
                     </div>
-                  ) : (
-                    <div className="p-6 text-center">
-                      <p className="text-xs text-neutral-400">No documents in vault. Upload files to continue.</p>
-                    </div>
-                  )}
-                </div>
-              )}
+                  </div>
+                )}
+              </StageBlock>
+            )}
 
-              {/* Upload Dialog */}
-              {vaultId && (
-                <DocumentUploadDialog
-                  open={isUploadOpen}
-                  onOpenChange={setIsUploadOpen}
-                  folderId={vaultId}
-                  onUploadComplete={(doc) => {
-                    setVaultDocuments(prev => [...prev, doc]);
-                    toast.success(`${doc.name} uploaded`);
-                  }}
-                />
-              )}
-            </section>
-          )}
+            {/* ===== Post-Production & Publish ===== */}
+            {pipelineStatus === 'stage2_approved' && session && sessionId && (
+              <PostProductionPanel
+                sessionId={sessionId}
+                companyName={session.company_name}
+                nseSymbol={session.company_nse_code}
+                vaultId={vaultId}
+                userEmail={user?.email || ''}
+                stage2Sections={stage2Sections}
+                onPublished={handlePublish}
+              />
+            )}
 
-          {/* ==================== STAGE 0: Sector Framework ==================== */}
-          {getStageNumber(pipelineStatus) >= 2 && (
-            <section className="mb-8">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <span className={cn(
-                    'flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold',
-                    currentStage > 3 ? 'bg-green-100 text-green-700' :
-                    currentStage === 3 ? 'bg-accent-100 text-accent-700' :
-                    'bg-neutral-200 text-neutral-600'
-                  )}>
-                    {currentStage > 3 ? <Check className="h-3.5 w-3.5" /> : '4'}
-                  </span>
-                  <h2 className="text-base font-semibold text-neutral-900">Stage 0: Sector Framework</h2>
-                  {stage0IsExisting && stage0Content && (
-                    <span className="text-[10px] font-medium text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded-full">
-                      Loaded from playbook
-                    </span>
-                  )}
+            {pipelineStatus === 'published' && (
+              <div className="rounded-2xl border border-emerald-200 bg-gradient-to-b from-emerald-50 to-white p-10 text-center flex flex-col items-center">
+                <div className="inline-flex items-center justify-center h-14 w-14 rounded-2xl bg-emerald-100 mb-4">
+                  <Check className="h-7 w-7 text-emerald-600" strokeWidth={2.5} />
                 </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowStage0Prompt(!showStage0Prompt)}
-                    className="text-neutral-500 text-xs"
-                  >
-                    {showStage0Prompt ? <EyeOff className="h-3.5 w-3.5 mr-1" /> : <Eye className="h-3.5 w-3.5 mr-1" />}
-                    {showStage0Prompt ? 'Hide Prompt' : 'View Prompt'}
-                  </Button>
-                  {pipelineStatus === 'documents_ready' && (
-                    <Button onClick={handleRunStage0} disabled={isRunning} size="sm">
-                      <Zap className="h-3.5 w-3.5 mr-1.5" />
-                      Generate Framework
-                    </Button>
-                  )}
-                </div>
+                <h3 className="text-xl font-bold text-emerald-800 mb-1">Report Published</h3>
+                <p className="text-sm text-emerald-600 mb-6">This research report is now live and visible to stakeholders.</p>
+                <Button 
+                  onClick={handleUnpublish} 
+                  variant="outline" 
+                  className="mx-auto border-emerald-200 text-emerald-800 hover:bg-emerald-50"
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Revert to Draft (Unpublish)
+                </Button>
               </div>
-
-              {showStage0Prompt && (
-                <PromptEditor
-                  stageKey="pipeline_stage0"
-                  title="Sector Framework Prompt"
-                  defaultSystem={DEFAULT_PROMPTS.stage0.system}
-                  defaultUser={DEFAULT_PROMPTS.stage0.user}
-                  userEmail={user?.email}
-                  onChange={setStage0Prompts}
-                  className="mb-4"
-                />
-              )}
-
-              {pipelineStatus === 'stage0_generating' && !stage0Content && (
-                <div className="rounded-xl border border-neutral-200 bg-white p-8 text-center">
-                  <Spinner size="sm" />
-                  <p className="text-sm text-neutral-500 mt-2">Generating sector framework...</p>
-                </div>
-              )}
-
-              {stage0Content && (
-                <StageReview
-                  title={`${selectedSector || session?.sector || ''} Sector Framework`}
-                  content={sectorFrameworkMarkdown || stage0Content}
-                  isApproved={currentStage > 3}
-                  isGenerating={pipelineStatus === 'stage0_generating'}
-                  onApprove={() => handleApprove('stage0')}
-                  onRegenerate={handleRunStage0}
-                  onEdit={(c) => { setStage0Content(c); setSectorFrameworkMarkdown(c); }}
-                />
-              )}
-            </section>
-          )}
-
-          {/* ==================== STAGE 1: Investment Thesis ==================== */}
-          {(currentStage >= 4 || pipelineStatus === 'stage0_approved' || pipelineStatus.startsWith('stage1')) && (
-            <section className="mb-8">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <span className={cn(
-                    'flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold',
-                    currentStage > 4 ? 'bg-green-100 text-green-700' :
-                    currentStage === 4 ? 'bg-accent-100 text-accent-700' :
-                    'bg-neutral-200 text-neutral-600'
-                  )}>
-                    {currentStage > 4 ? <Check className="h-3.5 w-3.5" /> : '5'}
-                  </span>
-                  <h2 className="text-base font-semibold text-neutral-900">Stage 1: Investment Thesis</h2>
-                  <span className="text-xs text-neutral-400">(1 LLM call · RAG + Framework + Financials)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowStage1Prompt(!showStage1Prompt)}
-                    className="text-neutral-500 text-xs"
-                  >
-                    {showStage1Prompt ? <EyeOff className="h-3.5 w-3.5 mr-1" /> : <Eye className="h-3.5 w-3.5 mr-1" />}
-                    {showStage1Prompt ? 'Hide Prompt' : 'View Prompt'}
-                  </Button>
-                  {pipelineStatus === 'stage0_approved' && (
-                    <Button onClick={handleRunStage1} disabled={isRunning} size="sm">
-                      <Zap className="h-3.5 w-3.5 mr-1.5" />
-                      Generate Thesis
-                    </Button>
-                  )}
-                </div>
-              </div>
-
-              {showStage1Prompt && (
-                <PromptEditor
-                  stageKey="pipeline_stage1"
-                  title="Investment Thesis Prompt (Single Call)"
-                  defaultSystem={DEFAULT_PROMPTS.stage1.system}
-                  defaultUser={DEFAULT_PROMPTS.stage1.user}
-                  userEmail={user?.email}
-                  onChange={setStage1Prompts}
-                  className="mb-4"
-                />
-              )}
-
-              {pipelineStatus === 'stage1_generating' && !stage1Thesis && (
-                <div className="rounded-xl border border-neutral-200 bg-white p-8 text-center">
-                  <Spinner size="sm" />
-                  <p className="text-sm text-neutral-500 mt-2">Generating investment thesis...</p>
-                </div>
-              )}
-
-              {stage1Thesis && (
-                <StageReview
-                  title="Investment Thesis"
-                  content={stage1Thesis}
-                  isApproved={currentStage > 4}
-                  isGenerating={pipelineStatus === 'stage1_generating'}
-                  onApprove={() => handleApprove('stage1')}
-                  onRegenerate={handleRunStage1}
-                  onEdit={(c) => setStage1Thesis(c)}
-                />
-              )}
-            </section>
-          )}
-
-          {/* ==================== STAGE 2: Full Report ==================== */}
-          {(currentStage >= 5 || pipelineStatus === 'stage1_approved' || pipelineStatus.startsWith('stage2')) && (
-            <section className="mb-8">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <span className={cn(
-                    'flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold',
-                    currentStage > 5 ? 'bg-green-100 text-green-700' :
-                    currentStage === 5 ? 'bg-accent-100 text-accent-700' :
-                    'bg-neutral-200 text-neutral-600'
-                  )}>
-                    {currentStage > 5 ? <Check className="h-3.5 w-3.5" /> : '6'}
-                  </span>
-                  <h2 className="text-base font-semibold text-neutral-900">Stage 2: Research Report</h2>
-                  <span className="text-xs text-neutral-400">(1 LLM call · 10 sections)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowStage2Prompt(!showStage2Prompt)}
-                    className="text-neutral-500 text-xs"
-                  >
-                    {showStage2Prompt ? <EyeOff className="h-3.5 w-3.5 mr-1" /> : <Eye className="h-3.5 w-3.5 mr-1" />}
-                    {showStage2Prompt ? 'Hide Prompt' : 'View Prompt'}
-                  </Button>
-                  {pipelineStatus === 'stage1_approved' && (
-                    <Button onClick={handleRunStage2} disabled={isRunning} size="sm">
-                      <Zap className="h-3.5 w-3.5 mr-1.5" />
-                      Generate Report
-                    </Button>
-                  )}
-                </div>
-              </div>
-
-              {showStage2Prompt && (
-                <PromptEditor
-                  stageKey="pipeline_stage2"
-                  title="Full Report Prompt (1 unified call)"
-                  defaultSystem={DEFAULT_PROMPTS.stage2.system}
-                  defaultUser={DEFAULT_PROMPTS.stage2.user}
-                  userEmail={user?.email}
-                  onChange={setStage2Prompts}
-                  className="mb-4"
-                />
-              )}
-
-              {pipelineStatus === 'stage2_generating' && stage2Sections.length === 0 && (
-                <div className="rounded-xl border border-neutral-200 bg-white p-8 text-center">
-                  <Spinner size="sm" />
-                  <p className="text-sm text-neutral-500 mt-2">Generating full report (single LLM call)...</p>
-                </div>
-              )}
-
-              {stage2Sections.map((section, i) => (
-                <StageReview
-                  key={section.key}
-                  title={section.title}
-                  content={section.content}
-                  isApproved={pipelineStatus === 'stage2_approved' || pipelineStatus === 'published'}
-                  isGenerating={pipelineStatus === 'stage2_generating'}
-                  onApprove={() => {
-                    if (i === stage2Sections.length - 1) handleApprove('stage2');
-                  }}
-                  onRegenerate={handleRunStage2}
-                  className="mb-3"
-                />
-              ))}
-            </section>
-          )}
-
-          {/* ==================== Publish ==================== */}
-          {pipelineStatus === 'stage2_approved' && (
-            <div className="flex justify-center py-6">
-              <Button size="lg" onClick={handlePublish}>
-                <FileText className="h-4 w-4 mr-2" />
-                Publish Report
-              </Button>
-            </div>
-          )}
-
-          {pipelineStatus === 'published' && (
-            <div className="rounded-xl border border-green-200 bg-green-50 p-6 text-center mb-8">
-              <Check className="h-8 w-8 text-green-600 mx-auto mb-2" />
-              <h3 className="text-sm font-semibold text-green-800">Report Published</h3>
-              <p className="text-xs text-green-600 mt-1">
-                This report is now visible to customers.
-              </p>
-            </div>
-          )}
-
-          {/* Session Info Footer */}
-          <div className="mt-6 pt-4 border-t border-neutral-100 flex items-center justify-between text-xs text-neutral-400">
-            <div className="flex items-center gap-4">
-              <span>Session: {sessionId?.slice(0, 8)}</span>
-              <span>Model: {PIPELINE_MODELS.find(m => m.id === selectedModel)?.label || selectedModel}</span>
-              {session?.total_tokens_used && session.total_tokens_used > 0 && (
-                <span>Tokens: {session.total_tokens_used.toLocaleString()}</span>
-              )}
-            </div>
-            {session?.created_at && (
-              <span>Created: {new Date(session.created_at).toLocaleString()}</span>
             )}
           </div>
-        </>
+        )}
+      </main>
+
+      {/* Upload Dialog */}
+      {vaultId && (
+        <DocumentUploadDialog
+          open={isUploadOpen}
+          onOpenChange={setIsUploadOpen}
+          folderId={vaultId}
+          nseSymbol={session?.company_nse_code || ''}
+          onUploadComplete={(doc) => {
+            setVaultDocuments(prev => [...prev, doc]);
+            toast.success(`${doc.name} uploaded`);
+          }}
+        />
       )}
     </div>
   );
 }
 
 // ========================
-// Metric Card Component
+// Sub-components
 // ========================
+
+function StatusBadge({ status }: { status: PipelineStatus }) {
+  const colorMap: Record<string, string> = {
+    published: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    review: 'bg-amber-50 text-amber-700 border-amber-200',
+    generating: 'bg-accent-50 text-accent-700 border-accent-200',
+    approved: 'bg-emerald-50 text-emerald-600 border-emerald-200',
+  };
+
+  const key = status === 'published' ? 'published' :
+    status.includes('review') ? 'review' :
+    status.includes('generating') ? 'generating' :
+    status.includes('approved') ? 'approved' : '';
+
+  return (
+    <span className={cn(
+      'text-[10px] font-semibold px-2 py-0.5 rounded-full border',
+      colorMap[key] || 'bg-neutral-50 text-neutral-500 border-neutral-200'
+    )}>
+      {PIPELINE_STAGE_LABELS[status]}
+    </span>
+  );
+}
 
 function MetricCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg bg-neutral-50 px-3 py-2.5">
-      <p className="text-[10px] text-neutral-500 mb-0.5">{label}</p>
-      <p className="text-sm font-semibold text-neutral-900">{value}</p>
+    <div className="rounded-lg bg-neutral-50 border border-neutral-100 px-3 py-2">
+      <p className="text-[9px] text-neutral-400 uppercase tracking-wider font-semibold mb-0.5">{label}</p>
+      <p className="text-sm font-bold text-neutral-900 tabular-nums">{value}</p>
     </div>
   );
 }
 
+// ========================
+// StageBlock — single card per stage, prompt editor + content in one container
+// ========================
+
+interface StageBlockProps {
+  title: string;
+  meta?: string;
+  done: boolean;
+  isActive: boolean;
+  showPrompt: boolean;
+  onTogglePrompt: () => void;
+  actions?: React.ReactNode;
+  promptEditor: React.ReactNode;
+  children?: React.ReactNode;
+}
+
+function StageBlock({ title, meta, done, isActive, showPrompt, onTogglePrompt, actions, promptEditor, children }: StageBlockProps) {
+  // Collapsed — completed stages show as a compact bar
+  if (done && !isActive) {
+    return (
+      <div className="flex items-center gap-3 rounded-xl border border-neutral-200 bg-white px-4 py-2.5">
+        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 shrink-0">
+          <Check className="h-3 w-3" strokeWidth={3} />
+        </span>
+        <span className="text-sm font-medium text-neutral-600">{title}</span>
+        {meta && <span className="text-[10px] text-neutral-400">{meta}</span>}
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-xl border border-neutral-200 bg-white shadow-sm overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-100">
+        <div className="flex items-center gap-2.5">
+          <h2 className="text-sm font-semibold text-neutral-900">{title}</h2>
+          {meta && <span className="text-[10px] text-neutral-400">{meta}</span>}
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onTogglePrompt}
+            className={cn(
+              'text-[11px] flex items-center gap-1 px-2 py-1 rounded-md transition-colors',
+              showPrompt
+                ? 'text-accent-600 bg-accent-50'
+                : 'text-neutral-400 hover:text-neutral-600 hover:bg-neutral-50'
+            )}
+          >
+            {showPrompt ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+            Prompt
+          </button>
+          {actions}
+        </div>
+      </div>
+
+      {/* Prompt editor — slides in, no extra border */}
+      {showPrompt && (
+        <div className="border-b border-neutral-100">
+          {promptEditor}
+        </div>
+      )}
+
+      {/* Content — no extra padding, StageReview fills edge-to-edge */}
+      {children}
+    </div>
+  );
+}
+
+// ========================
+// CollapsibleStage — for vault/documents
+// ========================
+
+interface CollapsibleStageProps {
+  title: string;
+  done: boolean;
+  defaultOpen: boolean;
+  trailing?: React.ReactNode;
+  children: React.ReactNode;
+}
+
+function CollapsibleStage({ title, done, defaultOpen, trailing, children }: CollapsibleStageProps) {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+
+  if (done && !isOpen) {
+    return (
+      <button
+        onClick={() => setIsOpen(true)}
+        className="w-full flex items-center gap-3 rounded-xl border border-neutral-200 bg-white px-4 py-2.5 hover:bg-neutral-50 transition-colors text-left"
+      >
+        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 shrink-0">
+          <Check className="h-3 w-3" strokeWidth={3} />
+        </span>
+        <span className="text-sm font-medium text-neutral-600 flex-1">{title}</span>
+        {trailing}
+        <ChevronDown className="h-3.5 w-3.5 text-neutral-400" />
+      </button>
+    );
+  }
+
+  return (
+    <div className="rounded-xl border border-neutral-200 bg-white shadow-sm overflow-hidden">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-100">
+        <div className="flex items-center gap-2.5">
+          {done && (
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 shrink-0">
+              <Check className="h-3 w-3" strokeWidth={3} />
+            </span>
+          )}
+          <h2 className="text-sm font-semibold text-neutral-900">{title}</h2>
+        </div>
+        <div className="flex items-center gap-2">
+          {trailing}
+          {done && (
+            <button onClick={() => setIsOpen(false)} className="p-1 rounded hover:bg-neutral-100 text-neutral-400">
+              <X className="h-3 w-3" />
+            </button>
+          )}
+        </div>
+      </div>
+      <div className="p-4">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// ========================
+// Path Selection Card
+// ========================
+
+interface PathCardProps {
+  icon: React.ReactNode;
+  title: string;
+  tag: string;
+  description: string;
+  color: 'accent' | 'emerald';
+  onClick: () => void;
+}
+
+function PathCard({ icon, title, tag, description, color, onClick }: PathCardProps) {
+  const colors = {
+    accent: {
+      border: 'hover:border-accent-300',
+      iconBg: 'bg-accent-50 group-hover:bg-accent-100',
+      iconText: 'text-accent-600',
+      arrow: 'text-accent-600',
+    },
+    emerald: {
+      border: 'hover:border-emerald-300',
+      iconBg: 'bg-emerald-50 group-hover:bg-emerald-100',
+      iconText: 'text-emerald-600',
+      arrow: 'text-emerald-600',
+    },
+  };
+  const c = colors[color];
+
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        'group rounded-xl border border-neutral-200 bg-white p-4 text-left transition-all hover:shadow-md',
+        c.border
+      )}
+    >
+      <div className="flex items-center gap-3 mb-2">
+        <div className={cn('h-9 w-9 rounded-lg flex items-center justify-center transition-colors', c.iconBg, c.iconText)}>
+          {icon}
+        </div>
+        <div>
+          <p className="text-sm font-semibold text-neutral-900">{title}</p>
+          <p className="text-[10px] text-neutral-400">{tag}</p>
+        </div>
+      </div>
+      <p className="text-xs text-neutral-500 leading-relaxed">{description}</p>
+      <div className={cn('mt-2 flex items-center text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity', c.arrow)}>
+        Start <ArrowRight className="h-3 w-3 ml-1" />
+      </div>
+    </button>
+  );
+}

@@ -184,7 +184,7 @@ export async function createVault(ticker: string, sector: string): Promise<Vault
     console.log('[API] data.files length:', data.files?.length);
 
     // Extract folder_id (from data or from first file's parents)
-    const folderId = data.folder_id || data.files?.[0]?.parents?.[0] || 'unknown';
+    const folderId = data.folder_id || data.main_folder_id || data.files?.[0]?.parents?.[0] || 'unknown';
 
     // Generate folder_link if not provided
     const folderLink = data.folder_link || `https://drive.google.com/drive/folders/${folderId}`;
@@ -896,14 +896,20 @@ export async function reorderPromptTemplates(
 /**
  * Publishes a report so it's visible to customers
  */
-export async function publishReport(reportId: string): Promise<void> {
+export async function publishReport(reportId: string, plan?: string): Promise<void> {
+  const updatePayload: any = {
+    is_published: true,
+    published_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+  
+  if (plan) {
+    updatePayload.plan = plan;
+  }
+
   const { error } = await supabase
     .from('research_reports')
-    .update({
-      is_published: true,
-      published_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    })
+    .update(updatePayload)
     .eq('report_id', reportId);
 
   if (error) {

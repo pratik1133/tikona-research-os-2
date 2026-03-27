@@ -8,7 +8,6 @@ import type {
   SectorKnowledge,
   SectorPlaybook,
   ResearchSection,
-  SectorFramework,
   SkbSuggestedUpdate,
 } from '@/types/pipeline';
 import { canTransition } from '@/types/pipeline';
@@ -526,4 +525,105 @@ export async function reviewSkbSuggestion(
     .eq('id', suggestionId);
 
   if (error) throw new Error(`Failed to review SKB suggestion: ${error.message}`);
+}
+
+// ========================
+// Pipeline Prompts (pipeline_prompts table)
+// ========================
+
+export type PipelineStage = 'stage0' | 'stage1' | 'stage2';
+
+export interface PipelinePrompt {
+  id: string;
+  stage: PipelineStage;
+  label: string;
+  system_prompt: string;
+  user_prompt: string;
+  is_default: boolean;
+  user_email: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * Get the effective prompt for a stage: user's custom prompt if it exists, otherwise null.
+ * The caller falls back to DEFAULT_PROMPTS from anthropic-pipeline.ts when null.
+ */
+export async function getPipelinePrompt(
+  stage: PipelineStage,
+  userEmail: string,
+): Promise<PipelinePrompt | null> {
+  const { data, error } = await supabase
+    .from('pipeline_prompts')
+    .select('*')
+    .eq('stage', stage)
+    .eq('user_email', userEmail)
+    .maybeSingle();
+
+  if (error) {
+    console.warn('[Pipeline] Could not load pipeline prompt:', error.message);
+    return null;
+  }
+  return data;
+}
+
+/**
+ * Save (upsert) a user's custom prompt for a stage.
+ */
+export async function savePipelinePrompt(input: {
+  stage: PipelineStage;
+  label: string;
+  system_prompt: string;
+  user_prompt: string;
+  user_email: string;
+}): Promise<PipelinePrompt> {
+  // Check if user already has a custom prompt for this stage
+  const existing = await getPipelinePrompt(input.stage, input.user_email);
+
+  if (existing) {
+    const { data, error } = await supabase
+      .from('pipeline_prompts')
+      .update({
+        label: input.label,
+        system_prompt: input.system_prompt,
+        user_prompt: input.user_prompt,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', existing.id)
+      .select()
+      .single();
+
+    if (error) throw new Error(`Failed to update pipeline prompt: ${error.message}`);
+    return data;
+  }
+
+  const { data, error } = await supabase
+    .from('pipeline_prompts')
+    .insert({
+      stage: input.stage,
+      label: input.label,
+      system_prompt: input.system_prompt,
+      user_prompt: input.user_prompt,
+      is_default: false,
+      user_email: input.user_email,
+    })
+    .select()
+    .single();
+
+  if (error) throw new Error(`Failed to save pipeline prompt: ${error.message}`);
+  return data;
+}
+
+/**
+ * Delete a user's custom prompt for a stage (reverts to defaults).
+ */
+export async function deletePipelinePrompt(stage: PipelineStage, userEmail: string): Promise<void> {
+  const { error } = await supabase
+    .from('pipeline_prompts')
+    .delete()
+    .eq('stage', stage)
+    .eq('user_email', userEmail)
+    .eq('is_default', false);
+
+  if (error) throw new Error(`Failed to delete pipeline prompt: ${error.message}`);
 }
