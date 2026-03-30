@@ -69,6 +69,10 @@ export interface PipelineSession {
   // Stage 2 — native table columns
   final_report_raw: string | null;
   final_report_approved: string | null;
+  // Vault columns
+  vault_folder_id: string | null;
+  vault_folder_url: string | null;
+  financial_model_file_url: string | null;
   // Pipeline columns
   pipeline_status: PipelineStatus | null;
   sector_framework: SectorFramework | null;

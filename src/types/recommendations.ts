@@ -68,4 +68,5 @@ export interface CreateRecommendationPayload {
   session_id: string | null;
   send_telegram: boolean;
   created_by: string | null;
+  pdf_file_id?: string | null;
 }

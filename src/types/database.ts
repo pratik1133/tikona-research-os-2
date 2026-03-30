@@ -414,6 +414,7 @@ export interface ResearchReport {
   // Publishing
   is_published: boolean;
   published_at: string | null;
+  plan: string | null;
 
   // Dynamic custom section columns (cs_* prefixed, created via RPC)
   // e.g. cs_valuation_analysis, cs_swot_analysis, etc.

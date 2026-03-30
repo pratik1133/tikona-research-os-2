@@ -71,7 +71,7 @@ export async function generateFinancialModel(
 
   const fileId = (data.file_id as string) || (data.id as string) || null;
   const fileUrl = fileId
-    ? `https://drive.google.com/file/d/${fileId}/view`
+    ? `https://docs.google.com/spreadsheets/d/${fileId}/edit`
     : (data.file_url as string) || null;
 
   return { fileId, fileUrl, fileName };

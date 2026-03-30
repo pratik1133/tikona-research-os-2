@@ -27,10 +27,13 @@ import {
   createVault,
   processVaultResponse,
   saveSessionDocuments,
+  getSessionDocuments,
   generateFinancialModel,
   unpublishReport,
   getReportBySession,
 } from '@/lib/api';
+import { createRecommendation, hasRecommendationForSession } from '@/lib/recommendations-api';
+import type { RecommendationRating } from '@/types/recommendations';
 import { runStage0, runStage1, runStage2, DEFAULT_PROMPTS } from '@/lib/anthropic-pipeline';
 import type { PromptOverrides } from '@/lib/anthropic-pipeline';
 import type { PipelineSession, PipelineProgress, PipelineStatus, SectorFramework } from '@/types/pipeline';
@@ -63,6 +66,7 @@ import {
   Clock,
   Hash,
   ChevronDown,
+  Send,
 } from 'lucide-react';
 
 // ========================
@@ -137,6 +141,10 @@ export default function ResearchPipeline() {
   // --- Report Section Tabs ---
   const [activeReportTab, setActiveReportTab] = useState(0);
 
+  // --- Telegram Recommendation ---
+  const [telegramSending, setTelegramSending] = useState(false);
+  const [telegramSent, setTelegramSent] = useState(false);
+
   // --- Data Queries ---
   const { data: companies } = useCompanySearch(debouncedSearch);
   const { data: financials } = useCompanyFinancials(selectedCompany);
@@ -170,7 +178,7 @@ export default function ResearchPipeline() {
   // Load recent sessions
   useEffect(() => {
     if (!user?.email) return;
-    listPipelineSessions({ createdBy: user.email, pageSize: 5 })
+    listPipelineSessions({ pageSize: 50 })
       .then(({ data }) => setRecentSessions(data))
       .catch(() => {});
   }, [user?.email]);
@@ -183,6 +191,20 @@ export default function ResearchPipeline() {
         setSession(s);
         setPipelineStatus((s.pipeline_status ?? 'company_selected') as PipelineStatus);
         setSelectedModel(s.selected_model ?? DEFAULT_PIPELINE_MODEL);
+
+        // Restore vault data
+        if (s.vault_folder_id) {
+          setVaultId(s.vault_folder_id);
+          setVaultLink(s.vault_folder_url || `https://drive.google.com/drive/folders/${s.vault_folder_id}`);
+          setVaultStatus('success');
+        }
+
+        // Restore financial model
+        if (s.financial_model_file_url) {
+          setFinancialModelStatus('success');
+          setFinancialModelFileUrl(s.financial_model_file_url);
+        }
+
         if (s.sector_framework) {
           setSectorFramework(s.sector_framework);
         } else {
@@ -203,11 +225,31 @@ export default function ResearchPipeline() {
         if (s.thesis_output) setStage1Thesis(s.thesis_output);
       }
     });
+    // Restore stage2 sections
     getResearchSections(sessionId, 'stage2').then((sections) => {
       if (sections.length > 0) {
         setStage2Sections(sections.map(s => ({ id: s.id, key: s.section_key, title: s.section_title, content: s.content })));
       }
     });
+    // Check if recommendation already sent
+    hasRecommendationForSession(sessionId).then((sent) => {
+      if (sent) setTelegramSent(true);
+    }).catch(() => {});
+    // Restore vault documents
+    getSessionDocuments(sessionId).then((docs) => {
+      if (docs.length > 0) {
+        setVaultDocuments(docs.map((d: any) => ({
+          id: d.drive_file_id || d.document_id,
+          name: d.file_name || d.document_name,
+          mimeType: d.mime_type || '',
+          size: d.file_size || 0,
+          viewUrl: d.view_url || '',
+          downloadUrl: d.download_url || '',
+          type: d.document_type || 'other',
+          category: d.category || 'other',
+        })));
+      }
+    }).catch(() => {});
   }, [sessionId]);
 
   // --- Company Selection ---
@@ -248,8 +290,18 @@ export default function ResearchPipeline() {
       setVaultDocuments(documents);
       setVaultStatus('success');
 
+      // Persist vault data to session for restore on resume
+      await updatePipelineOutput(newSession.session_id, {
+        vault_folder_id: folderId,
+        vault_folder_url: folderUrl,
+      });
+
       await transitionPipelineStatus(newSession.session_id, 'vault_ready', 'vault_creating');
       setPipelineStatus('vault_ready');
+
+      // Add to recent sessions list
+      setRecentSessions(prev => [{ ...newSession, pipeline_status: 'vault_ready' } as PipelineSession, ...prev]);
+
       toast.success('Vault created — choose your next step');
     } catch (err) {
       toast.error(`Failed to start pipeline: ${err instanceof Error ? err.message : 'Unknown error'}`);
@@ -279,6 +331,9 @@ export default function ResearchPipeline() {
       setFinancialModelStatus('success');
       setFinancialModelFileUrl(modelResult.fileUrl);
       toast.success(`Financial model generated: ${modelResult.fileName}`);
+
+      // Persist financial model URL
+      await updatePipelineOutput(sessionId, { financial_model_file_url: modelResult.fileUrl });
 
       await transitionPipelineStatus(sessionId, 'vault_ready', 'financial_model_generating');
       setPipelineStatus('vault_ready');
@@ -535,6 +590,70 @@ export default function ResearchPipeline() {
     }
   };
 
+  // --- Send Recommendation to Telegram from published report ---
+  const handleSendTelegramRecommendation = async () => {
+    if (!sessionId) return;
+    setTelegramSending(true);
+    try {
+      const report = await getReportBySession(sessionId);
+      if (!report) throw new Error('Report not found');
+
+      const plan = report.plan;
+      if (!plan) {
+        toast.error('No plan assigned to this report. Unpublish, select a plan, and re-publish.');
+        setTelegramSending(false);
+        return;
+      }
+
+      // Extract data from report record (cs_ prefixed custom columns)
+      // These columns may contain paragraphs — extract first number found
+      const extractFirstNumber = (v: any): number | null => {
+        if (v == null) return null;
+        const s = String(v);
+        // Match numbers like 1234, 1,234, 1234.56, ₹1,234.56
+        const match = s.match(/[\d,]+\.?\d*/);
+        if (!match) return null;
+        const n = parseFloat(match[0].replace(/,/g, ''));
+        return isNaN(n) ? null : n;
+      };
+
+      const rawRating = String(report.cs_rating || '').toUpperCase();
+      const rating: RecommendationRating = rawRating.includes('SELL') ? 'SELL' : 'BUY';
+      const cmp = extractFirstNumber(report.cs_current_market_price);
+      const targetPrice = extractFirstNumber(report.cs_target_price);
+
+      if (!targetPrice) {
+        toast.error('Target price not found in report sections');
+        setTelegramSending(false);
+        return;
+      }
+
+      await createRecommendation({
+        company_name: session?.company_name || '',
+        nse_symbol: session?.company_nse_code || '',
+        rating,
+        cmp,
+        target_price: targetPrice,
+        validity_type: '1_year',
+        validity_date: null,
+        plans: [plan],
+        trade_notes: null,
+        report_file_url: report.pdf_file_url || null,
+        session_id: sessionId,
+        send_telegram: true,
+        created_by: user?.email || null,
+        pdf_file_id: report.pdf_file_id || null,
+      });
+
+      setTelegramSent(true);
+      toast.success('Recommendation sent to Telegram!');
+    } catch (err) {
+      toast.error(`Failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    } finally {
+      setTelegramSending(false);
+    }
+  };
+
   // --- Resume a recent session ---
   const handleResumeSession = (s: PipelineSession) => {
     setSessionId(s.session_id);
@@ -556,6 +675,8 @@ export default function ResearchPipeline() {
     });
     setSearchInput(s.company_name);
     setSelectedSector(s.sector ?? '');
+    setTelegramSent(false);
+    setTelegramSending(false);
   };
 
   // --- Delete session ---
@@ -873,7 +994,7 @@ export default function ResearchPipeline() {
                         <BarChart3 className="h-4 w-4 text-accent-600 shrink-0" />
                         <span className="text-xs font-medium text-accent-800 flex-1">Financial Model — uploaded to vault</span>
                         <a
-                          href={financialModelFileUrl.replace('/view', '/edit').replace('file/d/', 'spreadsheets/d/')}
+                          href={financialModelFileUrl}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-xs text-accent-600 hover:text-accent-700 font-medium flex items-center gap-1"
@@ -901,7 +1022,7 @@ export default function ResearchPipeline() {
                           <div key={doc.id} className="flex items-center gap-3 px-3 py-2 hover:bg-neutral-50 transition-colors">
                             <FileText className="h-3.5 w-3.5 text-neutral-300 shrink-0" />
                             <span className="text-xs text-neutral-700 truncate flex-1">{doc.name}</span>
-                            <span className="text-[10px] text-neutral-400 tabular-nums">{(doc.size / 1024).toFixed(0)} KB</span>
+                            {doc.size > 0 && <span className="text-[10px] text-neutral-400 tabular-nums">{(doc.size / 1024).toFixed(0)} KB</span>}
                             {doc.viewUrl && (
                               <a href={doc.viewUrl} target="_blank" rel="noopener noreferrer" className="text-neutral-300 hover:text-accent-500 transition-colors">
                                 <ExternalLink className="h-3 w-3" />
@@ -1164,14 +1285,35 @@ export default function ResearchPipeline() {
                 </div>
                 <h3 className="text-xl font-bold text-emerald-800 mb-1">Report Published</h3>
                 <p className="text-sm text-emerald-600 mb-6">This research report is now live and visible to stakeholders.</p>
-                <Button 
-                  onClick={handleUnpublish} 
-                  variant="outline" 
-                  className="mx-auto border-emerald-200 text-emerald-800 hover:bg-emerald-50"
-                >
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Revert to Draft (Unpublish)
-                </Button>
+
+                <div className="flex items-center gap-3">
+                  {!telegramSent ? (
+                    <Button
+                      onClick={handleSendTelegramRecommendation}
+                      disabled={telegramSending}
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      {telegramSending ? (
+                        <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Sending...</>
+                      ) : (
+                        <><Send className="h-4 w-4 mr-2" /> Send Recommendation to Telegram</>
+                      )}
+                    </Button>
+                  ) : (
+                    <div className="flex items-center gap-2 text-emerald-600 font-medium text-sm px-4 py-2 bg-emerald-50 rounded-lg border border-emerald-200">
+                      <Check className="h-4 w-4" /> Recommendation Sent
+                    </div>
+                  )}
+
+                  <Button
+                    onClick={handleUnpublish}
+                    variant="outline"
+                    className="border-emerald-200 text-emerald-800 hover:bg-emerald-50"
+                  >
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Revert to Draft (Unpublish)
+                  </Button>
+                </div>
               </div>
             )}
           </div>

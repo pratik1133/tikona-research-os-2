@@ -20,7 +20,9 @@ import {
   getReportBySession,
   publishReport,
 } from '@/lib/api';
+import { createRecommendation } from '@/lib/recommendations-api';
 import type { TextSectionKey, ResearchReport } from '@/types/database';
+import type { RecommendationRating } from '@/types/recommendations';
 import {
   Check,
   Loader2,
@@ -36,6 +38,7 @@ import {
   ChevronUp,
   Shield,
   Edit3,
+  Send,
 } from 'lucide-react';
 
 // ========================
@@ -103,7 +106,6 @@ export default function PostProductionPanel({
 
   // --- PPT ---
   const [pptGenerating, setPptGenerating] = useState(false);
-  const [pptDialogOpen, setPptDialogOpen] = useState(false);
   const [pptElapsedSeconds, setPptElapsedSeconds] = useState(0);
   const [pptFileId, setPptFileId] = useState<string | null>(null);
   const [pptFileUrl, setPptFileUrl] = useState<string | null>(null);
@@ -128,6 +130,11 @@ export default function PostProductionPanel({
   // --- UI ---
   const [scriptExpanded, setScriptExpanded] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<string>('');
+
+  // --- Publish & Telegram ---
+  const [isPublished, setIsPublished] = useState(false);
+  const [telegramSending, setTelegramSending] = useState(false);
+  const [telegramSent, setTelegramSent] = useState(false);
 
   // Refs for stable reportId in polling callbacks
   const reportIdRef = useRef(reportId);
@@ -158,6 +165,28 @@ export default function PostProductionPanel({
     if (report.podcast_script) setPodcastScript(report.podcast_script);
     if (report.audio_file_url) setAudioFileUrl(report.audio_file_url);
     if (report.video_file_url) setVideoFileUrl(report.video_file_url);
+    if (report.is_published) {
+      setIsPublished(true);
+      if (report.plan) setSelectedPlan(report.plan);
+    }
+  }
+
+  // ========================
+  // Extract recommendation data from stage2 sections
+  // ========================
+
+  function getSectionValue(key: string): string {
+    const sec = stage2Sections.find((s) => s.key === key);
+    return sec?.content?.trim() ?? '';
+  }
+
+  function parseNumber(val: string): number | null {
+    if (!val) return null;
+    // Match first number in string (handles "₹1,234.56 per share" etc.)
+    const match = val.match(/[\d,]+\.?\d*/);
+    if (!match) return null;
+    const n = parseFloat(match[0].replace(/,/g, ''));
+    return isNaN(n) ? null : n;
   }
 
   // ========================
@@ -254,7 +283,6 @@ export default function PostProductionPanel({
     if (!reportId) return;
 
     setPptGenerating(true);
-    setPptDialogOpen(true);
     setPptElapsedSeconds(0);
 
     pptTimerRef.current = setInterval(() => {
@@ -300,7 +328,6 @@ export default function PostProductionPanel({
       toast.success('PPT created successfully!');
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'PPT generation failed');
-      setPptDialogOpen(false);
     } finally {
       if (pptTimerRef.current) {
         clearInterval(pptTimerRef.current);
@@ -465,9 +492,64 @@ export default function PostProductionPanel({
     }
     try {
       await publishReport(reportId, selectedPlan);
+      setIsPublished(true);
       onPublished();
     } catch (err) {
       toast.error(`Failed to publish: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    }
+  };
+
+  // ========================
+  // Step 6: Send Recommendation to Telegram
+  // ========================
+
+  const handleSendRecommendation = async () => {
+    if (!reportId || !selectedPlan) return;
+    setTelegramSending(true);
+
+    try {
+      // Fetch report record to get cs_ columns
+      const report = await getReportBySession(sessionId);
+      const reportData = report as any;
+
+      const rawRating = String(reportData?.cs_rating || getSectionValue('rating') || '').toUpperCase();
+      const rating: RecommendationRating = rawRating.includes('SELL') ? 'SELL' : 'BUY';
+
+      const cmpRaw = String(reportData?.cs_current_market_price || getSectionValue('current_market_price') || '');
+      const tpRaw = String(reportData?.cs_target_price || getSectionValue('target_price') || '');
+      const cmp = parseNumber(cmpRaw);
+      const targetPrice = parseNumber(tpRaw);
+      const reportUrl = pdfFileUrl || null;
+
+      if (!targetPrice) {
+        toast.error('Target price not found in report');
+        setTelegramSending(false);
+        return;
+      }
+
+      await createRecommendation({
+        company_name: companyName,
+        nse_symbol: nseSymbol,
+        rating,
+        cmp,
+        target_price: targetPrice,
+        validity_type: '1_year',
+        validity_date: null,
+        plans: [selectedPlan as any],
+        trade_notes: null,
+        report_file_url: pdfFileUrl || null,
+        session_id: sessionId,
+        send_telegram: true,
+        created_by: userEmail,
+        pdf_file_id: pdfFileId,
+      });
+
+      setTelegramSent(true);
+      toast.success('Recommendation sent to Telegram!');
+    } catch (err) {
+      toast.error(`Failed to send: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    } finally {
+      setTelegramSending(false);
     }
   };
 
@@ -716,22 +798,117 @@ export default function PostProductionPanel({
           </div>
         )}
 
-        <Button
-          onClick={handlePublish}
-          disabled={!pdfFileId || !selectedPlan || isAnyGenerating}
-          className={cn(
-            'w-full h-10 rounded-lg font-semibold text-sm',
-            pdfFileId && selectedPlan
-              ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm'
-              : 'bg-neutral-200 text-neutral-400 cursor-not-allowed'
-          )}
-        >
-          <Shield className="h-4 w-4 mr-2" /> Publish Report
-        </Button>
-        {!pdfFileId && (
-          <p className="text-[10px] text-neutral-400 text-center mt-1.5 transition-opacity">PDF must be generated before publishing</p>
+        {!isPublished ? (
+          <>
+            <Button
+              onClick={handlePublish}
+              disabled={!pdfFileId || !selectedPlan || isAnyGenerating}
+              className={cn(
+                'w-full h-10 rounded-lg font-semibold text-sm',
+                pdfFileId && selectedPlan
+                  ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm'
+                  : 'bg-neutral-200 text-neutral-400 cursor-not-allowed'
+              )}
+            >
+              <Shield className="h-4 w-4 mr-2" /> Publish Report
+            </Button>
+            {!pdfFileId && (
+              <p className="text-[10px] text-neutral-400 text-center mt-1.5 transition-opacity">PDF must be generated before publishing</p>
+            )}
+          </>
+        ) : (
+          <div className="flex items-center gap-2 text-emerald-600 text-sm font-medium">
+            <Check className="h-4 w-4" /> Report Published
+          </div>
         )}
       </div>
+
+      {/* === Step 6: Send Recommendation to Telegram === */}
+      {isPublished && (
+        <div className="px-4 py-4 border-t border-neutral-100 bg-gradient-to-b from-blue-50/40 to-white">
+          <div className="flex items-start gap-3">
+            <div className={cn(
+              'flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold shrink-0 mt-0.5',
+              telegramSent ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'
+            )}>
+              {telegramSent ? <Check className="h-3.5 w-3.5" strokeWidth={2.5} /> : 6}
+            </div>
+
+            <div className="flex-1 min-w-0">
+              <p className={cn('text-sm font-medium', telegramSent ? 'text-emerald-700' : 'text-neutral-900')}>
+                Send Recommendation to Telegram
+              </p>
+              <p className="text-[10px] text-neutral-400 mb-3">
+                Create a recommendation record and send to subscribers
+              </p>
+
+              {/* Preview auto-filled data */}
+              {(() => {
+                const rating = getSectionValue('rating').toUpperCase().includes('SELL') ? 'SELL' : 'BUY';
+                const cmp = parseNumber(getSectionValue('current_market_price'));
+                const tp = parseNumber(getSectionValue('target_price'));
+                const upside = cmp && tp ? (((tp - cmp) / cmp) * 100).toFixed(1) : null;
+                const planLabel = selectedPlan === 'midcap_wealth' ? 'Mid Cap Wealth Builders'
+                  : selectedPlan === 'smallcap_alpha' ? 'Smallcap Alpha Picks'
+                  : selectedPlan === 'sme_emerging' ? 'SME Emerging Business' : selectedPlan;
+
+                return (
+                  <div className="rounded-lg border border-neutral-200 bg-white p-3 mb-3 space-y-1.5">
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[11px]">
+                      <div>
+                        <span className="text-neutral-400">Company</span>
+                        <p className="font-medium text-neutral-800">{companyName} ({nseSymbol})</p>
+                      </div>
+                      <div>
+                        <span className="text-neutral-400">Rating</span>
+                        <p className={cn('font-semibold', rating === 'BUY' ? 'text-green-600' : 'text-red-600')}>{rating}</p>
+                      </div>
+                      <div>
+                        <span className="text-neutral-400">CMP</span>
+                        <p className="font-medium text-neutral-800">{cmp != null ? `₹${cmp.toLocaleString('en-IN')}` : '—'}</p>
+                      </div>
+                      <div>
+                        <span className="text-neutral-400">Target Price</span>
+                        <p className="font-medium text-neutral-800">{tp != null ? `₹${tp.toLocaleString('en-IN')}` : '—'}</p>
+                      </div>
+                      <div>
+                        <span className="text-neutral-400">Upside</span>
+                        <p className="font-medium text-neutral-800">{upside ? `${upside}%` : '—'}</p>
+                      </div>
+                      <div>
+                        <span className="text-neutral-400">Plan</span>
+                        <p className="font-medium text-neutral-800">{planLabel}</p>
+                      </div>
+                    </div>
+                    {pdfFileUrl && (
+                      <div className="text-[10px] text-neutral-400 pt-1 border-t border-neutral-100">
+                        Report: <a href={pdfFileUrl} target="_blank" rel="noopener noreferrer" className="text-accent-600 hover:underline">PDF attached</a>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+
+              {!telegramSent ? (
+                <Button
+                  onClick={handleSendRecommendation}
+                  disabled={telegramSending}
+                  size="sm"
+                  className="rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  {telegramSending ? (
+                    <><Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> Sending...</>
+                  ) : (
+                    <><Send className="h-3.5 w-3.5 mr-1.5" /> Send to Telegram</>
+                  )}
+                </Button>
+              ) : (
+                <span className="text-[11px] text-emerald-600 font-medium">Recommendation sent to Telegram</span>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

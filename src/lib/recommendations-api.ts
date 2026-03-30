@@ -10,7 +10,7 @@ const N8N_BASE_URL = 'https://n8n.tikonacapital.com';
 export async function createRecommendation(
   payload: CreateRecommendationPayload
 ): Promise<Recommendation> {
-  const { send_telegram, ...dbPayload } = payload;
+  const { send_telegram, pdf_file_id, ...dbPayload } = payload;
 
   const upside_pct =
     dbPayload.cmp && dbPayload.target_price
@@ -34,7 +34,7 @@ export async function createRecommendation(
 
   if (send_telegram) {
     try {
-      await sendToTelegram(rec);
+      await sendToTelegram(rec, pdf_file_id ?? null);
       await supabase
         .from('recommendations')
         .update({ telegram_sent: true })
@@ -100,6 +100,19 @@ export async function deleteRecommendation(id: string): Promise<void> {
 }
 
 // ========================
+// Check if recommendation exists for session
+// ========================
+
+export async function hasRecommendationForSession(sessionId: string): Promise<boolean> {
+  const { count, error } = await supabase
+    .from('recommendations')
+    .select('id', { count: 'exact', head: true })
+    .eq('session_id', sessionId);
+  if (error) return false;
+  return (count ?? 0) > 0;
+}
+
+// ========================
 // Resend Telegram
 // ========================
 
@@ -115,7 +128,7 @@ export async function resendTelegram(rec: Recommendation): Promise<void> {
 // Internal: send to n8n → Telegram
 // ========================
 
-async function sendToTelegram(rec: Recommendation): Promise<void> {
+async function sendToTelegram(rec: Recommendation, pdfFileId?: string | null): Promise<void> {
   const res = await fetch(`${N8N_BASE_URL}/webhook/send-recommendation`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -131,6 +144,7 @@ async function sendToTelegram(rec: Recommendation): Promise<void> {
       plans: rec.plans,
       trade_notes: rec.trade_notes,
       report_file_url: rec.report_file_url,
+      pdf_file_id: pdfFileId || null,
     }),
   });
   if (!res.ok) {

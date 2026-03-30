@@ -8,7 +8,14 @@
       "Bash(xargs wc:*)",
       "Bash(find c:Userspratiktikona-research-os-2/src c:Userspratiktikona-research-os-2/scripts -type f \\\\\\(-name *.ts -o -name *.tsx -o -name *.js -o -name *.jsx -o -name *.py \\\\\\))",
       "Bash(xargs grep:*)",
-      "Bash(grep -r \"N8N_BASE_URL\\\\|VITE_N8N\" c:Userspratiktikona-research-os-2src --include=*.ts --include=*.tsx -l)"
+      "Bash(grep -r \"N8N_BASE_URL\\\\|VITE_N8N\" c:Userspratiktikona-research-os-2src --include=*.ts --include=*.tsx -l)",
+      "Bash(grep -r \"financial_model_server\\\\|financial_model_v3\\\\|scripts/\" /c/Users/pratik/tikona-research-os-2/src /c/Users/pratik/tikona-research-os-2/*.json)",
+      "Bash(grep -r \"supabase_migration\\\\|verification_report\\\\|video_generation_integration\" /c/Users/pratik/tikona-research-os-2/src /c/Users/pratik/tikona-research-os-2/*.json /c/Users/pratik/tikona-research-os-2/*.md)",
+      "Read(//tmp/**)",
+      "Bash(grep -l \"index.css\" /c/Users/pratik/tikona-research-os-2/src/*.tsx /c/Users/pratik/tikona-research-os-2/*.html)",
+      "Bash(xargs ls:*)",
+      "Read(//c/Users/pratik/tikona-research-os-2/**)",
+      "Bash(sort -k1 -r)"
     ]
   }
 }
