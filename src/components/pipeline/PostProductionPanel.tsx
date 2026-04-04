@@ -519,8 +519,6 @@ export default function PostProductionPanel({
       const tpRaw = String(reportData?.cs_target_price || getSectionValue('target_price') || '');
       const cmp = parseNumber(cmpRaw);
       const targetPrice = parseNumber(tpRaw);
-      const reportUrl = pdfFileUrl || null;
-
       if (!targetPrice) {
         toast.error('Target price not found in report');
         setTelegramSending(false);
