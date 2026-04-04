@@ -46,7 +46,6 @@ import {
   Search,
   Building2,
   BarChart3,
-  FolderOpen,
   Upload,
   Check,
   Trash2,
@@ -59,7 +58,6 @@ import {
   FileText,
   Globe,
   ChevronRight,
-  ArrowRight,
   Play,
   Zap,
   X,
@@ -1521,54 +1519,3 @@ function CollapsibleStage({ title, done, defaultOpen, trailing, children }: Coll
 // ========================
 // Path Selection Card
 // ========================
-
-interface PathCardProps {
-  icon: React.ReactNode;
-  title: string;
-  tag: string;
-  description: string;
-  color: 'accent' | 'emerald';
-  onClick: () => void;
-}
-
-function PathCard({ icon, title, tag, description, color, onClick }: PathCardProps) {
-  const colors = {
-    accent: {
-      border: 'hover:border-accent-300',
-      iconBg: 'bg-accent-50 group-hover:bg-accent-100',
-      iconText: 'text-accent-600',
-      arrow: 'text-accent-600',
-    },
-    emerald: {
-      border: 'hover:border-emerald-300',
-      iconBg: 'bg-emerald-50 group-hover:bg-emerald-100',
-      iconText: 'text-emerald-600',
-      arrow: 'text-emerald-600',
-    },
-  };
-  const c = colors[color];
-
-  return (
-    <button
-      onClick={onClick}
-      className={cn(
-        'group rounded-xl border border-neutral-200 bg-white p-4 text-left transition-all hover:shadow-md',
-        c.border
-      )}
-    >
-      <div className="flex items-center gap-3 mb-2">
-        <div className={cn('h-9 w-9 rounded-lg flex items-center justify-center transition-colors', c.iconBg, c.iconText)}>
-          {icon}
-        </div>
-        <div>
-          <p className="text-sm font-semibold text-neutral-900">{title}</p>
-          <p className="text-[10px] text-neutral-400">{tag}</p>
-        </div>
-      </div>
-      <p className="text-xs text-neutral-500 leading-relaxed">{description}</p>
-      <div className={cn('mt-2 flex items-center text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity', c.arrow)}>
-        Start <ArrowRight className="h-3 w-3 ml-1" />
-      </div>
-    </button>
-  );
-}

@@ -1,9 +1,8 @@
 import { useCallback } from 'react';
 import {
-  GripVertical, Trash2, RefreshCw, Type, Table2,
-  BarChart3, MessageSquare, Hash, ChevronUp, ChevronDown,
+  GripVertical, Trash2, RefreshCw, ChevronUp, ChevronDown,
 } from 'lucide-react';
-import type { ReportBlock, BlockType, BlockContent, TemplateQuestion } from '@/types/report-builder';
+import type { ReportBlock, BlockType, BlockContent } from '@/types/report-builder';
 import BlockRenderer from './BlockRenderer';
 
 interface Props {
@@ -22,7 +21,6 @@ const BLOCK_LABELS: Record<BlockType, string> = {
   keyMetrics: 'Key Metrics',
 };
 
-function uid() { return crypto.randomUUID(); }
 
 export default function BlockEditor({ blocks, onChange, onRegenerateBlock, activeBlockId, onSelectBlock }: Props) {
   const updateBlock = useCallback((id: string, content: BlockContent) => {

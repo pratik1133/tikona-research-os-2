@@ -428,7 +428,7 @@ export default function Recommendations() {
   const [selectedPlans, setSelectedPlans] = useState<PlanId[]>([]);
   const [tradeNotes, setTradeNotes] = useState('');
   const [reportFileUrl, setReportFileUrl] = useState('');
-  const [reportFile, setReportFile] = useState<File | null>(null);
+  const [, setReportFile] = useState<File | null>(null);
   const [sendTelegram, setSendTelegram] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
 

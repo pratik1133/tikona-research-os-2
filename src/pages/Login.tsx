@@ -28,7 +28,7 @@ function GoogleIcon() {
 }
 
 export default function Login() {
-  const { user, role, isLoading, error, signInWithGoogle, clearError } = useAuth();
+  const { user, isLoading, error, signInWithGoogle, clearError } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {

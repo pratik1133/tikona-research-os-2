@@ -8,7 +8,7 @@ import {
 } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
-import { AUDIT_ACTIONS, ADMIN_EMAILS } from '@/lib/constants';
+import { AUDIT_ACTIONS } from '@/lib/constants';
 
 export type UserRole = 'admin';
 
