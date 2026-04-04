@@ -61,9 +61,9 @@ export default function ResearchReports() {
   const filtered = sessions.filter((s) => {
     const matchesSearch = !searchQuery ||
       s.company_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.nse_symbol.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      ((s.company_nse_code || '').toLowerCase().includes(searchQuery.toLowerCase())) ||
       (s.sector && s.sector.toLowerCase().includes(searchQuery.toLowerCase()));
-    const matchesStatus = statusFilter === 'all' || s.status === statusFilter;
+    const matchesStatus = statusFilter === 'all' || s.current_state === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
@@ -220,14 +220,14 @@ export default function ResearchReports() {
                         </td>
                         <td className="whitespace-nowrap px-4 py-3.5 text-sm text-neutral-600">
                           <span className="rounded bg-neutral-100 px-1.5 py-0.5 font-mono text-[11px]">
-                            {session.nse_symbol}
+                            {session.company_nse_code || '-'}
                           </span>
                         </td>
                         <td className="whitespace-nowrap px-4 py-3.5 text-sm text-neutral-500">
                           {session.sector || '-'}
                         </td>
                         <td className="whitespace-nowrap px-4 py-3.5">
-                          <StatusBadge status={session.status} />
+                          <StatusBadge status={(session.current_state || session.status) as any} />
                         </td>
                         <td className="whitespace-nowrap px-4 py-3.5 text-sm text-neutral-500">
                           <div>{formatDate(session.created_at)}</div>
@@ -237,9 +237,9 @@ export default function ResearchReports() {
                         </td>
                         <td className="whitespace-nowrap px-4 py-3.5 text-right">
                           <div className="flex items-center justify-end gap-1">
-                            {session.vault_url && (
+                            {Boolean(session.vault_folder_url) && (
                               <a
-                                href={session.vault_url}
+                                href={session.vault_folder_url as string}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-neutral-900 transition-colors hover:bg-neutral-100"

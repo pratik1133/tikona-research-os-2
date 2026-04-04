@@ -247,6 +247,8 @@ export default function ResearchPipeline() {
           downloadUrl: d.download_url || '',
           type: d.document_type || 'other',
           category: d.category || 'other',
+          uploadedAt: d.created_at || new Date().toISOString(),
+          parentFolderId: '',
         })));
       }
     }).catch(() => {});
@@ -295,6 +297,23 @@ export default function ResearchPipeline() {
         vault_folder_id: folderId,
         vault_folder_url: folderUrl,
       });
+
+      // Automatically save the incoming documents since they are physically in the vault
+      if (documents.length > 0) {
+        await saveSessionDocuments(
+          documents.map(d => ({
+            session_id: newSession.session_id,
+            drive_file_id: d.id,
+            file_name: d.name,
+            mime_type: d.mimeType,
+            file_size: d.size,
+            view_url: d.viewUrl,
+            download_url: d.downloadUrl,
+            document_type: d.type,
+            category: d.category,
+          }))
+        ).catch(() => console.error('Initial vault document save skipped/failed'));
+      }
 
       await transitionPipelineStatus(newSession.session_id, 'vault_ready', 'vault_creating');
       setPipelineStatus('vault_ready');
@@ -636,7 +655,7 @@ export default function ResearchPipeline() {
         target_price: targetPrice,
         validity_type: '1_year',
         validity_date: null,
-        plans: [plan],
+        plans: [(plan as any)],
         trade_notes: null,
         report_file_url: report.pdf_file_url || null,
         session_id: sessionId,

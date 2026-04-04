@@ -7,6 +7,8 @@ import {
   LayoutDashboard,
   GitBranch,
   Send,
+  FileEdit,
+  Layers,
 } from 'lucide-react';
 import SidebarLayout, { type NavItemConfig } from '@/components/Layout';
 
@@ -17,6 +19,8 @@ const adminNavItems: NavItemConfig[] = [
   { label: 'Research Reports',  path: '/admin/research-reports',  icon: FileText,        group: 'Research' },
   { label: 'Generate Research', path: '/admin/generate-research', icon: Sparkles,        group: 'Research' },
   { label: 'Report Generator',  path: '/admin/pipeline',          icon: GitBranch,       group: 'Research' },
+  { label: 'Report Builder',    path: '/admin/report-builder',    icon: FileEdit,        group: 'Research' },
+  { label: 'Sector Thesis',     path: '/admin/sector-thesis',     icon: Layers,          group: 'Research' },
   { label: 'Prompt Library',    path: '/admin/prompts',           icon: BookOpen,        group: 'Research' },
   { label: 'Recommendations',   path: '/admin/recommendations',   icon: Send,            group: 'Distribution' },
 ];

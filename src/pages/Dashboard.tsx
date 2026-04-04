@@ -167,20 +167,20 @@ export default function Dashboard() {
                         </td>
                         <td className="px-4 py-3">
                           <span className="font-mono text-xs text-neutral-500">
-                            {session.nse_symbol}
+                            {session.company_nse_code || '-'}
                           </span>
                         </td>
                         <td className="px-4 py-3">
-                          <StatusBadge status={session.status} />
+                          <StatusBadge status={(session.current_state || session.status) as any} />
                         </td>
                         <td className="px-4 py-3 text-right">
                           <div className="flex items-center justify-end gap-2">
                             <span className="text-xs text-neutral-400">
                               {formatRelativeDate(session.created_at)}
                             </span>
-                            {session.vault_url && (
+                            {Boolean(session.vault_folder_url) && (
                               <a
-                                href={session.vault_url}
+                                href={session.vault_folder_url as string}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-neutral-300 transition-colors hover:text-accent-600"

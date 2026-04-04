@@ -38,36 +38,24 @@ export const REPORT_SECTIONS: ReportSection[] = [
     searchKeywords: ['company', 'background', 'history', 'founded', 'headquarters', 'overview', 'about', 'milestones', 'journey', 'establishment'],
     prompt: `Write a comprehensive Company Background section for an equity research report.
 
-Cover the following in detail:
-- **Founding & History**: When was the company founded, by whom, key milestones in its journey
-- **Headquarters & Presence**: Where is the company headquartered, geographical presence (domestic/international)
-- **Stock Listing**: NSE/BSE codes, listing date, market cap category (large/mid/small cap)
-- **Ownership Structure**: Promoter holding, FII/DII holdings, key institutional investors
-- **Corporate Structure**: Subsidiaries, joint ventures, associate companies (if any)
-- **Key Achievements**: Major awards, recognitions, certifications, industry rankings
+Cover the company's founding & history, headquarters & geographical presence, stock listing details (NSE/BSE codes, market cap category), ownership structure (promoter/FII/DII holdings), corporate structure (subsidiaries, JVs), and key achievements.
 
-Use the provided document excerpts and financial data. Write in a professional, institutional-quality equity research analyst tone.
-Output in clean markdown with clear subheadings. Be factual and cite specific information from the documents.`,
+Write as a senior analyst would — in flowing prose that tells the company's story with authority. Use subheadings to organize the narrative, but within each subsection, write analytical paragraphs rather than bullet lists. You may use bullets sparingly for specific data points like shareholding percentages or listing details where a quick-reference format genuinely helps.
+
+Be factual and cite specific information from the provided documents and financial data.`,
   },
   {
     key: 'business_model',
     title: 'Business Model',
     headingPrompt: 'Generate a heading that highlights the company\'s unique business model, revenue engine, or value proposition.',
     searchKeywords: ['business model', 'revenue', 'products', 'services', 'segments', 'operations', 'customers', 'value proposition', 'distribution', 'channels', 'pricing'],
-    prompt: `Write a detailed Business Model Explanation section for an equity research report.
+    prompt: `Write a detailed Business Model section for an equity research report.
 
-Cover the following:
-- **Core Business**: What does the company do? Main products/services offered
-- **Business Segments**: Revenue breakdown by segment, contribution of each segment
-- **Revenue Model**: How does the company make money? Pricing strategy, contract types (if applicable)
-- **Customer Segments**: Who are the customers? B2B/B2C/Government, key clients, customer concentration
-- **Value Chain Position**: Where does the company sit in the industry value chain?
-- **Distribution & Channels**: How does the company reach its customers? Direct sales, distributors, online
-- **Capacity & Operations**: Manufacturing facilities, capacity utilization, expansion plans
-- **Key Differentiators**: What makes this business model unique or defensible?
+Explain the core business, revenue model and how the company makes money, business segments with revenue breakdown, customer segments (B2B/B2C/Government), value chain position, distribution channels, capacity & operations, and key differentiators that make the model defensible.
 
-Use the provided document excerpts and financial data. Write in a professional equity research analyst tone.
-Output in clean markdown with clear subheadings. Include revenue/segment breakdowns where available.`,
+Write with analytical depth in natural prose. Use subheadings to structure the narrative. Where you need to show segment-wise revenue breakdowns or capacity figures, a short bullet list or inline data is fine — but the analysis of WHY these segments matter, competitive dynamics, and strategic positioning should be in paragraph form.
+
+Use the provided document excerpts and financial data. Include revenue/segment breakdowns where available.`,
   },
   {
     key: 'management_analysis',
@@ -76,18 +64,11 @@ Output in clean markdown with clear subheadings. Include revenue/segment breakdo
     searchKeywords: ['management', 'CEO', 'MD', 'board', 'directors', 'leadership', 'experience', 'track record', 'promoter', 'governance', 'compensation', 'KMP'],
     prompt: `Write a Management Analysis section for an equity research report.
 
-Cover the following:
-- **Key Management Personnel (KMP)**: CEO/MD, CFO, COO and other key executives - their background, experience, tenure
-- **Board of Directors**: Composition, independent directors ratio, expertise on board
-- **Promoter Group**: Who are the promoters? Their background, involvement in day-to-day operations
-- **Management Track Record**: Past achievements, execution capability, strategic decisions made
-- **Corporate Governance**: Board meeting attendance, related party transactions, auditor observations
-- **Management Compensation**: Remuneration structure, ESOPs, alignment with shareholders
-- **Succession Planning**: Depth of management team, key man risk
-- **Management Guidance**: Historical accuracy of management guidance, credibility
+Assess the key management personnel (backgrounds, experience, tenure), board composition & governance quality, promoter group involvement, management track record & execution capability, corporate governance practices, compensation alignment with shareholders, succession planning, and credibility of management guidance.
 
-Use the provided document excerpts and financial data. Write in a professional equity research analyst tone.
-Output in clean markdown with clear subheadings. Be objective and balanced in your assessment.`,
+Write this as a seasoned analyst evaluating the people behind the business. Use prose to assess management quality — their vision, execution track record, and governance standards. A brief listing of key personnel names and designations is fine, but the analytical assessment should be in flowing paragraphs. Be objective and balanced.
+
+Use the provided document excerpts and financial data.`,
   },
   {
     key: 'industry_overview',
@@ -96,18 +77,11 @@ Output in clean markdown with clear subheadings. Be objective and balanced in yo
     searchKeywords: ['industry', 'market', 'sector', 'competition', 'landscape', 'players', 'market share', 'TAM', 'SAM', 'peers', 'competitors'],
     prompt: `Write an Industry Overview section for an equity research report.
 
-Cover the following:
-- **Industry Size & Structure**: Total Addressable Market (TAM), current market size, organized vs unorganized split
-- **Industry Growth**: Historical growth rates, projected growth (CAGR), key growth phases
-- **Market Structure**: Fragmented vs consolidated, number of players, market share distribution
-- **Competitive Landscape**: Key competitors, their market share, competitive positioning matrix
-- **Entry Barriers**: Capital requirements, technology, regulations, brand loyalty, distribution network
-- **Regulatory Environment**: Key regulations, licensing requirements, government policies impacting the sector
-- **Value Chain**: Industry value chain, margins at each stage, where value is captured
-- **Global vs Domestic**: How does India compare to global markets? Import/export dynamics
+Cover the industry size & TAM, growth trajectory (historical & projected CAGR), market structure (fragmented vs consolidated), competitive landscape & key players, entry barriers, regulatory environment, value chain dynamics, and India vs global market comparison.
 
-Use the provided document excerpts and financial data. Write in a professional equity research analyst tone.
-Output in clean markdown with clear subheadings. Include industry data and peer comparisons where available.`,
+Write this as an analyst painting the industry picture for an institutional investor. Use subheadings for organization, but write each subsection as analytical narrative. Quantify wherever possible — market sizes, growth rates, market shares — weaving the numbers into your prose naturally rather than listing them. Include peer comparisons where available.
+
+Use the provided document excerpts and financial data.`,
   },
   {
     key: 'industry_tailwinds',
@@ -116,25 +90,13 @@ Output in clean markdown with clear subheadings. Include industry data and peer 
     searchKeywords: ['tailwinds', 'growth drivers', 'opportunities', 'trends', 'favorable', 'positive', 'catalyst', 'expansion', 'potential', 'upside'],
     prompt: `Write a Key Industry Tailwinds section for an equity research report.
 
-Identify and explain the major positive factors driving industry growth:
+Identify and explain the major positive factors driving industry growth — structural growth drivers (demographics, urbanization, income growth), government policy support (PLI, infrastructure push), demand catalysts, technology trends, capacity expansion cycles, export opportunities (China+1), consolidation trends, and ESG/sustainability tailwinds.
 
-- **Structural Growth Drivers**: Long-term trends supporting industry growth (demographics, urbanization, rising income)
-- **Government Policy Support**: PLI schemes, infrastructure push, favorable regulations, Make in India
-- **Demand Drivers**: What's driving demand? New applications, replacement demand, penetration increase
-- **Technology Trends**: Digital transformation, automation, new technologies benefiting the industry
-- **Capacity Expansion**: Industry-wide capacity additions, new entrants, investment cycle
-- **Export Opportunities**: Global demand, China+1 strategy, trade agreements
-- **Consolidation Trends**: M&A activity, market share gains by organized players
-- **ESG/Sustainability**: Green initiatives, carbon neutrality, sustainable practices driving change
+For each major tailwind, describe the trend, quantify the opportunity where possible, indicate the timeline for impact, and explain how the company is positioned to benefit.
 
-For each tailwind:
-1. Describe the trend
-2. Quantify the opportunity (where possible)
-3. Timeline for impact
-4. How the company is positioned to benefit
+Write as an analyst building a conviction case. Use narrative paragraphs that connect the tailwinds to the company's specific positioning. You can use a few bullet points for quick data references, but the core analysis — why these tailwinds matter and how they translate to earnings — should be in prose.
 
-Use the provided document excerpts. Write in a professional equity research analyst tone.
-Output in clean markdown with clear categorization.`,
+Use the provided document excerpts.`,
   },
   {
     key: 'demand_drivers',
@@ -143,25 +105,13 @@ Output in clean markdown with clear categorization.`,
     searchKeywords: ['demand', 'drivers', 'growth', 'consumption', 'customers', 'market size', 'penetration', 'volumes', 'offtake', 'end-user'],
     prompt: `Write a Demand Drivers section for an equity research report.
 
-Analyze the key factors driving demand for the company's products/services:
+Analyze the key factors driving demand — end-user industries and their outlook, volume growth drivers, pricing dynamics & realization trends, domestic vs export demand, seasonality/cyclicality, new product development, customer acquisition & order book trends, replacement demand cycles, and penetration levels vs potential.
 
-- **End-User Industries**: Which industries/sectors drive demand? Their growth outlook
-- **Volume Growth Drivers**: What's driving volume growth? New customers, increased consumption, capacity expansion
-- **Pricing Dynamics**: Pricing trends, ability to pass on costs, realization trends
-- **Geographical Demand**: Domestic vs export demand, regional demand patterns
-- **Seasonality**: Any seasonal patterns in demand? Cyclicality factors
-- **New Product/Application Development**: New use cases, product innovation driving demand
-- **Customer Acquisition**: New customer wins, contract wins, order book growth
-- **Replacement Demand**: Asset replacement cycles, upgrade cycles
-- **Penetration Levels**: Current penetration vs potential, room for growth
+For each major demand driver, quantify its current contribution, assess the growth trajectory, and evaluate sustainability.
 
-For each demand driver:
-1. Quantify current contribution to revenue
-2. Expected growth trajectory
-3. Sustainability of the demand driver
+Write this as analytical commentary that helps an investor understand what's really driving the business forward. Use prose to explain the demand dynamics and their interplay. A few bullets for specific data points (revenue splits, growth rates) are fine, but your analysis of sustainability and trajectory should read as connected narrative.
 
-Use the provided document excerpts and financial data. Write in a professional equity research analyst tone.
-Output in clean markdown with clear categorization and data points.`,
+Use the provided document excerpts and financial data.`,
   },
   {
     key: 'industry_risks',
@@ -170,28 +120,13 @@ Output in clean markdown with clear categorization and data points.`,
     searchKeywords: ['risk', 'downside', 'threat', 'challenge', 'regulatory', 'competition', 'macroeconomic', 'operational', 'financial', 'concern', 'headwind', 'uncertainty'],
     prompt: `Write an Industry Risks section for an equity research report.
 
-Identify and analyze potential risks that could impact the industry and company:
+Identify and analyze potential risks across regulatory & policy, competitive, macroeconomic, operational, financial (debt, working capital, forex), commodity/input cost, demand, technology/disruption, ESG, and geopolitical dimensions.
 
-**Categories of Risks:**
-- **Regulatory & Policy Risks**: Changes in government regulations, policy shifts, compliance issues, taxation changes
-- **Competitive Risks**: Intensifying competition, new entrants, price wars, market share loss
-- **Macroeconomic Risks**: GDP slowdown, currency fluctuations, interest rate changes, inflation impact
-- **Operational Risks**: Supply chain disruptions, capacity constraints, labor issues, technology failures
-- **Financial Risks**: High debt levels, refinancing risk, working capital stress, forex exposure
-- **Commodity/Input Cost Risks**: Raw material price volatility, energy cost fluctuations
-- **Demand Risks**: Slowdown in end-user demand, shift in preferences, substitution threat
-- **Technology/Disruption Risks**: Technological obsolescence, digital disruption, EV transition (if applicable)
-- **ESG Risks**: Environmental concerns, social issues, governance red flags
-- **Geopolitical Risks**: Trade wars, sanctions, global supply chain shifts
+For each material risk, describe what it is, assess its potential impact and likelihood, and explain mitigating factors.
 
-For each major risk:
-1. Clearly describe the risk
-2. Assess potential impact (High/Medium/Low)
-3. Likelihood of occurrence
-4. Mitigating factors (company-specific or industry-wide)
+Write this as a balanced risk assessment — not a laundry list. Group related risks and discuss them in analytical paragraphs. An experienced investor reading this should understand not just WHAT the risks are, but HOW LIKELY they are and HOW SEVERE the impact could be. Use subheadings to organize by risk category, but write the analysis within each category as prose. You can include a brief severity indicator (High/Medium/Low) but embed it naturally.
 
-Use the provided document excerpts and financial data. Write in a professional equity research analyst tone.
-Output in clean markdown with clear risk categorization and severity assessment.`,
+Use the provided document excerpts and financial data.`,
   },
 ];
 
@@ -568,11 +503,18 @@ export async function generateSingleSection(
   const searchKeywords = customPrompt?.searchKeywords || section.searchKeywords;
   const sectionTitle = customPrompt?.title || section.title;
 
-  const systemPrompt = `You are a senior equity research analyst at a leading Indian investment bank.
+  const systemPrompt = `You are a senior equity research analyst at a leading Indian institutional investment bank.
 You are writing a research initiation report on ${companyName} (NSE: ${nseSymbol}).
-Your analysis should be thorough, data-driven, and written in a professional tone suitable for institutional investors.
-Use specific numbers, percentages, and data points from the provided context.
-Format your output in clean markdown.`;
+
+WRITING STYLE — THIS IS CRITICAL:
+- Write like a real senior analyst publishing a report. Use natural, authoritative prose with genuine insight and conviction.
+- The bulk of your writing should be flowing analytical paragraphs — not bullet-point lists.
+- You may use short bullet points SPARINGLY for specific data points, metrics, or quick comparisons where they genuinely improve readability, but do NOT default to bullet-point format for your analysis.
+- Use **bold** inline for key figures or terms when it adds emphasis, but do NOT force every paragraph into a "**Bold Descriptor:** explanation" pattern.
+- Vary your structure naturally. Connect insights across paragraphs. Interpret the data — don't just list facts.
+- NEVER write disclaimers about being an AI or lacking access. Write definitively as an authority.
+
+Format your output in clean markdown. Use specific numbers, percentages, and data points from the provided context.`;
 
   // Retrieve relevant document chunks via RAG pipeline, filtered by selection
   const chunks = await getRelevantChunks(
