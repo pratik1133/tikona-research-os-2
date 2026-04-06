@@ -1,10 +1,13 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { getFrameworkFromPlaybook, updateSectorPlaybook } from '@/lib/pipeline-api';
+import { runStage0 } from '@/lib/anthropic-pipeline';
 import type { SectorPlaybook } from '@/types/pipeline';
+import type { PipelineProgress } from '@/types/pipeline';
 import {
   Search, ChevronRight, Save, X, RefreshCw,
   Layers, CalendarDays, Hash, ArrowLeft, Pencil, Eye,
+  Sparkles, ChevronDown, ChevronUp, Zap, RotateCcw,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -20,6 +23,19 @@ export default function SectorThesis() {
   const [editMode, setEditMode] = useState(false);
   const [draft, setDraft] = useState('');
   const [saving, setSaving] = useState(false);
+
+  // --- Generate Framework state ---
+  const [showGeneratePanel, setShowGeneratePanel] = useState(false);
+  const [generateSector, setGenerateSector] = useState('');
+  const [generating, setGenerating] = useState(false);
+  const [generateProgress, setGenerateProgress] = useState<PipelineProgress | null>(null);
+  const [, setLastGeneratedCached] = useState<boolean | null>(null);
+
+  // --- Regenerate (right panel) state ---
+  const [regenerating, setRegenerating] = useState(false);
+  const [regenProgress, setRegenProgress] = useState<PipelineProgress | null>(null);
+
+  const sectorInputRef = useRef<HTMLInputElement>(null);
 
   // ---------- Fetch all playbooks ----------
   const fetchPlaybooks = useCallback(async () => {
@@ -42,6 +58,13 @@ export default function SectorThesis() {
 
   useEffect(() => { fetchPlaybooks(); }, [fetchPlaybooks]);
 
+  // Focus sector input when panel opens
+  useEffect(() => {
+    if (showGeneratePanel) {
+      setTimeout(() => sectorInputRef.current?.focus(), 100);
+    }
+  }, [showGeneratePanel]);
+
   // ---------- Select a playbook ----------
   const handleSelect = (pb: SectorPlaybook) => {
     setSelectedPlaybook(pb);
@@ -57,7 +80,6 @@ export default function SectorThesis() {
       const updated = await updateSectorPlaybook(selectedPlaybook.id, {
         framework_content: draft,
       });
-      // Refresh the list
       setPlaybooks(prev =>
         prev.map(p => (p.id === updated.id ? updated : p))
       );
@@ -69,6 +91,96 @@ export default function SectorThesis() {
       toast.error('Failed to save sector framework');
     } finally {
       setSaving(false);
+    }
+  };
+
+  // ---------- Generate new framework ----------
+  const handleGenerate = async () => {
+    const sector = generateSector.trim();
+    if (!sector) { toast.error('Please enter a sector name'); return; }
+
+    setGenerating(true);
+    setGenerateProgress(null);
+    setLastGeneratedCached(null);
+
+    try {
+      const result = await runStage0(
+        '',       // companyName — not needed for generic sector framework
+        '',       // nseSymbol
+        sector,
+        (p) => setGenerateProgress(p),
+        undefined,
+        false,    // use cache if available
+      );
+
+      setLastGeneratedCached(result.cached);
+
+      // Refresh list and auto-select the new/updated playbook
+      const { data } = await supabase
+        .from('sector_playbooks')
+        .select('*')
+        .order('sector_name');
+      const refreshed = data || [];
+      setPlaybooks(refreshed);
+
+      const found = refreshed.find(
+        (p) => p.sector_name.toLowerCase() === sector.toLowerCase()
+      );
+      if (found) {
+        handleSelect(found);
+        toast.success(
+          result.cached
+            ? `Loaded existing ${sector} framework (v${result.framework.version})`
+            : `Generated ${sector} framework (v${result.framework.version})`
+        );
+      }
+
+      setShowGeneratePanel(false);
+      setGenerateSector('');
+    } catch (err) {
+      console.error('Generation failed:', err);
+      toast.error('Framework generation failed. Please try again.');
+    } finally {
+      setGenerating(false);
+      setGenerateProgress(null);
+    }
+  };
+
+  // ---------- Regenerate existing framework ----------
+  const handleRegenerate = async () => {
+    if (!selectedPlaybook) return;
+    setRegenerating(true);
+    setRegenProgress(null);
+
+    try {
+      const result = await runStage0(
+        '',
+        '',
+        selectedPlaybook.sector_name,
+        (p) => setRegenProgress(p),
+        undefined,
+        true, // force regenerate — bypass cache
+      );
+
+      // Refresh list and re-select
+      const { data } = await supabase
+        .from('sector_playbooks')
+        .select('*')
+        .order('sector_name');
+      const refreshed = data || [];
+      setPlaybooks(refreshed);
+
+      const found = refreshed.find((p) => p.id === selectedPlaybook.id);
+      if (found) {
+        handleSelect(found);
+        toast.success(`Regenerated ${found.sector_name} framework (v${result.framework.version})`);
+      }
+    } catch (err) {
+      console.error('Regeneration failed:', err);
+      toast.error('Regeneration failed. Please try again.');
+    } finally {
+      setRegenerating(false);
+      setRegenProgress(null);
     }
   };
 
@@ -109,17 +221,88 @@ export default function SectorThesis() {
                 {playbooks.length} sector framework{playbooks.length !== 1 ? 's' : ''}
               </p>
             </div>
-            <button
-              onClick={fetchPlaybooks}
-              className="h-7 w-7 rounded-lg border border-neutral-200 flex items-center justify-center text-neutral-400 hover:text-accent-600 hover:border-accent-200 transition-colors"
-              title="Refresh"
-            >
-              <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={fetchPlaybooks}
+                className="h-7 w-7 rounded-lg border border-neutral-200 flex items-center justify-center text-neutral-400 hover:text-accent-600 hover:border-accent-200 transition-colors"
+                title="Refresh"
+              >
+                <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
+              </button>
+              {/* Generate Framework toggle button */}
+              <button
+                onClick={() => setShowGeneratePanel(v => !v)}
+                className={`h-7 px-2.5 rounded-lg border text-[11px] font-medium flex items-center gap-1.5 transition-colors ${
+                  showGeneratePanel
+                    ? 'bg-accent-600 border-accent-600 text-white'
+                    : 'border-accent-300 text-accent-700 hover:bg-accent-50'
+                }`}
+                title="Generate a new sector framework"
+              >
+                <Sparkles className="h-3 w-3" />
+                Generate
+                {showGeneratePanel ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+              </button>
+            </div>
           </div>
 
+          {/* Generate Framework Panel */}
+          {showGeneratePanel && (
+            <div className="mt-3 p-3 rounded-xl bg-accent-50 border border-accent-200">
+              <p className="text-[11px] font-semibold text-accent-700 mb-2 flex items-center gap-1">
+                <Sparkles className="h-3 w-3" /> Generate Sector Framework
+              </p>
+              <p className="text-[10px] text-accent-600 mb-2.5 leading-relaxed">
+                AI will research and build a comprehensive framework using live web data. Uses existing cache if available.
+              </p>
+              <input
+                ref={sectorInputRef}
+                value={generateSector}
+                onChange={(e) => setGenerateSector(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter' && !generating) handleGenerate(); }}
+                placeholder="e.g. Banking, IT, Pharma..."
+                disabled={generating}
+                className="w-full h-8 px-3 rounded-lg border border-accent-300 bg-white text-xs text-neutral-700 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-accent-500/20 focus:border-accent-400 disabled:opacity-60 mb-2"
+              />
+
+              {/* Progress bar */}
+              {generating && generateProgress && (
+                <div className="mb-2">
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-[10px] text-accent-700 leading-tight">{generateProgress.message}</p>
+                    <span className="text-[10px] text-accent-600 font-medium">{generateProgress.percent}%</span>
+                  </div>
+                  <div className="h-1 rounded-full bg-accent-200 overflow-hidden">
+                    <div
+                      className="h-full bg-accent-600 rounded-full transition-all duration-500"
+                      style={{ width: `${generateProgress.percent}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              <button
+                onClick={handleGenerate}
+                disabled={generating || !generateSector.trim()}
+                className="w-full h-8 rounded-lg bg-accent-600 hover:bg-accent-700 text-white text-xs font-medium flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {generating ? (
+                  <>
+                    <RefreshCw className="h-3 w-3 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Zap className="h-3 w-3" />
+                    Generate Framework
+                  </>
+                )}
+              </button>
+            </div>
+          )}
+
           {/* Search */}
-          <div className="relative">
+          <div className={`relative ${showGeneratePanel ? 'mt-3' : ''}`}>
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-neutral-400" />
             <input
               value={search}
@@ -143,7 +326,7 @@ export default function SectorThesis() {
                 {search ? 'No matching sectors' : 'No sector frameworks yet'}
               </p>
               <p className="text-[10px] text-neutral-300 mt-1">
-                Generate a sector framework in the Research Pipeline first
+                Use the Generate button above to create a framework
               </p>
             </div>
           ) : (
@@ -174,7 +357,11 @@ export default function SectorThesis() {
                         {pb.sector_name}
                       </p>
                       <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-[10px] text-neutral-400 flex items-center gap-1">
+                        <span className={`text-[10px] flex items-center gap-1 font-medium px-1.5 py-0.5 rounded-full ${
+                          isSelected
+                            ? 'bg-accent-100 text-accent-600'
+                            : 'bg-neutral-100 text-neutral-500'
+                        }`}>
                           <Hash className="h-2.5 w-2.5" /> v{pb.version}
                         </span>
                         <span className="text-[10px] text-neutral-400 flex items-center gap-1">
@@ -207,11 +394,14 @@ export default function SectorThesis() {
                   <ArrowLeft className="h-3.5 w-3.5" />
                 </button>
                 <div>
-                  <h2 className="text-sm font-bold text-neutral-900">
+                  <h2 className="text-sm font-bold text-neutral-900 flex items-center gap-2">
                     {selectedPlaybook.sector_name}
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent-100 text-accent-700 text-[10px] font-semibold">
+                      <Hash className="h-2.5 w-2.5" /> v{selectedPlaybook.version}
+                    </span>
                   </h2>
                   <p className="text-[10px] text-neutral-400">
-                    Version {selectedPlaybook.version} · Last updated {selectedPlaybook.last_updated}
+                    Last updated {selectedPlaybook.last_updated}
                   </p>
                 </div>
               </div>
@@ -242,15 +432,50 @@ export default function SectorThesis() {
                     </button>
                   </>
                 ) : (
-                  <button
-                    onClick={() => setEditMode(true)}
-                    className="h-8 px-4 rounded-lg bg-accent-600 hover:bg-accent-700 text-white text-xs font-medium transition-colors flex items-center gap-1.5"
-                  >
-                    <Pencil className="h-3.5 w-3.5" /> Edit Framework
-                  </button>
+                  <>
+                    {/* Regenerate button */}
+                    <button
+                      onClick={handleRegenerate}
+                      disabled={regenerating}
+                      className="h-8 px-3 rounded-lg border border-neutral-200 text-xs font-medium text-neutral-600 hover:bg-neutral-50 hover:border-neutral-300 transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                      title="Regenerate this framework using AI (force refresh)"
+                    >
+                      {regenerating ? (
+                        <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <RotateCcw className="h-3.5 w-3.5" />
+                      )}
+                      {regenerating ? 'Regenerating...' : 'Regenerate'}
+                    </button>
+                    <button
+                      onClick={() => setEditMode(true)}
+                      className="h-8 px-4 rounded-lg bg-accent-600 hover:bg-accent-700 text-white text-xs font-medium transition-colors flex items-center gap-1.5"
+                    >
+                      <Pencil className="h-3.5 w-3.5" /> Edit Framework
+                    </button>
+                  </>
                 )}
               </div>
             </div>
+
+            {/* Regeneration progress banner */}
+            {regenerating && regenProgress && (
+              <div className="px-6 py-2 bg-accent-50 border-b border-accent-200 shrink-0">
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-[11px] text-accent-700 flex items-center gap-1.5">
+                    <Sparkles className="h-3 w-3 animate-pulse" />
+                    {regenProgress.message}
+                  </p>
+                  <span className="text-[11px] font-medium text-accent-600">{regenProgress.percent}%</span>
+                </div>
+                <div className="h-1 rounded-full bg-accent-200 overflow-hidden">
+                  <div
+                    className="h-full bg-accent-600 rounded-full transition-all duration-500"
+                    style={{ width: `${regenProgress.percent}%` }}
+                  />
+                </div>
+              </div>
+            )}
 
             {/* Content */}
             <div className="flex-1 overflow-y-auto p-6">
@@ -292,9 +517,16 @@ export default function SectorThesis() {
               </div>
               <h3 className="text-sm font-semibold text-neutral-600 mb-1">Select a Sector</h3>
               <p className="text-xs text-neutral-400 leading-relaxed">
-                Choose a sector from the sidebar to view and edit its research framework.
-                These frameworks are used by the AI pipeline to generate company-specific research reports.
+                Choose a sector from the sidebar to view and edit its research framework,
+                or generate a new one using the Generate button.
               </p>
+              <button
+                onClick={() => setShowGeneratePanel(true)}
+                className="mt-4 h-9 px-4 rounded-lg bg-accent-600 hover:bg-accent-700 text-white text-xs font-medium transition-colors flex items-center gap-2 mx-auto"
+              >
+                <Sparkles className="h-3.5 w-3.5" />
+                Generate Framework
+              </button>
             </div>
           </div>
         )}
