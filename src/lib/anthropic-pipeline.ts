@@ -3,6 +3,7 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 import type { EquityUniverse } from '@/types/database';
+import { SECTORS } from '@/lib/sectors';
 import type { SectorFramework, PipelineProgress } from '@/types/pipeline';
 import {
   getSectorPlaybook,
@@ -157,74 +158,88 @@ function formatFinancialContext(financials: EquityUniverse | null): string {
 
 export const DEFAULT_PROMPTS = {
   stage0: {
-    system: `You are a senior equity research analyst specializing in Indian equity markets.
-You are building a comprehensive sector knowledge framework for the given sector.
-Your output will serve as the analytical foundation for all future research in this sector.
+    system: `You are a senior equity research analyst at a top-tier Indian institutional fund.
+You are writing a sector intelligence brief that will guide all company-level research in this sector.
+The current financial year is FY2025-26 (April 2025 – March 2026). Today's date context: early 2026.
+All data, estimates, and commentary must reflect this — anchor everything to FY24A, FY25A, FY26E, FY27E.
 
-IMPORTANT: Use your web search capability to find the latest, most accurate data about this sector in India.
-Search for: market size, key players, recent regulatory changes, growth rates, industry reports.
-Prioritize sources: IBEF, RBI, SEBI, industry associations, consulting firm reports (McKinsey, BCG, etc.), screener.in, trendlyne.com, moneycontrol.com.
+VOICE & STYLE — NON-NEGOTIABLE:
+- Write like a seasoned analyst briefing a portfolio manager. Sharp. Direct. Opinionated.
+- NO introductory sentence. Do NOT start with "I will", "Here is", "This framework", or any meta-commentary. Start immediately with the first section header.
+- NO generic statements. Every sentence must contain a specific number, company name, or analytical insight.
+- NO copy-pasting from web sources. Synthesize information into your own analytical voice.
+- NO academic or textbook definitions. Assume the reader knows what the sector is.
+- NO source citations inline (e.g., "According to IMARC Group..." or "McKinsey states..."). Just state the fact.
 
-CRITICAL FORMATTING RULES:
-- Output in clean markdown ONLY.
-- Do NOT use any markdown tables (no | pipe characters for tables). Use bullet points or numbered lists instead.
-- Use headers (##, ###), bold (**text**), bullet lists (-), and numbered lists (1.) freely.
-- Every sentence must carry analytical weight — no filler.
-- Include specific numbers, market sizes, and growth rates wherever possible.`,
-    user: `Create a comprehensive sector framework for the **{{SECTOR}}** sector in the Indian market.
-This framework will be used as the foundation for analyzing {{COMPANY}} (NSE: {{NSE_SYMBOL}}) and other companies in this sector.
+FORMATTING RULES:
+- Output clean markdown only — headers (##, ###), bold (**text**), bullet lists (-), numbered lists.
+- Absolutely NO markdown tables. No pipe characters. Use bullet points for all comparisons.
+- Keep bullets tight — 1-2 lines max per bullet. No paragraph-length bullets.
+- Use ₹ Cr for Indian rupee values, not USD unless comparing globally.
+- Bold key numbers and company names for scannability.
 
-Use web search to find the latest data and cover these areas:
+WEB SEARCH INSTRUCTIONS:
+- Search for the most recent FY25 results, FY26 budget announcements, and sector-specific data.
+- Look for: latest quarterly results (Q3FY26), government policy updates (Union Budget FY26), industry body data (SIAM, IBEF, CII, SEBI).
+- If web search returns stale data (pre-FY24), explicitly flag it as outdated and use best available estimate.`,
 
-## 1. Sector Overview
-- What defines this sector? Key characteristics
-- Market size in India (TAM with specific numbers in ₹ Cr or $ Bn)
-- Growth trajectory — historical CAGR and projected growth
-- Current phase (emerging / growth / mature / consolidating)
+    user: `Write a sector intelligence brief for the **{{SECTOR}}** sector in India.
+This will anchor all research on {{COMPANY}} (NSE: {{NSE_SYMBOL}}) and peer companies.
+Current context: FY2025-26. Use FY24A/FY25A actuals and FY26E/FY27E estimates throughout.
+
+Cover exactly these nine sections in order. No preamble, no conclusion paragraph.
+
+## 1. Sector Snapshot
+- India market size in ₹ Cr (FY25A) and projected size (FY27E) — with CAGR
+- Where India stands globally in this sector (rank, share of global output)
+- Current cycle position — early growth / mid-cycle / mature / turning — and why
+- One-line defining characteristic that sets this sector's investment thesis apart
 
 ## 2. Key Metrics to Track
-- Most important financial KPIs for this sector
-- Operational metrics that differentiate leaders from laggards
-- Industry-specific ratios (with typical ranges for top/bottom quartile)
+- **3-4 financial KPIs** that directly drive stock performance in this sector (e.g., EBITDA/tonne, realization per unit, spread)
+- **3-4 operational metrics** that differentiate leaders from laggards — with typical ranges
+- **Valuation multiples** most relevant for this sector — state the FY25 median for Indian listed peers
 
-## 3. Value Chain
-- Map the complete value chain from raw materials to end consumer
-- Where is value created/captured? Margin distribution across the chain
-- Key dependencies and bottlenecks
+## 3. Value Chain & Margin Distribution
+- Sketch the value chain in 3-4 stages from raw material to end consumer
+- For each stage: who captures it, approximate EBITDA margin range, key players
+- Identify where the maximum value is created and why
+- Name 1-2 specific bottlenecks or dependencies that affect the whole chain
 
-## 4. Competitive Dynamics
-- Market structure (fragmented vs. concentrated) — top 5 players with market share
-- Key competitive advantages (moats)
-- Pricing dynamics and margin structure
-- Barriers to entry
+## 4. Competitive Landscape
+- Market structure: fragmented or consolidated? Top 3-5 listed Indian players with approximate revenue (FY25) and market position
+- What separates the #1 player from the #3 player — be specific (cost, scale, technology, distribution)
+- Realistic barriers to entry — not generic, but specific to this sector in India
+- Pricing power: does this sector set prices or accept them? What drives realization?
 
-## 5. Regulatory Landscape
-- Key regulations governing this sector in India
-- Recent policy changes (last 1-2 years) and their impact
-- Upcoming regulatory risks/opportunities
+## 5. Regulatory & Policy Landscape
+- 2-3 most impactful regulations currently governing this sector
+- Key policy changes in FY25-FY26 (Union Budget allocations, PLI tranches, new rules) and their direct business impact
+- 1-2 upcoming regulatory events in FY26-FY27 that could materially shift the sector
 
-## 6. Growth Drivers
-- Structural growth drivers for the next 3-5 years
-- Government initiatives (PLI, infrastructure push, Make in India, etc.)
-- Technology and innovation trends
-- Demand-side catalysts
+## 6. Structural Growth Drivers (FY26-FY29)
+- 3-4 demand drivers with quantification (e.g., "EV penetration reaching X% adds Y GW of demand")
+- Government spending or policy tailwind with ₹ Cr allocation or target
+- Technology shift or disruption that benefits or threatens this sector
+- Export opportunity if relevant — India's global competitiveness angle
 
-## 7. Risk Factors
-- Sector-specific risks
-- Cyclicality and seasonality patterns
-- Input cost sensitivity
-- Technology disruption threats
+## 7. Key Risks
+- 3-4 risks specific to this sector — not generic macro risks
+- For each risk: what triggers it, which companies are most exposed, historical precedent if any
+- Cyclicality pattern: how many years is a typical upcycle/downcycle in this sector?
 
-## 8. Valuation Methodology
-- Best valuation methods for this sector
-- Key multiples to use (P/E, EV/EBITDA, P/B, etc.) with typical ranges
-- Historical valuation bands for sector leaders
+## 8. Valuation Framework
+- Primary valuation method for this sector and why it works here (not just "EV/EBITDA is common")
+- Historical multiple ranges: trough / fair value / peak — with the last time each was seen
+- What multiple expansion or compression looks like for this sector — the specific trigger
+- Red flag: what valuation signal tells you the sector is pricing in perfection
 
-## 9. Key Questions for Company Analysis
-- 10 most important questions an analyst should answer when researching a company in this sector
+## 9. Analyst's Checklist — 10 Questions Before Initiating Coverage
+Number each question 1-10. Make them specific to this sector, not generic investment questions.
+These should be the questions that separate a good analyst from a junior one.
 
-Be specific to the Indian market. Include real numbers, company names, and current data from web search.
-Do NOT use markdown tables — use bullet points and numbered lists throughout.`,
+Be specific to Indian listed companies and Indian market dynamics throughout.
+Do NOT use markdown tables anywhere. No pipe characters.`,
   },
   stage1: {
     system: `You are the Head of Research at a leading Indian investment bank.
