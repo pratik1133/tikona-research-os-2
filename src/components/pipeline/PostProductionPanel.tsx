@@ -46,6 +46,7 @@ import {
 // ========================
 
 const N8N_BASE = 'https://n8n.tikonacapital.com/webhook';
+const PPT_SERVICE_URL = import.meta.env.VITE_PPT_SERVICE_URL || N8N_BASE;
 
 // Standard research_reports columns (7 text sections)
 const STANDARD_SECTION_KEYS: TextSectionKey[] = [
@@ -297,7 +298,7 @@ export default function PostProductionPanel({
         (acc, s) => ({ ...acc, [s.key]: s.title }), {}
       );
 
-      const response = await fetch(`${N8N_BASE}/generate-report`, {
+      const response = await fetch(`${PPT_SERVICE_URL}/generate-ppt`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

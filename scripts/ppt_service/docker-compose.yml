@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+  ppt-service:
+    build: .
+    container_name: ppt-service
+    restart: unless-stopped
+    ports:
+      - "8501:8501"
+    env_file:
+      - .env
+    volumes:
+      - ppt-output:/tmp/ppt_output
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  ppt-output:
