@@ -66,7 +66,7 @@ export default function Dashboard() {
                   </div>
                   <div>
                     <p className="text-xs font-medium text-neutral-500 uppercase tracking-wider">Companies</p>
-                    <p className="mt-0.5 text-2xl font-semibold text-neutral-900 tabular-nums">{totalCompanies.toLocaleString()}</p>
+                    <p className="mt-1 text-2xl font-semibold text-neutral-900 tabular-nums">{totalCompanies.toLocaleString()}</p>
                   </div>
                 </div>
               </div>
@@ -77,7 +77,7 @@ export default function Dashboard() {
                   </div>
                   <div>
                     <p className="text-xs font-medium text-neutral-500 uppercase tracking-wider">Research Sessions</p>
-                    <p className="mt-0.5 text-2xl font-semibold text-neutral-900 tabular-nums">{totalSessions.toLocaleString()}</p>
+                    <p className="mt-1 text-2xl font-semibold text-neutral-900 tabular-nums">{totalSessions.toLocaleString()}</p>
                   </div>
                 </div>
               </div>
@@ -138,7 +138,7 @@ export default function Dashboard() {
                 <p className="text-sm text-neutral-500">No research sessions yet</p>
                 <Link
                   to="/admin/generate-research"
-                  className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-accent-600 hover:text-accent-700"
+                  className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-accent-600 hover:text-accent-700"
                 >
                   Create your first report
                   <ArrowRight className="h-3.5 w-3.5" />
@@ -149,10 +149,10 @@ export default function Dashboard() {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-neutral-100">
-                      <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Company</th>
-                      <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Symbol</th>
-                      <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Status</th>
-                      <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wider text-neutral-500">When</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-500">Company</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-500">Symbol</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-500">Status</th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-neutral-500">When</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-neutral-100">

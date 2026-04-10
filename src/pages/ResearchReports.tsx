@@ -115,7 +115,7 @@ export default function ResearchReports() {
       </header>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-auto bg-[#f8f8f6] p-7">
+      <div className="flex-1 overflow-auto bg-canvas p-7">
         {isLoading ? (
           <div className="overflow-hidden rounded-xl border border-neutral-200/60 bg-white">
             <TableSkeleton rows={8} cols={6} />
@@ -151,16 +151,16 @@ export default function ResearchReports() {
                   placeholder="Search by company, symbol, or sector..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full rounded-lg border border-neutral-200 bg-white py-2 pl-10 pr-4 text-sm text-neutral-900 placeholder:text-neutral-400 transition-all duration-150 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/40"
+                  className="w-full rounded-lg border border-neutral-200 bg-white py-2 pl-10 pr-4 text-sm text-neutral-900 placeholder:text-neutral-400 transition-all duration-150 focus-visible:border-accent-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40"
                 />
               </div>
-              <div className="flex items-center gap-1 rounded-lg border border-neutral-200 bg-white p-0.5">
+              <div className="flex items-center gap-1 rounded-lg border border-neutral-200 bg-white p-1">
                 {statusFilters.map((f) => (
                   <button
                     key={f.value}
                     onClick={() => setStatusFilter(f.value)}
                     className={cn(
-                      'rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
+                      'rounded-md px-3 py-2 text-xs font-medium transition-colors',
                       statusFilter === f.value
                         ? 'bg-accent-600 text-white shadow-sm'
                         : 'text-neutral-600 hover:bg-neutral-50'
@@ -177,22 +177,22 @@ export default function ResearchReports() {
               <table className="min-w-full divide-y divide-neutral-100 animate-content-ready">
                 <thead className="bg-neutral-50/80">
                   <tr>
-                    <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500">
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-500">
                       Company
                     </th>
-                    <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500">
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-500">
                       Symbol
                     </th>
-                    <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500">
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-500">
                       Sector
                     </th>
-                    <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500">
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-500">
                       Status
                     </th>
-                    <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-neutral-500">
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-500">
                       Created
                     </th>
-                    <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wider text-neutral-500">
+                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-neutral-500">
                       Actions
                     </th>
                   </tr>
@@ -215,34 +215,34 @@ export default function ResearchReports() {
                         key={session.session_id}
                         className="transition-colors hover:bg-accent-50/30"
                       >
-                        <td className="whitespace-nowrap px-4 py-3.5 text-sm font-medium text-neutral-900">
+                        <td className="whitespace-nowrap px-4 py-4 text-sm font-medium text-neutral-900">
                           {session.company_name}
                         </td>
-                        <td className="whitespace-nowrap px-4 py-3.5 text-sm text-neutral-600">
-                          <span className="rounded bg-neutral-100 px-1.5 py-0.5 font-mono text-[11px]">
+                        <td className="whitespace-nowrap px-4 py-4 text-sm text-neutral-600">
+                          <span className="rounded bg-neutral-100 px-2 py-0.5 font-mono text-xs">
                             {session.company_nse_code || '-'}
                           </span>
                         </td>
-                        <td className="whitespace-nowrap px-4 py-3.5 text-sm text-neutral-500">
+                        <td className="whitespace-nowrap px-4 py-4 text-sm text-neutral-500">
                           {session.sector || '-'}
                         </td>
-                        <td className="whitespace-nowrap px-4 py-3.5">
+                        <td className="whitespace-nowrap px-4 py-4">
                           <StatusBadge status={(session.current_state || session.status) as any} />
                         </td>
-                        <td className="whitespace-nowrap px-4 py-3.5 text-sm text-neutral-500">
+                        <td className="whitespace-nowrap px-4 py-4 text-sm text-neutral-500">
                           <div>{formatDate(session.created_at)}</div>
-                          <div className="text-[11px] text-neutral-400">
+                          <div className="text-xs text-neutral-400">
                             {formatTime(session.created_at)}
                           </div>
                         </td>
-                        <td className="whitespace-nowrap px-4 py-3.5 text-right">
+                        <td className="whitespace-nowrap px-4 py-4 text-right">
                           <div className="flex items-center justify-end gap-1">
                             {Boolean(session.vault_folder_url) && (
                               <a
                                 href={session.vault_folder_url as string}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-neutral-900 transition-colors hover:bg-neutral-100"
+                                className="inline-flex items-center gap-1 rounded-md px-2 py-2 text-xs font-medium text-neutral-900 transition-colors hover:bg-neutral-100"
                                 title="Open vault in Google Drive"
                               >
                                 <ExternalLink className="h-3.5 w-3.5" />
@@ -252,7 +252,7 @@ export default function ResearchReports() {
                             <button
                               onClick={() => handleDelete(session.session_id)}
                               disabled={deletingId === session.session_id}
-                              className="inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50"
+                              className="inline-flex items-center gap-1 rounded-md px-2 py-2 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50"
                               title="Delete session"
                             >
                               {deletingId === session.session_id ? (
@@ -283,7 +283,7 @@ export default function ResearchReports() {
                   <button
                     onClick={() => setPage((p) => Math.max(0, p - 1))}
                     disabled={page === 0}
-                    className="inline-flex items-center gap-1 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="inline-flex items-center gap-1 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <ChevronLeft className="h-4 w-4" />
                     Previous
@@ -296,7 +296,7 @@ export default function ResearchReports() {
                       setPage((p) => Math.min(totalPages - 1, p + 1))
                     }
                     disabled={page >= totalPages - 1}
-                    className="inline-flex items-center gap-1 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="inline-flex items-center gap-1 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     Next
                     <ChevronRight className="h-4 w-4" />

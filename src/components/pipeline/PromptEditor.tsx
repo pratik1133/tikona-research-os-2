@@ -100,15 +100,15 @@ export default function PromptEditor({
       <div className="flex items-center justify-between px-4 py-2 border-b border-neutral-100">
         <div className="flex items-center gap-2">
           <Code2 className="h-3.5 w-3.5 text-neutral-400" />
-          <span className="text-[11px] font-semibold text-neutral-500">{title}</span>
+          <span className="text-xs font-semibold text-neutral-500">{title}</span>
           <StatusBadge isModified={isModified} isCustom={isCustom} />
         </div>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
           <Button
             size="sm"
             variant="ghost"
             onClick={handleReset}
-            className="h-6 px-2 text-[10px] text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100"
+            className="h-6 px-2 text-xs text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100"
           >
             <RotateCcw className="h-3 w-3 mr-1" />
             Reset
@@ -118,7 +118,7 @@ export default function PromptEditor({
             onClick={handleSave}
             disabled={isSaving || !isModified}
             className={cn(
-              'h-6 px-2.5 text-[10px] font-medium rounded-md transition-all',
+              'h-6 px-3 text-xs font-medium rounded-md transition-all',
               isModified
                 ? 'bg-accent-600 hover:bg-accent-700 text-white'
                 : 'bg-neutral-200 text-neutral-400 cursor-not-allowed'
@@ -153,12 +153,12 @@ export default function PromptEditor({
       />
 
       {/* Variables hint */}
-      <div className="px-4 py-1.5 border-t border-neutral-100 bg-neutral-50">
-        <p className="text-[9px] text-neutral-400">
+      <div className="px-4 py-2 border-t border-neutral-100 bg-neutral-50">
+        <p className="text-xs text-neutral-400">
           <span className="font-medium">Variables:</span>{' '}
-          <code className="px-1 bg-neutral-100 rounded text-[9px]">{'{{COMPANY}}'}</code>{' '}
-          <code className="px-1 bg-neutral-100 rounded text-[9px]">{'{{NSE_SYMBOL}}'}</code>{' '}
-          <code className="px-1 bg-neutral-100 rounded text-[9px]">{'{{SECTOR}}'}</code>
+          <code className="px-1 bg-neutral-100 rounded text-xs">{'{{COMPANY}}'}</code>{' '}
+          <code className="px-1 bg-neutral-100 rounded text-xs">{'{{NSE_SYMBOL}}'}</code>{' '}
+          <code className="px-1 bg-neutral-100 rounded text-xs">{'{{SECTOR}}'}</code>
         </p>
       </div>
     </div>
@@ -172,7 +172,7 @@ export default function PromptEditor({
 function StatusBadge({ isModified, isCustom }: { isModified: boolean; isCustom: boolean }) {
   if (isModified) {
     return (
-      <span className="inline-flex items-center gap-0.5 text-[9px] font-medium text-amber-600 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-full">
+      <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md">
         <AlertCircle className="h-2.5 w-2.5" /> Unsaved
       </span>
     );
@@ -180,14 +180,14 @@ function StatusBadge({ isModified, isCustom }: { isModified: boolean; isCustom: 
 
   if (isCustom) {
     return (
-      <span className="inline-flex items-center gap-0.5 text-[9px] font-medium text-accent-600 bg-accent-50 border border-accent-200 px-1.5 py-0.5 rounded-full">
+      <span className="inline-flex items-center gap-1 text-xs font-medium text-accent-600 bg-accent-50 border border-accent-200 px-2 py-0.5 rounded-md">
         <Check className="h-2.5 w-2.5" /> Custom
       </span>
     );
   }
 
   return (
-    <span className="text-[9px] font-medium text-neutral-400 bg-neutral-100 px-1.5 py-0.5 rounded-full">
+    <span className="text-xs font-medium text-neutral-400 bg-neutral-100 px-2 py-0.5 rounded-md">
       Default
     </span>
   );
@@ -211,10 +211,10 @@ function PromptSection({ label, icon, value, onChange, isExpanded, onToggle }: P
         onClick={onToggle}
         className="w-full flex items-center justify-between px-4 py-2 hover:bg-neutral-100/50 transition-colors text-left"
       >
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
           <div className="text-neutral-400">{icon}</div>
-          <span className="text-[11px] font-medium text-neutral-600">{label}</span>
-          <span className="text-[9px] text-neutral-400">{lineCount} lines</span>
+          <span className="text-xs font-medium text-neutral-600">{label}</span>
+          <span className="text-xs text-neutral-400">{lineCount} lines</span>
         </div>
         {isExpanded ? (
           <ChevronUp className="h-3 w-3 text-neutral-400" />
@@ -224,11 +224,11 @@ function PromptSection({ label, icon, value, onChange, isExpanded, onToggle }: P
       </button>
 
       {isExpanded && (
-        <div className="px-4 pb-2.5">
+        <div className="px-4 pb-3">
           <textarea
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            className="w-full rounded-lg border border-neutral-200 bg-white p-3 text-[11px] text-neutral-800 font-mono leading-relaxed resize-y focus:outline-none focus:ring-2 focus:ring-accent-500/20 focus:border-accent-400 transition-all"
+            className="w-full rounded-lg border border-neutral-200 bg-white p-3 text-xs text-neutral-800 font-mono leading-relaxed resize-y focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40 focus-visible:border-accent-400 transition-all"
             style={{ minHeight: '120px', maxHeight: '350px' }}
             spellCheck={false}
           />

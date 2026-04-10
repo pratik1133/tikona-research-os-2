@@ -37,19 +37,19 @@ export default function TextBlock({ content, onChange }: Props) {
         <textarea
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          className="w-full min-h-[160px] rounded-lg border border-neutral-300 bg-white p-3 text-sm text-neutral-800 font-mono leading-relaxed resize-y focus:outline-none focus:ring-2 focus:ring-accent-500/30 focus:border-accent-400"
+          className="w-full min-h-[160px] rounded-lg border border-neutral-200 bg-white p-3 text-sm text-neutral-800 font-mono leading-relaxed resize-y focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40 focus-visible:border-accent-400"
           spellCheck={false}
         />
         <div className="flex items-center gap-2">
           <button
             onClick={handleSave}
-            className="px-3 py-1.5 rounded-lg bg-accent-600 text-white text-xs font-medium hover:bg-accent-700 transition-colors"
+            className="px-3 py-2 rounded-lg bg-accent-600 text-white text-xs font-medium hover:bg-accent-700 transition-colors"
           >
             Save
           </button>
           <button
             onClick={() => { setDraft(content.markdown); setEditing(false); }}
-            className="px-3 py-1.5 rounded-lg border border-neutral-200 text-neutral-600 text-xs font-medium hover:bg-neutral-50 transition-colors"
+            className="px-3 py-2 rounded-lg border border-neutral-200 text-neutral-600 text-xs font-medium hover:bg-neutral-50 transition-colors"
           >
             Cancel
           </button>

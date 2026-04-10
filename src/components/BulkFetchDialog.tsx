@@ -330,7 +330,7 @@ export default function BulkFetchDialog({
 
               {parseError && (
                 <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
-                  <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
+                  <AlertCircle className="h-4 w-4 text-red-500 mt-1 flex-shrink-0" />
                   <p className="text-sm text-red-700">{parseError}</p>
                 </div>
               )}
@@ -383,18 +383,18 @@ export default function BulkFetchDialog({
               ) : needsTypeSelection ? (
                 <div className="space-y-2">
                   <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                    <AlertCircle className="h-4 w-4 text-amber-600 mt-0.5" />
+                    <AlertCircle className="h-4 w-4 text-amber-600 mt-1" />
                     <p className="text-sm text-amber-700">
                       Could not detect identifier type. Please select manually.
                     </p>
                   </div>
-                  <div className="space-y-1.5">
+                  <div className="space-y-2">
                     <Label htmlFor="identifier_type">Identifier Type</Label>
                     <select
                       id="identifier_type"
                       value={selectedType}
                       onChange={(e) => setSelectedType(e.target.value as IdentifierType)}
-                      className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:border-transparent"
+                      className="w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40 focus-visible:border-accent-400"
                     >
                       {IDENTIFIER_OPTIONS.map((option) => (
                         <option key={option.value} value={option.value}>
@@ -410,7 +410,7 @@ export default function BulkFetchDialog({
               <div className="space-y-2">
                 <Label>Preview (first 5 rows)</Label>
                 <div className="border border-neutral-200 rounded-lg overflow-hidden">
-                  <div className="bg-neutral-50 px-3 py-1.5 border-b border-neutral-200">
+                  <div className="bg-neutral-50 px-3 py-2 border-b border-neutral-200">
                     <span className="text-xs font-medium text-neutral-600 uppercase">
                       {IDENTIFIER_OPTIONS.find((o) => o.value === effectiveType)?.label}
                     </span>
@@ -419,13 +419,13 @@ export default function BulkFetchDialog({
                     {parsedRows.slice(0, 5).map((row, idx) => (
                       <div
                         key={idx}
-                        className="px-3 py-1.5 text-sm text-neutral-700 font-mono"
+                        className="px-3 py-2 text-sm text-neutral-700 font-mono"
                       >
                         {row.value}
                       </div>
                     ))}
                     {parsedRows.length > 5 && (
-                      <div className="px-3 py-1.5 text-xs text-neutral-500 italic">
+                      <div className="px-3 py-2 text-xs text-neutral-500 italic">
                         ... and {parsedRows.length - 5} more rows
                       </div>
                     )}

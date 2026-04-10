@@ -9,13 +9,13 @@ interface Props {
 
 const SENTIMENT_STYLES = {
   positive: {
-    bg: 'bg-emerald-50',
-    border: 'border-emerald-200',
-    title: 'text-emerald-800',
-    text: 'text-emerald-700',
+    bg: 'bg-green-50',
+    border: 'border-green-200',
+    title: 'text-green-800',
+    text: 'text-green-700',
     icon: TrendingUp,
-    iconColor: 'text-emerald-500',
-    badge: 'bg-emerald-100 text-emerald-700',
+    iconColor: 'text-green-500',
+    badge: 'bg-green-100 text-green-700',
   },
   negative: {
     bg: 'bg-red-50',
@@ -57,7 +57,7 @@ export default function SentimentBlock({ content, onChange }: Props) {
   return (
     <div className={`rounded-xl border ${s.border} ${s.bg} p-4`}>
       <div className="flex items-start gap-3">
-        <div className={`mt-0.5 ${s.iconColor}`}>
+        <div className={`mt-1 ${s.iconColor}`}>
           <Icon className="h-5 w-5" />
         </div>
         <div className="flex-1 min-w-0">
@@ -81,7 +81,7 @@ export default function SentimentBlock({ content, onChange }: Props) {
             )}
             <button
               onClick={cycleSentiment}
-              className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${s.badge} hover:opacity-80 transition-opacity`}
+              className={`text-xs px-2 py-0.5 rounded-md font-medium ${s.badge}} hover:opacity-80 transition-opacity`}
             >
               {content.sentiment.charAt(0).toUpperCase() + content.sentiment.slice(1)}
             </button>

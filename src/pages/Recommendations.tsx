@@ -81,7 +81,7 @@ function RatingBadge({ rating }: { rating: RecommendationRating }) {
   const cfg = RATING_CONFIG[rating];
   return (
     <span className={cn(
-      'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold border',
+      'inline-flex items-center gap-2 px-2 py-0.5 rounded-full text-xs font-semibold border',
       cfg.bg, cfg.color, cfg.border
     )}>
       <span className={cn('h-1.5 w-1.5 rounded-full', cfg.dot)} />
@@ -93,7 +93,7 @@ function RatingBadge({ rating }: { rating: RecommendationRating }) {
 function PlanBadge({ planId }: { planId: PlanId }) {
   const plan = PLAN_OPTIONS.find(p => p.id === planId);
   return (
-    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-accent-50 text-accent-700 border border-accent-100">
+    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-accent-50 text-accent-700 border border-accent-100">
       {plan?.label ?? planId}
     </span>
   );
@@ -106,14 +106,14 @@ function StatCard({
   icon: React.FC<{ className?: string }>; color: string;
 }) {
   return (
-    <div className="bg-white rounded-2xl border border-neutral-200 p-5 flex items-center gap-4">
+    <div className="bg-white rounded-xl border border-neutral-200 p-6 flex items-center gap-4">
       <div className={cn('h-11 w-11 rounded-xl flex items-center justify-center shrink-0', color)}>
         <Icon className="h-5 w-5 text-white" />
       </div>
       <div>
         <p className="text-2xl font-bold text-neutral-900 tabular-nums">{value}</p>
-        <p className="text-xs text-neutral-500 mt-0.5">{label}</p>
-        {sub && <p className="text-[11px] text-neutral-400 mt-0.5">{sub}</p>}
+        <p className="text-xs text-neutral-500 mt-1">{label}</p>
+        {sub && <p className="text-xs text-neutral-400 mt-1">{sub}</p>}
       </div>
     </div>
   );
@@ -158,16 +158,16 @@ function DonutChart({
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span className="text-xl font-bold text-neutral-900">{total}</span>
-          <span className="text-[10px] text-neutral-400">Total</span>
+          <span className="text-xs text-neutral-400">Total</span>
         </div>
       </div>
       <div className="flex gap-4 text-xs">
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
           <span className="h-2.5 w-2.5 rounded-full bg-accent-500" />
           <span className="text-neutral-600">Active <strong>{active}</strong></span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+        <div className="flex items-center gap-2">
+          <span className="h-2.5 w-2.5 rounded-full bg-green-500" />
           <span className="text-neutral-600">Closed <strong>{closed}</strong></span>
         </div>
       </div>
@@ -230,7 +230,7 @@ function ActionMenu({
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen(!open)}
-        className="p-1.5 rounded-lg hover:bg-neutral-100 text-neutral-400 hover:text-neutral-600 transition-colors"
+        className="p-2 rounded-lg hover:bg-neutral-100 text-neutral-400 hover:text-neutral-600 transition-colors"
       >
         <MoreHorizontal className="h-4 w-4" />
       </button>
@@ -240,7 +240,7 @@ function ActionMenu({
             <>
               <button
                 onClick={() => { onClose(rec.id, true); setOpen(false); }}
-                className="w-full text-left px-3 py-2 hover:bg-emerald-50 text-emerald-700 flex items-center gap-2"
+                className="w-full text-left px-3 py-2 hover:bg-green-50 text-green-700 flex items-center gap-2"
               >
                 <CheckCircle2 className="h-3.5 w-3.5" /> Target Achieved
               </button>
@@ -317,7 +317,7 @@ function RecTable({
         <thead>
           <tr className="border-b border-neutral-100">
             {['Date', 'Company', 'Rating', 'CMP', 'Target', 'Upside', 'Validity', 'Plans', 'Telegram', 'Status', ''].map(h => (
-              <th key={h} className="text-left px-3 py-2.5 text-[10px] font-semibold text-neutral-400 uppercase tracking-wider whitespace-nowrap">
+              <th key={h} className="text-left px-3 py-3 text-xs font-semibold text-neutral-400 uppercase tracking-wider whitespace-nowrap">
                 {h}
               </th>
             ))}
@@ -329,44 +329,44 @@ function RecTable({
             const isPositive = (upside ?? 0) >= 0;
             return (
               <tr key={rec.id} className="hover:bg-neutral-50/60 transition-colors">
-                <td className="px-3 py-2.5 text-neutral-500 whitespace-nowrap">
+                <td className="px-3 py-3 text-neutral-500 whitespace-nowrap">
                   {formatDate(rec.created_at)}
                 </td>
-                <td className="px-3 py-2.5">
+                <td className="px-3 py-3">
                   <div className="font-semibold text-neutral-900">{rec.nse_symbol}</div>
-                  <div className="text-[10px] text-neutral-400 truncate max-w-[120px]">{rec.company_name}</div>
+                  <div className="text-xs text-neutral-400 truncate max-w-[120px]">{rec.company_name}</div>
                 </td>
-                <td className="px-3 py-2.5">
+                <td className="px-3 py-3">
                   <RatingBadge rating={rec.rating} />
                 </td>
-                <td className="px-3 py-2.5 text-neutral-700 tabular-nums">
+                <td className="px-3 py-3 text-neutral-700 tabular-nums">
                   {rec.cmp != null ? `₹${formatNum(rec.cmp)}` : '—'}
                 </td>
-                <td className="px-3 py-2.5 font-semibold text-neutral-900 tabular-nums">
+                <td className="px-3 py-3 font-semibold text-neutral-900 tabular-nums">
                   ₹{formatNum(rec.target_price)}
                 </td>
-                <td className="px-3 py-2.5 tabular-nums">
+                <td className="px-3 py-3 tabular-nums">
                   {upside != null ? (
                     <span className={cn(
-                      'flex items-center gap-0.5 font-semibold',
-                      isPositive ? 'text-emerald-600' : 'text-red-600'
+                      'flex items-center gap-1 font-semibold',
+                      isPositive ? 'text-green-600' : 'text-red-600'
                     )}>
                       {isPositive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
                       {upside > 0 ? '+' : ''}{upside}%
                     </span>
                   ) : '—'}
                 </td>
-                <td className="px-3 py-2.5 text-neutral-500 whitespace-nowrap">
+                <td className="px-3 py-3 text-neutral-500 whitespace-nowrap">
                   {validityLabel(rec)}
                 </td>
-                <td className="px-3 py-2.5">
+                <td className="px-3 py-3">
                   <div className="flex flex-wrap gap-1">
                     {rec.plans.map(p => <PlanBadge key={p} planId={p} />)}
                   </div>
                 </td>
-                <td className="px-3 py-2.5">
+                <td className="px-3 py-3">
                   {rec.telegram_sent ? (
-                    <span className="text-emerald-600 flex items-center gap-1">
+                    <span className="text-green-600 flex items-center gap-1">
                       <CheckCircle2 className="h-3.5 w-3.5" /> Sent
                     </span>
                   ) : (
@@ -375,17 +375,17 @@ function RecTable({
                     </span>
                   )}
                 </td>
-                <td className="px-3 py-2.5">
+                <td className="px-3 py-3">
                   {rec.status === 'active' ? (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-accent-50 text-accent-700 border border-accent-100">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-accent-50 text-accent-700 border border-accent-100">
                       <span className="h-1.5 w-1.5 rounded-full bg-accent-500 animate-pulse" />
                       Active
                     </span>
                   ) : (
                     <span className={cn(
-                      'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border',
+                      'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold border',
                       rec.is_successful
-                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                        ? 'bg-green-50 text-green-700 border-green-200'
                         : 'bg-neutral-100 text-neutral-500 border-neutral-200'
                     )}>
                       {rec.is_successful ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
@@ -393,7 +393,7 @@ function RecTable({
                     </span>
                   )}
                 </td>
-                <td className="px-3 py-2.5">
+                <td className="px-3 py-3">
                   <ActionMenu rec={rec} onClose={onClose} onDelete={onDelete} onResend={onResend} />
                 </td>
               </tr>
@@ -634,21 +634,21 @@ export default function Recommendations() {
     : null;
 
   return (
-    <div className="min-h-screen bg-[#f8f8f6]">
+    <div className="min-h-screen bg-canvas">
       {/* Header */}
       <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-sm border-b border-neutral-200/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-3">
             <div className="h-8 w-8 rounded-lg bg-accent-600 flex items-center justify-center shadow-sm">
               <Send className="h-4 w-4 text-white" />
             </div>
             <div>
               <h1 className="text-sm font-semibold text-neutral-900 leading-tight">Recommendations</h1>
-              <p className="text-[10px] text-neutral-400 leading-tight">Send research to subscribers via Telegram</p>
+              <p className="text-xs text-neutral-400 leading-tight">Send research to subscribers via Telegram</p>
             </div>
           </div>
           <div className="flex items-center gap-2 text-xs text-neutral-500">
-            <span className="h-2 w-2 rounded-full bg-emerald-500" />
+            <span className="h-2 w-2 rounded-full bg-green-500" />
             {activeRecs.length} active
           </div>
         </div>
@@ -679,13 +679,13 @@ export default function Recommendations() {
             <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden">
               <div className="px-6 py-4 border-b border-neutral-100">
                 <h2 className="text-sm font-semibold text-neutral-900">New Recommendation</h2>
-                <p className="text-xs text-neutral-500 mt-0.5">Will be sent to selected plan subscribers on Telegram</p>
+                <p className="text-xs text-neutral-500 mt-1">Will be sent to selected plan subscribers on Telegram</p>
               </div>
 
               <div className="p-6 space-y-5">
                 {/* Company search */}
                 <div>
-                  <label className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">
                     Company *
                   </label>
                   <div className="relative" ref={dropdownRef}>
@@ -704,7 +704,7 @@ export default function Recommendations() {
                       className="pl-9 h-10 rounded-xl"
                     />
                     {selectedCompany && (
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] font-mono text-neutral-400 bg-neutral-100 px-1.5 py-0.5 rounded">
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-mono text-neutral-400 bg-neutral-100 px-2 py-0.5 rounded">
                         {selectedCompany.nse_symbol}
                       </span>
                     )}
@@ -713,12 +713,12 @@ export default function Recommendations() {
                         {companies.map(c => (
                           <button
                             key={c.company_id}
-                            className="w-full text-left px-4 py-2.5 hover:bg-accent-50 border-b border-neutral-50 last:border-0 transition-colors"
+                            className="w-full text-left px-4 py-3 hover:bg-accent-50 border-b border-neutral-50 last:border-0 transition-colors"
                             onClick={() => handleSelectCompany(c)}
                           >
                             <span className="font-medium text-sm text-neutral-900">{c.company_name}</span>
                             {c.nse_symbol && (
-                              <span className="ml-2 text-[10px] text-neutral-400 bg-neutral-100 px-1.5 py-0.5 rounded font-mono">
+                              <span className="ml-2 text-xs text-neutral-400 bg-neutral-100 px-2 py-0.5 rounded font-mono">
                                 {c.nse_symbol}
                               </span>
                             )}
@@ -731,7 +731,7 @@ export default function Recommendations() {
 
                 {/* Rating */}
                 <div>
-                  <label className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">
                     Rating *
                   </label>
                   <div className="flex flex-wrap gap-2">
@@ -742,7 +742,7 @@ export default function Recommendations() {
                           key={r}
                           onClick={() => setRating(r)}
                           className={cn(
-                            'px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all',
+                            'px-3 py-2 rounded-lg text-xs font-semibold border transition-all',
                             rating === r
                               ? `${cfg.bg} ${cfg.color} ${cfg.border} shadow-sm`
                               : 'bg-neutral-50 text-neutral-500 border-neutral-200 hover:border-neutral-300'
@@ -758,7 +758,7 @@ export default function Recommendations() {
                 {/* CMP + Target */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-1.5">
+                    <label className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">
                       CMP (₹)
                     </label>
                     <div className="relative">
@@ -781,7 +781,7 @@ export default function Recommendations() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-1.5">
+                    <label className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">
                       Target Price (₹) *
                     </label>
                     <div className="relative">
@@ -794,8 +794,8 @@ export default function Recommendations() {
                       />
                       {upside != null && (
                         <span className={cn(
-                          'absolute right-2.5 top-1/2 -translate-y-1/2 text-[11px] font-bold',
-                          upside >= 0 ? 'text-emerald-600' : 'text-red-600'
+                          'absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold',
+                          upside >= 0 ? 'text-green-600' : 'text-red-600'
                         )}>
                           {upside > 0 ? '+' : ''}{upside}%
                         </span>
@@ -806,7 +806,7 @@ export default function Recommendations() {
 
                 {/* Validity */}
                 <div>
-                  <label className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">
                     Validity *
                   </label>
                   <div className="flex gap-2 mb-2">
@@ -847,7 +847,7 @@ export default function Recommendations() {
 
                 {/* Plans */}
                 <div>
-                  <label className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">
                     Share with Plans *
                   </label>
                   <div className="flex flex-wrap gap-2">
@@ -882,7 +882,7 @@ export default function Recommendations() {
 
                 {/* Trade Notes */}
                 <div>
-                  <label className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">
                     Trade Notes
                   </label>
                   <textarea
@@ -890,13 +890,13 @@ export default function Recommendations() {
                     onChange={e => setTradeNotes(e.target.value)}
                     placeholder="Add rationale, key catalysts, risk factors..."
                     rows={3}
-                    className="w-full px-3 py-2.5 text-sm border border-neutral-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-accent-200 focus:border-accent-400 text-neutral-800 placeholder:text-neutral-400"
+                    className="w-full px-3 py-3 text-sm border border-neutral-200 rounded-xl resize-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40 focus-visible:border-accent-400 text-neutral-800 placeholder:text-neutral-400"
                   />
                 </div>
 
                 {/* Report File URL */}
                 <div>
-                  <label className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">
                     Research Report (URL)
                   </label>
                   <div className="relative">
@@ -908,7 +908,7 @@ export default function Recommendations() {
                       className="pl-9 h-10 rounded-xl"
                     />
                   </div>
-                  <p className="text-[11px] text-neutral-400 mt-1">
+                  <p className="text-xs text-neutral-400 mt-1">
                     Paste the report URL from your vault or any accessible link
                   </p>
                 </div>
@@ -952,7 +952,7 @@ export default function Recommendations() {
               <select
                 value={filterPlan}
                 onChange={e => setFilterPlan(e.target.value)}
-                className="h-9 px-3 text-sm border border-neutral-200 rounded-lg text-neutral-700 focus:outline-none focus:ring-2 focus:ring-accent-200"
+                className="h-9 px-3 text-sm border border-neutral-200 rounded-lg text-neutral-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40"
               >
                 <option value="">All Plans</option>
                 {PLAN_OPTIONS.map(p => (
@@ -981,7 +981,7 @@ export default function Recommendations() {
                 variant="outline"
                 className="rounded-lg"
               >
-                <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+                <RefreshCw className="h-3.5 w-3.5 mr-2" />
                 Apply
               </Button>
               {(filterPlan || filterFrom || filterTo) && (
@@ -1001,7 +1001,7 @@ export default function Recommendations() {
               <>
                 {/* Active */}
                 <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden">
-                  <div className="px-5 py-3.5 border-b border-neutral-100 flex items-center gap-3">
+                  <div className="px-5 py-4 border-b border-neutral-100 flex items-center gap-3">
                     <span className="h-2 w-2 rounded-full bg-accent-500 animate-pulse" />
                     <h3 className="text-sm font-semibold text-neutral-800">
                       Active Recommendations
@@ -1021,7 +1021,7 @@ export default function Recommendations() {
 
                 {/* History */}
                 <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden">
-                  <div className="px-5 py-3.5 border-b border-neutral-100 flex items-center gap-3">
+                  <div className="px-5 py-4 border-b border-neutral-100 flex items-center gap-3">
                     <Clock className="h-4 w-4 text-neutral-400" />
                     <h3 className="text-sm font-semibold text-neutral-800">
                       Trade History
@@ -1069,7 +1069,7 @@ export default function Recommendations() {
                     label="Closed Trades"
                     value={closedRecs.length}
                     icon={CheckCircle2}
-                    color="bg-emerald-500"
+                    color="bg-green-500"
                   />
                   <StatCard
                     label="Success Rate"
@@ -1091,7 +1091,7 @@ export default function Recommendations() {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                   {/* Donut: trade status */}
-                  <div className="bg-white rounded-2xl border border-neutral-200 p-5">
+                  <div className="bg-white rounded-xl border border-neutral-200 p-6">
                     <h3 className="text-sm font-semibold text-neutral-800 mb-4">Trade Status</h3>
                     <DonutChart
                       active={activeRecs.length}
@@ -1101,7 +1101,7 @@ export default function Recommendations() {
                   </div>
 
                   {/* Bar: success rate by plan */}
-                  <div className="bg-white rounded-2xl border border-neutral-200 p-5">
+                  <div className="bg-white rounded-xl border border-neutral-200 p-6">
                     <h3 className="text-sm font-semibold text-neutral-800 mb-4">Success Rate by Plan</h3>
                     {planPerformance.every(p => p.closed === 0) ? (
                       <p className="text-xs text-neutral-400 text-center py-8">No closed trades yet</p>
@@ -1111,14 +1111,14 @@ export default function Recommendations() {
                           label: p.label.split(' ').slice(0, 2).join(' '),
                           value: p.rate,
                           max: 100,
-                          color: p.rate >= 60 ? 'bg-emerald-500' : p.rate >= 40 ? 'bg-amber-500' : 'bg-red-400',
+                          color: p.rate >= 60 ? 'bg-green-500' : p.rate >= 40 ? 'bg-amber-500' : 'bg-red-400',
                         }))}
                       />
                     )}
                   </div>
 
                   {/* Bar: rating breakdown */}
-                  <div className="bg-white rounded-2xl border border-neutral-200 p-5">
+                  <div className="bg-white rounded-xl border border-neutral-200 p-6">
                     <h3 className="text-sm font-semibold text-neutral-800 mb-4">Rating Breakdown</h3>
                     {ratingBreakdown.length === 0 ? (
                       <p className="text-xs text-neutral-400 text-center py-8">No data</p>
@@ -1144,7 +1144,7 @@ export default function Recommendations() {
                     <thead>
                       <tr className="border-b border-neutral-100 bg-neutral-50/50">
                         {['Plan', 'Total', 'Active', 'Closed', 'Successful', 'Success Rate'].map(h => (
-                          <th key={h} className="text-left px-5 py-3 text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">
+                          <th key={h} className="text-left px-5 py-3 text-xs font-semibold text-neutral-400 uppercase tracking-wider">
                             {h}
                           </th>
                         ))}
@@ -1153,24 +1153,24 @@ export default function Recommendations() {
                     <tbody className="divide-y divide-neutral-50">
                       {planPerformance.map(plan => (
                         <tr key={plan.id} className="hover:bg-neutral-50/60">
-                          <td className="px-5 py-3.5 font-medium text-neutral-800">{plan.label}</td>
-                          <td className="px-5 py-3.5 text-neutral-600 tabular-nums">{plan.total}</td>
-                          <td className="px-5 py-3.5 text-neutral-600 tabular-nums">{plan.total - plan.closed}</td>
-                          <td className="px-5 py-3.5 text-neutral-600 tabular-nums">{plan.closed}</td>
-                          <td className="px-5 py-3.5 text-emerald-600 tabular-nums font-medium">
+                          <td className="px-5 py-4 font-medium text-neutral-800">{plan.label}</td>
+                          <td className="px-5 py-4 text-neutral-600 tabular-nums">{plan.total}</td>
+                          <td className="px-5 py-4 text-neutral-600 tabular-nums">{plan.total - plan.closed}</td>
+                          <td className="px-5 py-4 text-neutral-600 tabular-nums">{plan.closed}</td>
+                          <td className="px-5 py-4 text-green-600 tabular-nums font-medium">
                             {allRecs.filter(r => r.plans.includes(plan.id) && r.is_successful).length}
                           </td>
-                          <td className="px-5 py-3.5">
+                          <td className="px-5 py-4">
                             <div className="flex items-center gap-3">
                               <div className="flex-1 h-1.5 rounded-full bg-neutral-100 overflow-hidden max-w-[80px]">
                                 <div
-                                  className={cn('h-full rounded-full', plan.rate >= 60 ? 'bg-emerald-500' : plan.rate >= 40 ? 'bg-amber-500' : 'bg-red-400')}
+                                  className={cn('h-full rounded-full', plan.rate >= 60 ? 'bg-green-500' : plan.rate >= 40 ? 'bg-amber-500' : 'bg-red-400')}
                                   style={{ width: `${plan.rate}%` }}
                                 />
                               </div>
                               <span className={cn(
-                                'text-sm font-bold tabular-nums',
-                                plan.rate >= 60 ? 'text-emerald-600' : plan.rate >= 40 ? 'text-amber-600' : plan.closed === 0 ? 'text-neutral-400' : 'text-red-600'
+                                'text-sm font-semibold tabular-nums',
+                                plan.rate >= 60 ? 'text-green-600' : plan.rate >= 40 ? 'text-amber-600' : plan.closed === 0 ? 'text-neutral-400' : 'text-red-600'
                               )}>
                                 {plan.closed === 0 ? '—' : `${plan.rate}%`}
                               </span>

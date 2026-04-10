@@ -22,7 +22,7 @@ export function Spinner({ className, size = 'md' }: SpinnerProps) {
 
 export function FullPageSpinner() {
   return (
-    <div className="flex h-screen w-full items-center justify-center bg-[#f8f8f6]">
+    <div className="flex h-screen w-full items-center justify-center bg-canvas">
       <div className="flex flex-col items-center gap-3">
         <Spinner size="lg" />
         <p className="text-sm text-neutral-500">Loading...</p>

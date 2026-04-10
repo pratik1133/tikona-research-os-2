@@ -1448,7 +1448,7 @@ export default function GenerateResearch() {
               {steps.map((step, i) => (
                 <div key={step.label} className="flex items-center gap-1">
                   <div className={cn(
-                    'flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors',
+                    'flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium transition-colors',
                     step.done ? 'bg-green-50 text-green-700' :
                       i === currentStep ? 'bg-accent-50 text-accent-700' :
                         'bg-neutral-50 text-neutral-400'
@@ -1456,7 +1456,7 @@ export default function GenerateResearch() {
                     {step.done ? (
                       <CheckCircle2 className="h-3 w-3" />
                     ) : (
-                      <span className="flex h-4 w-4 items-center justify-center rounded-full bg-current/10 text-[10px]">{i + 1}</span>
+                      <span className="flex h-4 w-4 items-center justify-center rounded-full bg-current/10 text-xs">{i + 1}</span>
                     )}
                     <span className="hidden md:inline">{step.label}</span>
                   </div>
@@ -1471,7 +1471,7 @@ export default function GenerateResearch() {
       </header>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-auto bg-[#f8f8f6] p-7">
+      <div className="flex-1 overflow-auto bg-canvas p-7">
         <div className="mx-auto max-w-full">
           {/* Search Input */}
           <div className="mb-6" ref={dropdownRef}>
@@ -1516,7 +1516,7 @@ export default function GenerateResearch() {
                       <li key={company.company_id}>
                         <button
                           onClick={() => handleSelect(company)}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-neutral-50 transition-colors"
+                          className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-neutral-50 transition-colors"
                         >
                           <div className="flex h-8 w-8 items-center justify-center rounded-md bg-accent-50">
                             <Building2 className="h-4 w-4 text-accent-600" />
@@ -1536,7 +1536,7 @@ export default function GenerateResearch() {
                 </div>
               )}
             </div>
-            <p className="text-xs text-neutral-500 mt-1.5">
+            <p className="text-xs text-neutral-500 mt-2">
               Enter NSE symbol or company name to search
             </p>
           </div>
@@ -1580,13 +1580,13 @@ export default function GenerateResearch() {
                         disabled={isRefreshing || !(selectedCompany?.nse_symbol || selectedCompany?.isin)}
                         className="h-8"
                       >
-                        <RefreshCw className={cn('h-3.5 w-3.5 mr-1.5', isRefreshing && 'animate-spin')} />
+                        <RefreshCw className={cn('h-3.5 w-3.5 mr-2', isRefreshing && 'animate-spin')} />
                         {isRefreshing ? 'Refreshing...' : 'Refresh Data'}
                       </Button>
                       {!financialsLoading && (
                       <div
                         className={cn(
-                          'flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium',
+                          'flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium',
                           hasFinancialData
                             ? 'bg-green-50 text-green-700'
                             : 'bg-amber-50 text-amber-700'
@@ -1711,7 +1711,7 @@ export default function GenerateResearch() {
                         <p className="text-sm font-semibold text-green-900">
                           Vault Created Successfully!
                         </p>
-                        <p className="text-sm text-green-700 mt-0.5">
+                        <p className="text-sm text-green-700 mt-1">
                           Your research folder is ready with {vaultDocuments.length} documents
                           {sessionId && ' (session saved)'}
                         </p>
@@ -1722,7 +1722,7 @@ export default function GenerateResearch() {
                           size="sm"
                           onClick={() => setIsUploadOpen(true)}
                         >
-                          <Upload className="h-3.5 w-3.5 mr-1.5" />
+                          <Upload className="h-3.5 w-3.5 mr-2" />
                           Upload
                         </Button>
                         <Button variant="outline" size="sm" onClick={handleReset}>
@@ -1772,7 +1772,7 @@ export default function GenerateResearch() {
                                 <p className="text-sm font-semibold text-neutral-900">
                                   Ingest Documents for AI
                                 </p>
-                                <p className="text-xs text-neutral-500 mt-0.5">
+                                <p className="text-xs text-neutral-500 mt-1">
                                   {ingestionStatus === 'idle' && 'Process documents into vector chunks for RAG retrieval'}
                                   {ingestionStatus === 'ingesting' && `Processing ${ingestionProgress.current}/${ingestionProgress.total} documents...`}
                                   {ingestionStatus === 'done' && 'Documents ingested and ready for AI generation'}
@@ -1789,17 +1789,17 @@ export default function GenerateResearch() {
                             >
                               {ingestionStatus === 'ingesting' ? (
                                 <>
-                                  <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                                  <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" />
                                   Ingesting...
                                 </>
                               ) : ingestionStatus === 'done' ? (
                                 <>
-                                  <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
+                                  <CheckCircle2 className="h-3.5 w-3.5 mr-2" />
                                   Re-ingest
                                 </>
                               ) : (
                                 <>
-                                  <Brain className="h-3.5 w-3.5 mr-1.5" />
+                                  <Brain className="h-3.5 w-3.5 mr-2" />
                                   Ingest Documents
                                 </>
                               )}
@@ -1837,14 +1837,14 @@ export default function GenerateResearch() {
                                 <h3 className="text-sm font-semibold text-neutral-900">
                                   Research Report Drafting Workspace
                                 </h3>
-                                <p className="text-xs text-neutral-500 mt-0.5">
+                                <p className="text-xs text-neutral-500 mt-1">
                                   {sections.filter((s) => s.status === 'confirmed').length}/{sections.length} sections confirmed
                                 </p>
                               </div>
                             </div>
                             <div className="flex gap-2">
                               <Button size="sm" variant="outline" onClick={() => setIsAddSectionOpen(true)}>
-                                <Plus className="h-3.5 w-3.5 mr-1.5" />
+                                <Plus className="h-3.5 w-3.5 mr-2" />
                                 Add Section
                               </Button>
                               <Button
@@ -1855,12 +1855,12 @@ export default function GenerateResearch() {
                               >
                                 {sections.some((s) => s.status === 'generating') ? (
                                   <>
-                                    <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                                    <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" />
                                     Generating...
                                   </>
                                 ) : (
                                   <>
-                                    <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+                                    <Sparkles className="h-3.5 w-3.5 mr-2" />
                                     Generate All
                                   </>
                                 )}
@@ -1872,7 +1872,7 @@ export default function GenerateResearch() {
                                   onClick={handleConfirmAll}
                                   className="bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
                                 >
-                                  <Check className="h-3.5 w-3.5 mr-1.5" />
+                                  <Check className="h-3.5 w-3.5 mr-2" />
                                   Confirm All
                                 </Button>
                               )}
@@ -1883,9 +1883,9 @@ export default function GenerateResearch() {
                                 disabled={!allSectionsConfirmed || pptGenerating}
                               >
                                 {pptGenerating ? (
-                                  <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                                  <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" />
                                 ) : (
-                                  <DownloadCloud className="h-3.5 w-3.5 mr-1.5" />
+                                  <DownloadCloud className="h-3.5 w-3.5 mr-2" />
                                 )}
                                 Create PPT
                               </Button>
@@ -1911,7 +1911,7 @@ export default function GenerateResearch() {
                                 <div className="p-4">
                                   {/* ── Card Header ── */}
                                   <div className="flex items-center gap-3 mb-3">
-                                    <div className="flex flex-col gap-0.5 shrink-0">
+                                    <div className="flex flex-col gap-1 shrink-0">
                                       <button
                                         onClick={() => handleMoveSection(idx, 'up')}
                                         disabled={idx === 0}
@@ -1954,7 +1954,7 @@ export default function GenerateResearch() {
                                       </Button>
                                     )}
                                     <span className={cn(
-                                      'text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full shrink-0',
+                                      'text-xs font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full shrink-0',
                                       section.status === 'confirmed' ? 'bg-green-100 text-green-700' :
                                         section.status === 'generating' ? 'bg-accent-100 text-accent-700' :
                                           section.status === 'generated' ? 'bg-amber-100 text-amber-700' :
@@ -1968,7 +1968,7 @@ export default function GenerateResearch() {
 
                                   {/* ── Heading Row (compact inline) ── */}
                                   <div className="flex items-center gap-2 mb-3 px-1">
-                                    <span className="text-[10px] text-neutral-400 uppercase font-semibold tracking-wider shrink-0">Heading:</span>
+                                    <span className="text-xs text-neutral-400 uppercase font-semibold tracking-wider shrink-0">Heading:</span>
                                     {section.isEditingHeading ? (
                                       <input
                                         type="text"
@@ -1977,7 +1977,7 @@ export default function GenerateResearch() {
                                         onBlur={() => handleHeadingBlur(section.key)}
                                         onKeyDown={(e) => { if (e.key === 'Enter') handleHeadingBlur(section.key); }}
                                         autoFocus
-                                        className="flex-1 text-sm font-medium border border-accent-300 rounded px-2 py-0.5 bg-white focus:outline-none focus:ring-2 focus:ring-accent-500/40"
+                                        className="flex-1 text-sm font-medium border border-neutral-200 rounded px-2 py-0.5 bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40"
                                       />
                                     ) : (
                                       <span
@@ -2003,13 +2003,13 @@ export default function GenerateResearch() {
 
                                   {/* ── AI Output Area ── */}
                                   <div className={cn(
-                                    'rounded-lg border px-3 py-2.5 mb-3',
+                                    'rounded-lg border px-3 py-3 mb-3',
                                     section.status === 'confirmed' ? 'border-green-200 bg-green-50/50' :
                                       section.output ? 'border-amber-200 bg-amber-50/30' :
                                         'border-neutral-200 bg-neutral-50/50'
                                   )}>
                                     <p className={cn(
-                                      'text-[10px] font-semibold uppercase tracking-wider mb-1.5',
+                                      'text-xs font-semibold uppercase tracking-wider mb-2',
                                       section.status === 'confirmed' ? 'text-green-500' :
                                         section.output ? 'text-amber-500' : 'text-neutral-400'
                                     )}>AI Output</p>
@@ -2022,7 +2022,7 @@ export default function GenerateResearch() {
                                       <textarea
                                         value={section.output}
                                         onChange={(e) => handleUpdateOutput(section.key, e.target.value)}
-                                        className="w-full min-h-[200px] text-sm border border-neutral-200 rounded-lg p-3 bg-white focus:outline-none focus:ring-2 focus:ring-accent-500/40 resize-y"
+                                        className="w-full min-h-[200px] text-sm border border-neutral-200 rounded-lg p-3 bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40 resize-y"
                                         disabled={section.status === 'confirmed'}
                                       />
                                     ) : section.output ? (
@@ -2036,7 +2036,7 @@ export default function GenerateResearch() {
                                         {section.output.length > 400 && (
                                           <button
                                             onClick={() => setExpandedOutputKey(expandedOutputKey === section.key ? null : section.key)}
-                                            className="text-xs text-accent-600 hover:text-accent-800 mt-1.5 flex items-center gap-1"
+                                            className="text-xs text-accent-600 hover:text-accent-800 mt-2 flex items-center gap-1"
                                           >
                                             <ChevronsDown className={cn('h-3 w-3 transition-transform', expandedOutputKey === section.key && 'rotate-180')} />
                                             {expandedOutputKey === section.key ? 'Show less' : 'Show more'}
@@ -2055,7 +2055,7 @@ export default function GenerateResearch() {
                                   <div className="flex items-center justify-between pt-3 border-t border-neutral-100">
                                     {section.status === 'confirmed' ? (
                                       <>
-                                        <div className="flex items-center gap-1.5 text-xs text-green-700 font-medium px-2.5 py-1.5 bg-green-100 rounded-md">
+                                        <div className="flex items-center gap-2 text-xs text-green-700 font-medium px-3 py-2 bg-green-100 rounded-md">
                                           <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
                                           Confirmed
                                         </div>
@@ -2080,7 +2080,7 @@ export default function GenerateResearch() {
                                               onClick={() => handleGenerateSection(section.key)}
                                               className="text-xs h-8"
                                             >
-                                              <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+                                              <Sparkles className="h-3.5 w-3.5 mr-2" />
                                               {section.output ? 'Regenerate' : 'Generate'}
                                             </Button>
                                           )}
@@ -2093,9 +2093,9 @@ export default function GenerateResearch() {
                                             className="text-xs h-8"
                                           >
                                             {section.headingStatus === 'generating' ? (
-                                              <><Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> Heading...</>
+                                              <><Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" /> Heading...</>
                                             ) : (
-                                              <><Type className="h-3.5 w-3.5 mr-1.5" /> {section.generatedHeading ? 'Regen Heading' : 'Gen. Heading'}</>
+                                              <><Type className="h-3.5 w-3.5 mr-2" /> {section.generatedHeading ? 'Regen Heading' : 'Gen. Heading'}</>
                                             )}
                                           </Button>
                                           {/* Confirm */}
@@ -2103,9 +2103,9 @@ export default function GenerateResearch() {
                                             <Button
                                               size="sm"
                                               onClick={() => handleConfirmSection(section.key)}
-                                              className="text-xs h-8 bg-green-600 hover:bg-green-700 text-white"
+                                              className="text-xs h-8"
                                             >
-                                              <Check className="h-3.5 w-3.5 mr-1.5" />
+                                              <Check className="h-3.5 w-3.5 mr-2" />
                                               Confirm
                                             </Button>
                                           )}
@@ -2126,7 +2126,7 @@ export default function GenerateResearch() {
                                                 <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-neutral-200 rounded-lg shadow-lg z-20 py-1">
                                                   {section.promptDirty && (
                                                     <button
-                                                      className="w-full text-left px-3 py-1.5 text-xs text-neutral-700 hover:bg-neutral-50 flex items-center gap-2"
+                                                      className="w-full text-left px-3 py-2 text-xs text-neutral-700 hover:bg-neutral-50 flex items-center gap-2"
                                                       onClick={() => { handleSavePromptToLibrary(section.key); setOpenMenuKey(null); }}
                                                     >
                                                       <Save className="h-3 w-3" /> Save Prompt to Library
@@ -2134,7 +2134,7 @@ export default function GenerateResearch() {
                                                   )}
                                                   {section.output && (
                                                     <button
-                                                      className="w-full text-left px-3 py-1.5 text-xs text-neutral-700 hover:bg-neutral-50 flex items-center gap-2"
+                                                      className="w-full text-left px-3 py-2 text-xs text-neutral-700 hover:bg-neutral-50 flex items-center gap-2"
                                                       onClick={() => { handleToggleEditOutput(section.key); setOpenMenuKey(null); }}
                                                     >
                                                       <FileText className="h-3 w-3" /> Edit Output
@@ -2174,7 +2174,7 @@ export default function GenerateResearch() {
                                       <p className="text-sm font-semibold text-green-900">
                                         PowerPoint Created
                                       </p>
-                                      <p className="text-xs text-green-700 mt-0.5">
+                                      <p className="text-xs text-green-700 mt-1">
                                         Review in Google Drive, then convert to PDF
                                       </p>
                                     </div>
@@ -2185,7 +2185,7 @@ export default function GenerateResearch() {
                                       size="sm"
                                       onClick={() => setPptDialogOpen(true)}
                                     >
-                                      <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
+                                      <ExternalLink className="h-3.5 w-3.5 mr-2" />
                                       Preview & Edit
                                     </Button>
                                     <Button
@@ -2193,7 +2193,7 @@ export default function GenerateResearch() {
                                       size="sm"
                                       onClick={() => window.open(pptFileUrl, '_blank')}
                                     >
-                                      <DownloadCloud className="h-3.5 w-3.5 mr-1.5" />
+                                      <DownloadCloud className="h-3.5 w-3.5 mr-2" />
                                       Open in Drive
                                     </Button>
                                     <Button
@@ -2204,12 +2204,12 @@ export default function GenerateResearch() {
                                     >
                                       {pdfGenerating ? (
                                         <>
-                                          <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                                          <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" />
                                           Converting...
                                         </>
                                       ) : (
                                         <>
-                                          <FileText className="h-3.5 w-3.5 mr-1.5" />
+                                          <FileText className="h-3.5 w-3.5 mr-2" />
                                           Convert to PDF
                                         </>
                                       )}
@@ -2230,7 +2230,7 @@ export default function GenerateResearch() {
                                         <p className="text-sm font-semibold text-neutral-900">
                                           PDF Report Ready
                                         </p>
-                                        <p className="text-xs text-neutral-700 mt-0.5">
+                                        <p className="text-xs text-neutral-700 mt-1">
                                           Your final research report is ready for download
                                         </p>
                                       </div>
@@ -2241,14 +2241,14 @@ export default function GenerateResearch() {
                                         size="sm"
                                         onClick={() => window.open(pdfFileUrl!, '_blank')}
                                       >
-                                        <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
+                                        <ExternalLink className="h-3.5 w-3.5 mr-2" />
                                         View PDF
                                       </Button>
                                       <Button
                                         size="sm"
                                         onClick={() => window.open(`https://drive.google.com/uc?export=download&id=${pdfFileId}`, '_blank')}
                                       >
-                                        <DownloadCloud className="h-3.5 w-3.5 mr-1.5" />
+                                        <DownloadCloud className="h-3.5 w-3.5 mr-2" />
                                         Download PDF
                                       </Button>
                                     </div>
@@ -2267,7 +2267,7 @@ export default function GenerateResearch() {
                                       <p className="text-sm font-semibold text-neutral-900">
                                         Podcast Generation
                                       </p>
-                                      <p className="text-xs text-neutral-500 mt-0.5">
+                                      <p className="text-xs text-neutral-500 mt-1">
                                         Generate an AI podcast from your research report
                                       </p>
                                     </div>
@@ -2298,16 +2298,16 @@ export default function GenerateResearch() {
                                   {podcastScript && (
                                     <div className="space-y-4">
                                       <div>
-                                        <label className="text-xs font-medium text-neutral-700 mb-1.5 block">
+                                        <label className="text-xs font-medium text-neutral-700 mb-2 block">
                                           Podcast Script
                                         </label>
                                         <textarea
                                           value={podcastScript}
                                           onChange={(e) => setPodcastScript(e.target.value)}
                                           rows={10}
-                                          className="w-full max-h-64 rounded-lg border border-neutral-200 bg-white p-3 text-sm text-neutral-700 resize-y focus:outline-none focus:ring-2 focus:ring-accent-500/40 focus:border-accent-400"
+                                          className="w-full max-h-64 rounded-lg border border-neutral-200 bg-white p-3 text-sm text-neutral-700 resize-y focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40 focus-visible:border-accent-400"
                                         />
-                                        <p className="mt-1 text-[11px] text-neutral-400">
+                                        <p className="mt-1 text-xs text-neutral-400">
                                           Edit the script above before generating audio.
                                         </p>
                                       </div>
@@ -2335,7 +2335,7 @@ export default function GenerateResearch() {
                                       {/* Step 3: Audio Player */}
                                       {audioFileUrl && (
                                         <div className="rounded-lg border border-neutral-200 bg-white p-4">
-                                          <p className="text-xs font-medium text-neutral-700 mb-2 flex items-center gap-1.5">
+                                          <p className="text-xs font-medium text-neutral-700 mb-2 flex items-center gap-2">
                                             <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />
                                             Podcast Ready
                                           </p>
@@ -2351,7 +2351,7 @@ export default function GenerateResearch() {
                                             variant="outline"
                                             onClick={() => window.open(audioFileUrl, '_blank')}
                                           >
-                                            <DownloadCloud className="h-3.5 w-3.5 mr-1.5" />
+                                            <DownloadCloud className="h-3.5 w-3.5 mr-2" />
                                             Download MP3
                                           </Button>
                                         </div>
@@ -2372,7 +2372,7 @@ export default function GenerateResearch() {
                                       <p className="text-sm font-semibold text-blue-900">
                                         Video Generation
                                       </p>
-                                      <p className="text-xs text-blue-700 mt-0.5">
+                                      <p className="text-xs text-blue-700 mt-1">
                                         Create an AI-narrated video summary of your report
                                       </p>
                                     </div>
@@ -2412,7 +2412,7 @@ export default function GenerateResearch() {
                                   ) : (
                                     <div className="space-y-4">
                                       <div className="rounded-lg border border-blue-200 bg-white p-4">
-                                        <p className="text-xs font-medium text-blue-800 mb-2 flex items-center gap-1.5">
+                                        <p className="text-xs font-medium text-blue-800 mb-2 flex items-center gap-2">
                                           <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />
                                           Video Ready
                                         </p>
@@ -2435,7 +2435,7 @@ export default function GenerateResearch() {
                                             onClick={() => window.open(videoFileUrl, '_blank')}
                                             className="w-full"
                                           >
-                                            <DownloadCloud className="h-3.5 w-3.5 mr-1.5" />
+                                            <DownloadCloud className="h-3.5 w-3.5 mr-2" />
                                             Download MP4
                                           </Button>
                                         </div>
@@ -2471,14 +2471,14 @@ export default function GenerateResearch() {
                                       <h4 className="text-sm font-semibold text-neutral-900">
                                         Publish Report
                                       </h4>
-                                      <p className="text-xs text-neutral-500 mt-0.5">
+                                      <p className="text-xs text-neutral-500 mt-1">
                                         Make this report visible to customers in the Investor Portal
                                       </p>
                                     </div>
                                   </div>
 
                                   {isPublished ? (
-                                    <div className="flex items-center gap-2 text-green-700 bg-green-100 rounded-lg px-4 py-2.5">
+                                    <div className="flex items-center gap-2 text-green-700 bg-green-100 rounded-lg px-4 py-3">
                                       <CheckCircle2 className="h-4 w-4" />
                                       <span className="text-sm font-medium">Published to customers</span>
                                     </div>
@@ -2498,7 +2498,7 @@ export default function GenerateResearch() {
                                         }
                                       }}
                                       disabled={isPublishing}
-                                      className="w-full bg-green-600 hover:bg-green-700 text-white min-w-[200px]"
+                                      className="w-full min-w-[200px]"
                                     >
                                       {isPublishing ? (
                                         <>
@@ -2527,12 +2527,12 @@ export default function GenerateResearch() {
                 {vaultStatus === 'error' && errorMessage && (
                   <div className="border-t border-neutral-100 bg-red-50 px-6 py-4">
                     <div className="flex items-start gap-3">
-                      <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+                      <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-1" />
                       <div className="flex-1">
                         <p className="text-sm font-medium text-red-900">
                           Failed to Create Vault
                         </p>
-                        <p className="text-sm text-red-700 mt-0.5">{errorMessage}</p>
+                        <p className="text-sm text-red-700 mt-1">{errorMessage}</p>
                       </div>
                     </div>
                   </div>
@@ -2661,7 +2661,7 @@ export default function GenerateResearch() {
                   { label: 'Populating master template', time: 120 },
                   { label: 'Uploading to Google Drive', time: 200 },
                 ].map((step, i) => (
-                  <div key={step.label} className="flex items-center gap-2.5">
+                  <div key={step.label} className="flex items-center gap-3">
                     {pptElapsedSeconds >= step.time ? (
                       <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />
                     ) : pptElapsedSeconds >= (i > 0 ? [10, 60, 120, 200][i - 1] : 0) ? (
@@ -2701,7 +2701,7 @@ export default function GenerateResearch() {
                     }}
                     title="Refresh preview after editing"
                   >
-                    <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+                    <RefreshCw className="h-3.5 w-3.5 mr-2" />
                     Refresh Preview
                   </Button>
                   <Button
@@ -2709,7 +2709,7 @@ export default function GenerateResearch() {
                     variant="outline"
                     onClick={() => window.open(`https://docs.google.com/presentation/d/${pptFileId}/edit`, '_blank')}
                   >
-                    <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
+                    <ExternalLink className="h-3.5 w-3.5 mr-2" />
                     Edit in Google Slides
                   </Button>
                 </div>
@@ -2739,22 +2739,22 @@ export default function GenerateResearch() {
                     variant="outline"
                     onClick={() => window.open(pptFileUrl!, '_blank')}
                   >
-                    <DownloadCloud className="h-4 w-4 mr-1.5" />
+                    <DownloadCloud className="h-4 w-4 mr-2" />
                     Open in Drive
                   </Button>
                   <Button
                     onClick={handleConfirmAndConvert}
                     disabled={pdfGenerating}
-                    className="bg-green-600 hover:bg-green-700 min-w-[210px]"
+                    className="min-w-[210px]"
                   >
                     {pdfGenerating ? (
                       <>
-                        <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                         Converting to PDF...
                       </>
                     ) : (
                       <>
-                        <FileText className="h-4 w-4 mr-1.5" />
+                        <FileText className="h-4 w-4 mr-2" />
                         Confirm & Convert to PDF
                       </>
                     )}
@@ -2774,11 +2774,11 @@ export default function GenerateResearch() {
                   </div>
                   <div className="flex gap-2">
                     <Button size="sm" variant="outline" onClick={() => window.open(pdfFileUrl!, '_blank')}>
-                      <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
+                      <ExternalLink className="h-3.5 w-3.5 mr-2" />
                       View PDF
                     </Button>
                     <Button size="sm" onClick={() => window.open(`https://drive.google.com/uc?export=download&id=${pdfFileId}`, '_blank')}>
-                      <DownloadCloud className="h-3.5 w-3.5 mr-1.5" />
+                      <DownloadCloud className="h-3.5 w-3.5 mr-2" />
                       Download PDF
                     </Button>
                   </div>
@@ -2810,7 +2810,7 @@ export default function GenerateResearch() {
                   <textarea
                     value={section.prompt}
                     onChange={(e) => handleUpdatePrompt(section.key, e.target.value)}
-                    className="w-full min-h-[180px] text-sm font-mono border border-neutral-200 rounded-lg p-3 bg-white focus:outline-none focus:ring-2 focus:ring-accent-500/40 resize-y"
+                    className="w-full min-h-[180px] text-sm font-mono border border-neutral-200 rounded-lg p-3 bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40 resize-y"
                   />
                 </div>
                 {/* Heading Prompt */}
@@ -2821,7 +2821,7 @@ export default function GenerateResearch() {
                     value={section.headingPrompt}
                     onChange={(e) => handleUpdateHeadingPrompt(section.key, e.target.value)}
                     placeholder="e.g., Create a compelling heading that captures the company's core identity..."
-                    className="w-full min-h-[80px] text-sm border border-neutral-200 rounded-lg p-3 bg-white focus:outline-none focus:ring-2 focus:ring-accent-500/40 focus:border-accent-400 resize-y"
+                    className="w-full min-h-[80px] text-sm border border-neutral-200 rounded-lg p-3 bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40 focus-visible:border-accent-400 resize-y"
                   />
                 </div>
                 {/* Search Keywords */}
@@ -2850,7 +2850,7 @@ export default function GenerateResearch() {
                 size="sm"
                 onClick={() => { if (editPromptModalKey) handleSavePromptToLibrary(editPromptModalKey); }}
               >
-                <Save className="h-3.5 w-3.5 mr-1.5" />
+                <Save className="h-3.5 w-3.5 mr-2" />
                 Save to Library
               </Button>
             )}
@@ -2886,7 +2886,7 @@ export default function GenerateResearch() {
                 value={newSectionTitle}
                 onChange={(e) => setNewSectionTitle(e.target.value)}
                 placeholder="e.g., Competitive Positioning"
-                className="mt-1.5"
+                className="mt-2"
               />
             </div>
             <div>
@@ -2896,7 +2896,7 @@ export default function GenerateResearch() {
                 value={newSectionHeadingPrompt}
                 onChange={(e) => setNewSectionHeadingPrompt(e.target.value)}
                 placeholder="e.g., Create a compelling heading that captures the company's competitive positioning and market dominance..."
-                className="w-full mt-1.5 min-h-[60px] text-sm border border-neutral-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-accent-500/40 resize-y"
+                className="w-full mt-2 min-h-[60px] text-sm border border-neutral-300 rounded-md p-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40 resize-y"
               />
               <p className="text-xs text-neutral-500 mt-1">
                 Instructions for AI to generate a dynamic heading for this section
@@ -2909,7 +2909,7 @@ export default function GenerateResearch() {
                 value={newSectionPrompt}
                 onChange={(e) => setNewSectionPrompt(e.target.value)}
                 placeholder="Write the instructions for the AI to generate this section..."
-                className="w-full mt-1.5 min-h-[120px] text-sm border border-neutral-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-accent-500/40"
+                className="w-full mt-2 min-h-[120px] text-sm border border-neutral-300 rounded-md p-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40"
               />
             </div>
             <div>
@@ -2919,7 +2919,7 @@ export default function GenerateResearch() {
                 value={newSectionKeywords}
                 onChange={(e) => setNewSectionKeywords(e.target.value)}
                 placeholder="e.g., competition, market share, peers, moat"
-                className="mt-1.5"
+                className="mt-2"
               />
               <p className="text-xs text-neutral-500 mt-1">
                 Comma-separated keywords to find relevant document chunks for this section
@@ -2931,7 +2931,7 @@ export default function GenerateResearch() {
               Cancel
             </Button>
             <Button onClick={handleAddSection}>
-              <Plus className="h-3.5 w-3.5 mr-1.5" />
+              <Plus className="h-3.5 w-3.5 mr-2" />
               Add Section
             </Button>
           </DialogFooter>
@@ -2957,7 +2957,7 @@ export default function GenerateResearch() {
               This Session Only
             </Button>
             <Button onClick={handlePromptUpdateUniversal}>
-              <Save className="h-3.5 w-3.5 mr-1.5" />
+              <Save className="h-3.5 w-3.5 mr-2" />
               Update Universal Prompt
             </Button>
           </DialogFooter>

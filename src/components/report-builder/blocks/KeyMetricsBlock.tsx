@@ -18,24 +18,24 @@ export default function KeyMetricsBlock({ content, onChange }: Props) {
       {content.metrics.map((metric, i) => (
         <div
           key={i}
-          className="rounded-xl border border-neutral-200 bg-gradient-to-b from-white to-neutral-50/50 p-3.5 hover:shadow-sm transition-shadow"
+          className="rounded-xl border border-neutral-200 bg-gradient-to-b from-white to-neutral-50/50 p-4 hover:shadow-sm transition-shadow"
         >
           <input
             value={metric.label}
             onChange={(e) => updateMetric(i, 'label', e.target.value)}
-            className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400 bg-transparent border-0 outline-none w-full mb-1"
+            className="text-xs font-semibold uppercase tracking-wider text-neutral-400 bg-transparent border-0 outline-none w-full mb-1"
           />
           <input
             value={metric.value}
             onChange={(e) => updateMetric(i, 'value', e.target.value)}
-            className="text-lg font-bold text-neutral-900 tabular-nums bg-transparent border-0 outline-none w-full"
+            className="text-lg font-semibold text-neutral-900 tabular-nums bg-transparent border-0 outline-none w-full"
           />
           {metric.subtext !== undefined && (
             <input
               value={metric.subtext || ''}
               onChange={(e) => updateMetric(i, 'subtext', e.target.value)}
               placeholder="subtext"
-              className="text-[11px] text-neutral-500 bg-transparent border-0 outline-none w-full mt-0.5"
+              className="text-xs text-neutral-500 bg-transparent border-0 outline-none w-full mt-1"
             />
           )}
         </div>

@@ -21,7 +21,7 @@ const config: Record<ResearchSession['status'], { label: string; className: stri
 export default function StatusBadge({ status }: { status: ResearchSession['status'] }) {
   const { label, className, dotColor } = config[status] ?? config.document_review;
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset ${className}`}>
+    <span className={`inline-flex items-center gap-2 rounded-full px-3 py-0.5 text-xs font-medium ring-1 ring-inset ${className}`}>
       <span className={`h-1.5 w-1.5 rounded-full ${dotColor}`} />
       {label}
     </span>

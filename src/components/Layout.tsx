@@ -26,16 +26,16 @@ export interface NavItemConfig {
 
 export function Logo({ collapsed, subtitle, linkTo }: { collapsed: boolean; subtitle: string; linkTo: string }) {
   return (
-    <NavLink to={linkTo} className="flex items-center gap-2.5">
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent-600">
-        <span className="text-[11px] font-bold tracking-tight text-white">TC</span>
+    <NavLink to={linkTo} className="flex items-center gap-3">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white">
+        <img src="/tikona-logo.png" alt="Tikona Capital" className="h-7 w-7 object-contain" />
       </div>
       {!collapsed && (
         <div className="overflow-hidden">
-          <h1 className="truncate text-[13px] font-semibold text-neutral-900 leading-tight">
+          <h1 className="truncate text-sm font-semibold text-neutral-900 leading-tight">
             Tikona Capital
           </h1>
-          <p className="truncate text-[10px] text-neutral-400 leading-tight">{subtitle}</p>
+          <p className="truncate text-xs text-neutral-400 leading-tight">{subtitle}</p>
         </div>
       )}
     </NavLink>
@@ -57,7 +57,7 @@ export function NavItem({
       end={item.end}
       className={({ isActive }) =>
         cn(
-          'group flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-medium transition-all duration-150',
+          'group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150',
           isActive
             ? 'bg-accent-50 text-accent-700 font-semibold'
             : 'text-neutral-500 hover:bg-neutral-50 hover:text-neutral-700',
@@ -93,26 +93,26 @@ export function UserProfile({ collapsed }: { collapsed: boolean }) {
   return (
     <div
       className={cn(
-        'border-t border-neutral-200/60 p-2.5',
+        'border-t border-neutral-200/60 p-3',
         collapsed && 'flex flex-col items-center'
       )}
     >
       <div
         className={cn(
-          'flex items-center gap-2.5',
+          'flex items-center gap-3',
           collapsed && 'flex-col gap-2'
         )}
       >
         <Avatar className="h-7 w-7">
           {avatarUrl && <AvatarImage src={avatarUrl} alt={email} />}
-          <AvatarFallback className="bg-accent-100 text-accent-700 text-[10px] font-semibold">
+          <AvatarFallback className="bg-accent-100 text-accent-700 text-xs font-semibold">
             {getInitials(displayName || email)}
           </AvatarFallback>
         </Avatar>
 
         {!collapsed && (
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[13px] font-medium text-neutral-700">
+            <p className="truncate text-sm font-medium text-neutral-700">
               {displayName}
             </p>
           </div>
@@ -137,7 +137,7 @@ export function UserProfile({ collapsed }: { collapsed: boolean }) {
               variant="ghost"
               size="icon"
               onClick={signOut}
-              className="mt-1.5 h-7 w-7 text-neutral-400 hover:text-red-600 hover:bg-red-50"
+              className="mt-2 h-7 w-7 text-neutral-400 hover:text-red-600 hover:bg-red-50"
             >
               <LogOut className="h-3.5 w-3.5" />
             </Button>
@@ -179,7 +179,7 @@ export default function SidebarLayout({ navItems, logoSubtitle, logoLink }: Side
 
   return (
     <TooltipProvider>
-      <div className="flex h-screen bg-[#f8f8f6]">
+      <div className="flex h-screen bg-canvas">
         {/* Sidebar */}
         <aside
           className={cn(
@@ -203,7 +203,7 @@ export default function SidebarLayout({ navItems, logoSubtitle, logoLink }: Side
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-2 pt-2">
+          <nav className="flex-1 min-h-0 overflow-y-auto px-2 pt-2 pb-2">
             {collapsed && (
               <div className="flex justify-center mb-2">
                 <Button
@@ -219,14 +219,14 @@ export default function SidebarLayout({ navItems, logoSubtitle, logoLink }: Side
             {groupedItems.map((group, gi) => (
               <div key={gi}>
                 {group.name && !collapsed && (
-                  <p className="px-3 pt-5 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-neutral-400">
+                  <p className="px-3 pt-5 pb-2 text-xs font-semibold uppercase tracking-widest text-neutral-400">
                     {group.name}
                   </p>
                 )}
                 {group.name && collapsed && gi > 0 && (
                   <div className="mx-2 my-2 h-px bg-neutral-100" />
                 )}
-                <div className="space-y-0.5">
+                <div className="space-y-1">
                   {group.items.map((item) => (
                     <NavItem key={item.path} item={item} collapsed={collapsed} />
                   ))}

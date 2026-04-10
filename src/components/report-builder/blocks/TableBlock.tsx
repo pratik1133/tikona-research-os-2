@@ -66,7 +66,7 @@ export default function TableBlock({ content, onChange }: Props) {
               {(content.headers || []).map((header, ci) => (
                 <th
                   key={ci}
-                  className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap relative"
+                  className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap relative"
                 >
                   {editingHeader === ci ? (
                     <input
@@ -87,14 +87,14 @@ export default function TableBlock({ content, onChange }: Props) {
                   )}
                   <button
                     onClick={() => removeColumn(ci)}
-                    className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-white items-center justify-center text-[8px] opacity-0 group-hover/table:opacity-100 transition-opacity hidden group-hover/table:flex"
+                    className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-white items-center justify-center text-xs opacity-0 group-hover/table:opacity-100 transition-opacity hidden group-hover/table:flex"
                     title="Remove column"
                   >
                     <Minus className="h-2.5 w-2.5" />
                   </button>
                 </th>
               ))}
-              <th className="px-1 py-2.5 w-8 opacity-0 group-hover/table:opacity-100 transition-opacity">
+              <th className="px-1 py-3 w-8 opacity-0 group-hover/table:opacity-100 transition-opacity">
                 <button
                   onClick={addColumn}
                   className="h-5 w-5 rounded bg-neutral-600 text-white flex items-center justify-center hover:bg-neutral-500"
@@ -112,7 +112,7 @@ export default function TableBlock({ content, onChange }: Props) {
                 className={`border-b border-neutral-100 ${ri % 2 === 0 ? 'bg-white' : 'bg-neutral-50/50'} hover:bg-accent-50/30 transition-colors group/row`}
               >
                 {(row || []).map((cell, ci) => (
-                  <td key={ci} className="px-4 py-2.5 text-neutral-700 whitespace-nowrap">
+                  <td key={ci} className="px-4 py-3 text-neutral-700 whitespace-nowrap">
                     {editingCell?.row === ri && editingCell?.col === ci ? (
                       <input
                         autoFocus
@@ -144,7 +144,7 @@ export default function TableBlock({ content, onChange }: Props) {
                     )}
                   </td>
                 ))}
-                <td className="px-1 py-2.5 w-8 opacity-0 group-hover/row:opacity-100 transition-opacity">
+                <td className="px-1 py-3 w-8 opacity-0 group-hover/row:opacity-100 transition-opacity">
                   <button
                     onClick={() => removeRow(ri)}
                     className="h-5 w-5 rounded bg-red-100 text-red-500 flex items-center justify-center hover:bg-red-200"
@@ -160,7 +160,7 @@ export default function TableBlock({ content, onChange }: Props) {
       </div>
       <button
         onClick={addRow}
-        className="mt-1.5 flex items-center gap-1 text-[11px] text-neutral-400 hover:text-accent-600 transition-colors opacity-0 group-hover/table:opacity-100"
+        className="mt-2 flex items-center gap-1 text-xs text-neutral-400 hover:text-accent-600 transition-colors opacity-0 group-hover/table:opacity-100"
       >
         <Plus className="h-3 w-3" /> Add row
       </button>

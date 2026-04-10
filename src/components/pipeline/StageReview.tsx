@@ -66,12 +66,12 @@ export default function StageReview({
     <div className={cn('', className)}>
       {/* Approved banner */}
       {isApproved && (
-        <div className="flex items-center gap-2 px-4 py-2 bg-emerald-50 border-b border-emerald-100">
-          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-white">
+        <div className="flex items-center gap-2 px-4 py-2 bg-green-50 border-b border-green-100">
+          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-green-500 text-white">
             <Check className="h-3 w-3" strokeWidth={2.5} />
           </div>
-          <span className="text-xs font-semibold text-emerald-700">{title}</span>
-          <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-full ml-auto">Approved</span>
+          <span className="text-xs font-semibold text-green-700">{title}</span>
+          <span className="text-xs font-semibold text-green-600 bg-green-100 px-2 py-0.5 rounded-full ml-auto">Approved</span>
         </div>
       )}
 
@@ -81,7 +81,7 @@ export default function StageReview({
           <textarea
             value={editContent}
             onChange={(e) => setEditContent(e.target.value)}
-            className="w-full min-h-[300px] max-h-[600px] rounded-lg border border-neutral-200 bg-neutral-50 p-4 text-sm font-mono text-neutral-800 leading-relaxed resize-y focus:outline-none focus:ring-2 focus:ring-accent-500/30 focus:border-accent-400 focus:bg-white transition-all"
+            className="w-full min-h-[300px] max-h-[600px] rounded-lg border border-neutral-200 bg-neutral-50 p-4 text-sm font-mono text-neutral-800 leading-relaxed resize-y focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40 focus-visible:border-accent-400 focus-visible:bg-white transition-all"
             spellCheck={false}
           />
           <div className="flex gap-2 mt-3">
@@ -97,7 +97,7 @@ export default function StageReview({
         <>
           {/* Toolbar — expand toggle */}
           {!isApproved && (
-            <div className="flex items-center justify-end px-4 py-1.5 border-b border-neutral-50">
+            <div className="flex items-center justify-end px-4 py-2 border-b border-neutral-50">
               <button
                 onClick={() => setIsFullHeight(!isFullHeight)}
                 className="p-1 rounded hover:bg-neutral-100 text-neutral-400 hover:text-neutral-600 transition-colors"
@@ -164,7 +164,7 @@ function renderMarkdown(md: string): string {
     // Table rows
     .replace(/^\|(.+)\|$/gm, (_, row: string) => {
       const cells = row.split('|').map(c => c.trim()).filter(Boolean);
-      return '<tr>' + cells.map(c => `<td class="border border-neutral-200 px-3 py-1.5 text-xs">${c}</td>`).join('') + '</tr>';
+      return '<tr>' + cells.map(c => `<td class="border border-neutral-200 px-3 py-2 text-xs">${c}</td>`).join('') + '</tr>';
     })
     // Horizontal rules
     .replace(/^---+$/gm, '<hr class="my-5 border-neutral-200" />')

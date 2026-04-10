@@ -362,25 +362,25 @@ export default function ReportBuilder() {
   // ========================
   if (step === 'editor') {
     return (
-      <div className="h-screen flex flex-col bg-[#f0f2f5] overflow-hidden">
+      <div className="h-screen flex flex-col bg-surface-muted overflow-hidden">
         {/* Editor Toolbar */}
-        <div className="shrink-0 flex items-center justify-between px-6 py-3 bg-[#1e2330] text-white print:hidden shadow-md z-20">
+        <div className="shrink-0 flex items-center justify-between px-6 py-3 bg-neutral-900 text-white print:hidden shadow-md z-20">
           <div className="flex items-center gap-3">
             <button onClick={handleNewReport} className="text-neutral-400 hover:text-white transition-colors">
               <ArrowLeft className="h-4 w-4" />
             </button>
-            <FileText className="h-4 w-4 text-emerald-400" />
+            <FileText className="h-4 w-4 text-green-400" />
             <span className="text-sm font-semibold">{currentReport?.name || 'Report Editor'}</span>
           </div>
           <div className="flex items-center gap-3">
             <Button onClick={handleExportPPT} variant="outline" size="sm" className="rounded border-neutral-600 text-neutral-300 hover:text-white hover:border-neutral-400 bg-transparent h-8 shadow-none">
-              <FileText className="h-3.5 w-3.5 mr-1.5" /> Download PPT
+              <FileText className="h-3.5 w-3.5 mr-2" /> Download PPT
             </Button>
             <Button onClick={handleExportPDF} size="sm" className="rounded bg-blue-600 hover:bg-blue-700 text-white h-8 border-none shadow-none">
-              <Download className="h-3.5 w-3.5 mr-1.5" /> Download PDF
+              <Download className="h-3.5 w-3.5 mr-2" /> Download PDF
             </Button>
-            <Button onClick={handleSaveReport} size="sm" className="rounded bg-emerald-600 hover:bg-emerald-700 text-white h-8 border-none shadow-none">
-              <Save className="h-3.5 w-3.5 mr-1.5" /> Save
+            <Button onClick={handleSaveReport} size="sm" className="rounded bg-green-600 hover:bg-green-700 text-white h-8 border-none shadow-none">
+              <Save className="h-3.5 w-3.5 mr-2" /> Save
             </Button>
           </div>
         </div>
@@ -390,26 +390,26 @@ export default function ReportBuilder() {
           <div className="w-[300px] flex-shrink-0 bg-white border-r border-neutral-200 flex flex-col print:hidden z-10 shadow-[2px_0_10px_rgba(0,0,0,0.03)] h-full overflow-y-auto">
             {/* INSERT section block */}
             <div className="p-5 border-b border-neutral-100">
-              <h3 className="text-[11px] font-bold text-neutral-400 tracking-wider mb-4 uppercase">Insert</h3>
+              <h3 className="text-xs font-semibold text-neutral-400 tracking-wider mb-4 uppercase">Insert</h3>
               <div className="space-y-2">
-                <button onClick={() => handleAddBlock('text')} className="w-full flex items-center gap-3 p-2.5 rounded-lg border border-neutral-200 hover:border-blue-400 hover:bg-blue-50 text-sm text-neutral-700 transition-colors shadow-sm">
+                <button onClick={() => handleAddBlock('text')} className="w-full flex items-center gap-3 p-3 rounded-lg border border-neutral-200 hover:border-blue-400 hover:bg-blue-50 text-sm text-neutral-700 transition-colors shadow-sm">
                   <Type className="h-4 w-4 text-neutral-400" /> Text Block
                 </button>
-                <button onClick={() => handleAddBlock('table')} className="w-full flex items-center gap-3 p-2.5 rounded-lg border border-neutral-200 hover:border-blue-400 hover:bg-blue-50 text-sm text-neutral-700 transition-colors shadow-sm">
+                <button onClick={() => handleAddBlock('table')} className="w-full flex items-center gap-3 p-3 rounded-lg border border-neutral-200 hover:border-blue-400 hover:bg-blue-50 text-sm text-neutral-700 transition-colors shadow-sm">
                   <Table2 className="h-4 w-4 text-neutral-400" /> New Table
                 </button>
-                <button onClick={() => handleAddBlock('chart')} className="w-full flex items-center gap-3 p-2.5 rounded-lg border border-neutral-200 hover:border-blue-400 hover:bg-blue-50 text-sm text-neutral-700 transition-colors shadow-sm">
+                <button onClick={() => handleAddBlock('chart')} className="w-full flex items-center gap-3 p-3 rounded-lg border border-neutral-200 hover:border-blue-400 hover:bg-blue-50 text-sm text-neutral-700 transition-colors shadow-sm">
                   <BarChart3 className="h-4 w-4 text-neutral-400" /> New Chart
                 </button>
-                <button onClick={() => handleAddBlock('sentiment')} className="w-full flex items-center gap-3 p-2.5 rounded-lg border border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50 text-sm text-neutral-700 transition-colors shadow-sm">
-                  <MessageSquare className="h-4 w-4 text-emerald-500" /> New Sentiment
+                <button onClick={() => handleAddBlock('sentiment')} className="w-full flex items-center gap-3 p-3 rounded-lg border border-green-200 hover:border-green-400 hover:bg-green-50 text-sm text-neutral-700 transition-colors shadow-sm">
+                  <MessageSquare className="h-4 w-4 text-green-500" /> New Sentiment
                 </button>
               </div>
             </div>
 
             {/* BLOCKS List */}
             <div className="p-5 border-b border-neutral-100 flex-1">
-              <h3 className="text-[11px] font-bold text-neutral-400 tracking-wider mb-4 uppercase">
+              <h3 className="text-xs font-semibold text-neutral-400 tracking-wider mb-4 uppercase">
                 Blocks ({blocks.length})
               </h3>
               <div className="space-y-1">
@@ -423,7 +423,7 @@ export default function ReportBuilder() {
                     {b.type === 'text' && <Type className="h-3 w-3 shrink-0" />}
                     {b.type === 'table' && <Table2 className="h-3 w-3 shrink-0" />}
                     {b.type === 'chart' && <BarChart3 className="h-3 w-3 shrink-0" />}
-                    {b.type === 'sentiment' && <MessageSquare className="h-3 w-3 shrink-0 text-emerald-500" />}
+                    {b.type === 'sentiment' && <MessageSquare className="h-3 w-3 shrink-0 text-green-500" />}
                     <span className="truncate">
                       {(b.content as any).title || (b.content as any).sentiment || b.type.charAt(0).toUpperCase() + b.type.slice(1)} Block
                     </span>
@@ -434,7 +434,7 @@ export default function ReportBuilder() {
 
             {/* TIPS */}
             <div className="p-5 bg-neutral-50">
-              <h3 className="text-[11px] font-bold text-neutral-400 tracking-wider mb-3 uppercase">Tips</h3>
+              <h3 className="text-xs font-semibold text-neutral-400 tracking-wider mb-3 uppercase">Tips</h3>
               <ul className="text-xs text-neutral-500 space-y-2 list-disc pl-4">
                 <li>Click a block to select, then use arrows to reorder</li>
                 <li>Right-click table cells for row/col operations</li>
@@ -452,23 +452,23 @@ export default function ReportBuilder() {
             >
               
               {/* GIS-style Cover Card (Fixed at top of A4) */}
-              <div className="mb-6 rounded-lg bg-[#f0f4f8] border border-[#e2e8f0] p-5">
+              <div className="mb-6 rounded-lg bg-neutral-50 border border-neutral-200 p-5">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h1 className="text-[#1a365d] text-[22px] font-bold mb-1 font-serif tracking-tight">
-                      {currentReport?.companyName} <span className="font-sans font-normal text-[15px] text-[#4a5568] ml-1">(NSE Code : {currentReport?.nseSymbol})</span>
+                    <h1 className="text-neutral-900 text-2xl font-bold mb-1 font-serif tracking-tight">
+                      {currentReport?.companyName} <span className="font-sans font-normal text-sm text-neutral-500 ml-1">(NSE Code : {currentReport?.nseSymbol})</span>
                     </h1>
-                    <p className="text-[13px] text-[#4a5568] tracking-wide inline-flex items-center gap-2">
-                       Price : Rs.{financials?.current_price?.toFixed(1) || '—'} 
+                    <p className="text-sm text-neutral-500 tracking-wide inline-flex items-center gap-2">
+                       Price : Rs.{financials?.current_price?.toFixed(1) || '—'}
                        <span className="text-neutral-300">|</span>
                        MCAP : Rs.{(financials?.market_cap ? financials.market_cap : 0).toLocaleString()} Cr.
-                       <span className="text-neutral-300">|</span> 
+                       <span className="text-neutral-300">|</span>
                        Industry : {financials?.industry || currentReport?.sector}
                     </p>
                   </div>
                   <div className="text-right flex flex-col items-end pt-1">
                     <TikonaLogo className="h-8 mb-2" />
-                    <p className="text-[12px] text-[#4a5568] font-medium tracking-wide">
+                    <p className="text-xs text-neutral-500 font-medium tracking-wide">
                       {new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}
                     </p>
                   </div>
@@ -484,7 +484,7 @@ export default function ReportBuilder() {
               />
               
               {/* Footer text included in print */}
-              <div className="mt-12 pt-4 border-t border-neutral-200 text-center text-[10px] text-neutral-400 pb-2">
+              <div className="mt-12 pt-4 border-t border-neutral-200 text-center text-xs text-neutral-400 pb-2">
                 Made on Tikona Capital OS
               </div>
             </div>
@@ -514,17 +514,17 @@ export default function ReportBuilder() {
             <div key={s.key} className="flex items-center flex-1">
               <div className="flex flex-col items-center">
                 <div className={`h-10 w-10 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
-                  done ? 'bg-emerald-500 text-white' :
+                  done ? 'bg-green-500 text-white' :
                   active ? 'bg-accent-600 text-white ring-4 ring-accent-100' :
                   'bg-neutral-200 text-neutral-500'
                 }`}>
                   {done ? <Check className="h-5 w-5" /> : i + 1}
                 </div>
                 <p className={`text-xs font-semibold mt-2 ${active ? 'text-accent-700' : 'text-neutral-500'}`}>{s.label}</p>
-                <p className="text-[10px] text-neutral-400">{s.sublabel}</p>
+                <p className="text-xs text-neutral-400">{s.sublabel}</p>
               </div>
               {i < steps.length - 1 && (
-                <div className={`flex-1 h-0.5 mx-4 mt-[-24px] ${done ? 'bg-emerald-400' : 'bg-neutral-200'}`} />
+                <div className={`flex-1 h-0.5 mx-4 mt-[-24px] ${done ? 'bg-green-400' : 'bg-neutral-200'}`} />
               )}
             </div>
           );
@@ -543,7 +543,7 @@ export default function ReportBuilder() {
                 onChange={(e) => { setSearchInput(e.target.value); setIsDropdownOpen(true); setSelectedCompany(null); }}
                 onFocus={() => searchInput.length >= 2 && setIsDropdownOpen(true)}
                 placeholder="Search by company name or NSE symbol..."
-                className="w-full h-12 pl-10 pr-4 rounded-xl border border-neutral-300 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500/30 focus:border-accent-400"
+                className="w-full h-12 pl-10 pr-4 rounded-xl border border-neutral-200 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40 focus-visible:border-accent-400"
               />
               {isSearching && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400 animate-spin" />}
             </div>
@@ -569,11 +569,11 @@ export default function ReportBuilder() {
 
           {/* Selected Company Card */}
           {selectedCompany && (
-            <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50/50 p-4 animate-fade-up">
+            <div className="mt-4 rounded-xl border border-green-200 bg-green-50/50 p-4 animate-fade-up">
               <div className="flex items-center gap-2 mb-2">
-                <Check className="h-4 w-4 text-emerald-600" />
-                <span className="text-sm font-semibold text-emerald-800">{selectedCompany.company_name}</span>
-                <span className="text-xs font-mono text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded">NSE: {selectedCompany.nse_symbol}</span>
+                <Check className="h-4 w-4 text-green-600" />
+                <span className="text-sm font-semibold text-green-800">{selectedCompany.company_name}</span>
+                <span className="text-xs font-mono text-green-600 bg-green-100 px-2 py-0.5 rounded">NSE: {selectedCompany.nse_symbol}</span>
               </div>
               {financials && (
                 <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mt-3">
@@ -585,9 +585,9 @@ export default function ReportBuilder() {
                     { label: 'Sector', value: financials.sector || financials.broad_sector || '—' },
                     { label: 'EBITDA M%', value: financials.ebitda_margin_ttm ? `${financials.ebitda_margin_ttm.toFixed(1)}%` : '—' },
                   ].map(m => (
-                    <div key={m.label} className="rounded-lg bg-white border border-emerald-100 px-2.5 py-1.5">
-                      <p className="text-[9px] font-semibold uppercase tracking-wider text-neutral-400">{m.label}</p>
-                      <p className="text-sm font-bold text-neutral-900 tabular-nums">{m.value}</p>
+                    <div key={m.label} className="rounded-lg bg-white border border-green-100 px-3 py-2">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-neutral-400">{m.label}</p>
+                      <p className="text-sm font-semibold text-neutral-900 tabular-nums">{m.value}</p>
                     </div>
                   ))}
                 </div>
@@ -603,10 +603,10 @@ export default function ReportBuilder() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-neutral-50 border-b border-neutral-200">
-                      <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase text-neutral-500">Report Name</th>
-                      <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase text-neutral-500">Generated On</th>
-                      <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase text-neutral-500">Template</th>
-                      <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase text-neutral-500">Actions</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-neutral-500">Report Name</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-neutral-500">Generated On</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-neutral-500">Template</th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold uppercase text-neutral-500">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-neutral-100">
@@ -660,14 +660,14 @@ export default function ReportBuilder() {
               <ChevronLeft className="h-3.5 w-3.5" /> Back to Company
             </button>
             <Button onClick={() => setShowTemplateBuilder(true)} variant="outline" size="sm" className="rounded-lg">
-              <Plus className="h-3.5 w-3.5 mr-1.5" /> Create Template
+              <Plus className="h-3.5 w-3.5 mr-2" /> Create Template
             </Button>
           </div>
 
           {/* Company badge */}
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50/30 px-4 py-2.5 flex items-center gap-2 mb-5">
-            <Check className="h-4 w-4 text-emerald-600" />
-            <span className="text-sm font-medium text-emerald-800">{selectedCompany?.company_name}</span>
+          <div className="rounded-xl border border-green-200 bg-green-50/30 px-4 py-3 flex items-center gap-2 mb-5">
+            <Check className="h-4 w-4 text-green-600" />
+            <span className="text-sm font-medium text-green-800">{selectedCompany?.company_name}</span>
           </div>
 
           {/* Template Grid */}
@@ -698,16 +698,16 @@ export default function ReportBuilder() {
                 </div>
                 <p className="text-xs text-neutral-500">
                   {template.questions.length} section{template.questions.length !== 1 ? 's' : ''}
-                  {template.isDefault && <span className="ml-2 text-[10px] text-accent-500 bg-accent-50 px-1.5 py-0.5 rounded-full font-medium">Default</span>}
+                  {template.isDefault && <span className="ml-2 text-xs text-accent-500 bg-accent-50 px-2 py-0.5 rounded-md font-medium">Default</span>}
                 </p>
                 <div className="flex flex-wrap gap-1 mt-2">
                   {template.questions.slice(0, 4).map(q => (
-                    <span key={q.id} className="text-[10px] bg-neutral-100 text-neutral-500 px-2 py-0.5 rounded-full truncate max-w-[140px]">
+                    <span key={q.id} className="text-xs bg-neutral-100 text-neutral-500 px-2 py-0.5 rounded-md truncate max-w-[140px]">
                       {q.heading || q.question.slice(0, 25)}
                     </span>
                   ))}
                   {template.questions.length > 4 && (
-                    <span className="text-[10px] bg-neutral-100 text-neutral-400 px-2 py-0.5 rounded-full">
+                    <span className="text-xs bg-neutral-100 text-neutral-400 px-2 py-0.5 rounded-md">
                       +{template.questions.length - 4} more
                     </span>
                   )}
@@ -733,31 +733,31 @@ export default function ReportBuilder() {
           </button>
 
           {/* Company badge */}
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50/30 px-4 py-2.5 flex items-center gap-2 mb-5">
-            <Check className="h-4 w-4 text-emerald-600" />
-            <span className="text-sm font-medium text-emerald-800">{selectedCompany?.company_name}</span>
+          <div className="rounded-xl border border-green-200 bg-green-50/30 px-4 py-3 flex items-center gap-2 mb-5">
+            <Check className="h-4 w-4 text-green-600" />
+            <span className="text-sm font-medium text-green-800">{selectedCompany?.company_name}</span>
           </div>
 
           {/* Report Name */}
           <div className="mb-5">
-            <label className="text-xs font-semibold text-neutral-700 mb-1.5 block">
+            <label className="text-xs font-semibold text-neutral-700 mb-2 block">
               Report Name <span className="text-red-500">*</span>
             </label>
             <input
               value={reportName}
               onChange={(e) => setReportName(e.target.value)}
               placeholder="Enter a name for this report"
-              className="w-full h-11 px-4 rounded-xl border border-neutral-300 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500/30 focus:border-accent-400"
+              className="w-full h-11 px-4 rounded-xl border border-neutral-200 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40 focus-visible:border-accent-400"
             />
           </div>
 
           {/* Model Selector */}
           <div className="mb-5">
-            <label className="text-xs font-semibold text-neutral-700 mb-1.5 block">AI Model</label>
+            <label className="text-xs font-semibold text-neutral-700 mb-2 block">AI Model</label>
             <select
               value={selectedModel}
               onChange={(e) => setSelectedModel(e.target.value)}
-              className="w-full h-11 px-4 rounded-xl border border-neutral-300 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500/30 focus:border-accent-400 bg-white"
+              className="w-full h-11 px-4 rounded-xl border border-neutral-200 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40 focus-visible:border-accent-400 bg-white"
             >
               {AVAILABLE_MODELS.map(m => (
                 <option key={m.id} value={m.id}>{m.label}</option>
@@ -787,7 +787,7 @@ export default function ReportBuilder() {
                   </p>
                   <p className="text-xs text-accent-600 truncate">{progress.currentHeading}</p>
                 </div>
-                <span className="text-xs font-bold text-accent-600 tabular-nums">
+                <span className="text-xs font-semibold text-accent-600 tabular-nums">
                   {Math.round((progress.currentQuestion / progress.totalQuestions) * 100)}%
                 </span>
               </div>

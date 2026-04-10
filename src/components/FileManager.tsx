@@ -97,7 +97,7 @@ function DocumentCategory({
                 <p className="text-sm font-medium text-neutral-900 truncate">
                   {doc.name}
                 </p>
-                <div className="flex items-center gap-3 text-xs text-neutral-500 mt-0.5">
+                <div className="flex items-center gap-3 text-xs text-neutral-500 mt-1">
                   <span>{formatFileSize(doc.size)}</span>
                   <span>•</span>
                   <span>
@@ -191,7 +191,7 @@ export default function FileManager({
           <h3 className="text-lg font-semibold text-neutral-900">
             Research Documents
           </h3>
-          <p className="text-sm text-neutral-500 mt-0.5">
+          <p className="text-sm text-neutral-500 mt-1">
             {totalFiles} {totalFiles === 1 ? 'document' : 'documents'} fetched
             {selectedCount > 0 && ` • ${selectedCount} selected for AI context`}
           </p>

@@ -152,13 +152,13 @@ export default function FetchDataDialog({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Identifier Type Dropdown */}
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <Label htmlFor="identifier_type">Identifier Type</Label>
             <select
               id="identifier_type"
               value={identifierType}
               onChange={handleTypeChange}
-              className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:border-transparent"
+              className="w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40 focus-visible:border-accent-400"
               disabled={isLoading}
             >
               {IDENTIFIER_OPTIONS.map((option) => (
@@ -170,7 +170,7 @@ export default function FetchDataDialog({
           </div>
 
           {/* Input Field */}
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <Label htmlFor="identifier_value">
               {currentOption?.label} Value
             </Label>

@@ -10,6 +10,7 @@ import {
   Sparkles, ChevronDown, ChevronUp, Zap, RotateCcw,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { SECTORS } from '@/lib/sectors';
 
 // ========================
 // Sector Thesis Page
@@ -27,9 +28,13 @@ export default function SectorThesis() {
   // --- Generate Framework state ---
   const [showGeneratePanel, setShowGeneratePanel] = useState(false);
   const [generateSector, setGenerateSector] = useState('');
+  const [sectorDropdownOpen, setSectorDropdownOpen] = useState(false);
+  const [sectorFilter, setSectorFilter] = useState('');
   const [generating, setGenerating] = useState(false);
   const [generateProgress, setGenerateProgress] = useState<PipelineProgress | null>(null);
   const [, setLastGeneratedCached] = useState<boolean | null>(null);
+
+  const sectorDropdownRef = useRef<HTMLDivElement>(null);
 
   // --- Regenerate (right panel) state ---
   const [regenerating, setRegenerating] = useState(false);
@@ -57,6 +62,17 @@ export default function SectorThesis() {
   }, []);
 
   useEffect(() => { fetchPlaybooks(); }, [fetchPlaybooks]);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (sectorDropdownRef.current && !sectorDropdownRef.current.contains(e.target as Node)) {
+        setSectorDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
   // Focus sector input when panel opens
   useEffect(() => {
@@ -193,15 +209,15 @@ export default function SectorThesis() {
   const renderMarkdown = (md: string) => {
     return md
       .replace(/^#### (.+)$/gm, '<h5 class="text-sm font-semibold text-neutral-800 mt-5 mb-1">$1</h5>')
-      .replace(/^### (.+)$/gm, '<h4 class="text-base font-semibold text-neutral-800 mt-6 mb-1.5">$1</h4>')
+      .replace(/^### (.+)$/gm, '<h4 class="text-base font-semibold text-neutral-800 mt-6 mb-2">$1</h4>')
       .replace(/^## (.+)$/gm, '<h3 class="text-lg font-bold text-neutral-900 mt-7 mb-2 pb-1 border-b border-neutral-200">$1</h3>')
       .replace(/^# (.+)$/gm, '<h2 class="text-xl font-bold text-neutral-900 mt-8 mb-2">$1</h2>')
       .replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-neutral-900">$1</strong>')
       .replace(/\*(.+?)\*/g, '<em>$1</em>')
       .replace(/^> (.+)$/gm, '<blockquote class="border-l-3 border-accent-300 pl-3 my-2 text-neutral-600 italic">$1</blockquote>')
-      .replace(/^- (.+)$/gm, '<li class="ml-5 list-disc text-neutral-700 leading-relaxed text-[13px]">$1</li>')
-      .replace(/^(\d+)\. (.+)$/gm, '<li class="ml-5 list-decimal text-neutral-700 leading-relaxed text-[13px]">$2</li>')
-      .replace(/\n{2,}/g, '</p><p class="text-[13px] text-neutral-700 leading-relaxed mt-2">')
+      .replace(/^- (.+)$/gm, '<li class="ml-5 list-disc text-neutral-700 leading-relaxed text-sm">$1</li>')
+      .replace(/^(\d+)\. (.+)$/gm, '<li class="ml-5 list-decimal text-neutral-700 leading-relaxed text-sm">$2</li>')
+      .replace(/\n{2,}/g, '</p><p class="text-sm text-neutral-700 leading-relaxed mt-2">')
       .replace(/\n/g, '<br/>');
   };
 
@@ -213,15 +229,15 @@ export default function SectorThesis() {
         <div className="p-4 border-b border-neutral-100">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <h1 className="text-base font-bold text-neutral-900 flex items-center gap-2">
+              <h1 className="text-base font-semibold text-neutral-900 flex items-center gap-2">
                 <Layers className="h-4 w-4 text-accent-600" />
                 Sector Thesis
               </h1>
-              <p className="text-[11px] text-neutral-400 mt-0.5">
+              <p className="text-xs text-neutral-400 mt-1">
                 {playbooks.length} sector framework{playbooks.length !== 1 ? 's' : ''}
               </p>
             </div>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-2">
               <button
                 onClick={fetchPlaybooks}
                 className="h-7 w-7 rounded-lg border border-neutral-200 flex items-center justify-center text-neutral-400 hover:text-accent-600 hover:border-accent-200 transition-colors"
@@ -232,7 +248,7 @@ export default function SectorThesis() {
               {/* Generate Framework toggle button */}
               <button
                 onClick={() => setShowGeneratePanel(v => !v)}
-                className={`h-7 px-2.5 rounded-lg border text-[11px] font-medium flex items-center gap-1.5 transition-colors ${
+                className={`h-7 px-3 rounded-lg border text-xs font-medium flex items-center gap-2 transition-colors ${
                   showGeneratePanel
                     ? 'bg-accent-600 border-accent-600 text-white'
                     : 'border-accent-300 text-accent-700 hover:bg-accent-50'
@@ -249,28 +265,64 @@ export default function SectorThesis() {
           {/* Generate Framework Panel */}
           {showGeneratePanel && (
             <div className="mt-3 p-3 rounded-xl bg-accent-50 border border-accent-200">
-              <p className="text-[11px] font-semibold text-accent-700 mb-2 flex items-center gap-1">
+              <p className="text-xs font-semibold text-accent-700 mb-2 flex items-center gap-1">
                 <Sparkles className="h-3 w-3" /> Generate Sector Framework
               </p>
-              <p className="text-[10px] text-accent-600 mb-2.5 leading-relaxed">
+              <p className="text-xs text-accent-600 mb-3 leading-relaxed">
                 AI will research and build a comprehensive framework using live web data. Uses existing cache if available.
               </p>
-              <input
-                ref={sectorInputRef}
-                value={generateSector}
-                onChange={(e) => setGenerateSector(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter' && !generating) handleGenerate(); }}
-                placeholder="e.g. Banking, IT, Pharma..."
-                disabled={generating}
-                className="w-full h-8 px-3 rounded-lg border border-accent-300 bg-white text-xs text-neutral-700 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-accent-500/20 focus:border-accent-400 disabled:opacity-60 mb-2"
-              />
+              <div className="relative mb-2" ref={sectorDropdownRef}>
+                <input
+                  ref={sectorInputRef}
+                  value={sectorDropdownOpen ? sectorFilter : generateSector}
+                  onChange={(e) => {
+                    setSectorFilter(e.target.value);
+                    setSectorDropdownOpen(true);
+                    if (!e.target.value) setGenerateSector('');
+                  }}
+                  onFocus={() => { setSectorDropdownOpen(true); setSectorFilter(''); }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !generating && generateSector) handleGenerate();
+                    if (e.key === 'Escape') setSectorDropdownOpen(false);
+                  }}
+                  placeholder="Search or select a sector..."
+                  disabled={generating}
+                  className="w-full h-8 px-3 pr-7 rounded-lg border border-neutral-200 bg-white text-xs text-neutral-700 placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40 focus-visible:border-accent-400 disabled:opacity-60"
+                />
+                <ChevronDown className={`absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-neutral-400 pointer-events-none transition-transform ${sectorDropdownOpen ? 'rotate-180' : ''}`} />
+                {sectorDropdownOpen && (
+                  <div className="absolute z-50 mt-1 w-full max-h-48 overflow-y-auto rounded-lg border border-neutral-200 bg-white shadow-lg">
+                    {SECTORS
+                      .filter(s => s.toLowerCase().includes(sectorFilter.toLowerCase()))
+                      .map(sector => (
+                        <button
+                          key={sector}
+                          onClick={() => {
+                            setGenerateSector(sector);
+                            setSectorFilter('');
+                            setSectorDropdownOpen(false);
+                          }}
+                          className={`w-full text-left px-3 py-2 text-xs hover:bg-accent-50 transition-colors ${
+                            generateSector === sector ? 'bg-accent-50 text-accent-700 font-medium' : 'text-neutral-700'
+                          }`}
+                        >
+                          {sector}
+                        </button>
+                      ))
+                    }
+                    {SECTORS.filter(s => s.toLowerCase().includes(sectorFilter.toLowerCase())).length === 0 && (
+                      <p className="px-3 py-2 text-xs text-neutral-400">No matching sectors</p>
+                    )}
+                  </div>
+                )}
+              </div>
 
               {/* Progress bar */}
               {generating && generateProgress && (
                 <div className="mb-2">
                   <div className="flex items-center justify-between mb-1">
-                    <p className="text-[10px] text-accent-700 leading-tight">{generateProgress.message}</p>
-                    <span className="text-[10px] text-accent-600 font-medium">{generateProgress.percent}%</span>
+                    <p className="text-xs text-accent-700 leading-tight">{generateProgress.message}</p>
+                    <span className="text-xs text-accent-600 font-medium">{generateProgress.percent}%</span>
                   </div>
                   <div className="h-1 rounded-full bg-accent-200 overflow-hidden">
                     <div
@@ -284,7 +336,7 @@ export default function SectorThesis() {
               <button
                 onClick={handleGenerate}
                 disabled={generating || !generateSector.trim()}
-                className="w-full h-8 rounded-lg bg-accent-600 hover:bg-accent-700 text-white text-xs font-medium flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full h-8 rounded-lg bg-accent-600 hover:bg-accent-700 text-white text-xs font-medium flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {generating ? (
                   <>
@@ -308,7 +360,7 @@ export default function SectorThesis() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search sectors..."
-              className="w-full h-8 pl-8 pr-3 rounded-lg border border-neutral-200 bg-neutral-50 text-xs text-neutral-700 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-accent-500/20 focus:border-accent-300"
+              className="w-full h-8 pl-8 pr-3 rounded-lg border border-neutral-200 bg-neutral-50 text-xs text-neutral-700 placeholder:text-neutral-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40 focus-visible:border-accent-400"
             />
           </div>
         </div>
@@ -325,7 +377,7 @@ export default function SectorThesis() {
               <p className="text-xs text-neutral-400">
                 {search ? 'No matching sectors' : 'No sector frameworks yet'}
               </p>
-              <p className="text-[10px] text-neutral-300 mt-1">
+              <p className="text-xs text-neutral-300 mt-1">
                 Use the Generate button above to create a framework
               </p>
             </div>
@@ -351,20 +403,20 @@ export default function SectorThesis() {
                       {pb.sector_name.slice(0, 2).toUpperCase()}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className={`text-[13px] font-medium truncate ${
+                      <p className={`text-sm font-medium truncate ${
                         isSelected ? 'text-accent-800' : 'text-neutral-800'
                       }`}>
                         {pb.sector_name}
                       </p>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <span className={`text-[10px] flex items-center gap-1 font-medium px-1.5 py-0.5 rounded-full ${
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className={`text-xs flex items-center gap-1 font-medium px-2 py-0.5 rounded-full ${
                           isSelected
                             ? 'bg-accent-100 text-accent-600'
                             : 'bg-neutral-100 text-neutral-500'
                         }`}>
                           <Hash className="h-2.5 w-2.5" /> v{pb.version}
                         </span>
-                        <span className="text-[10px] text-neutral-400 flex items-center gap-1">
+                        <span className="text-xs text-neutral-400 flex items-center gap-1">
                           <CalendarDays className="h-2.5 w-2.5" /> {pb.last_updated}
                         </span>
                       </div>
@@ -381,7 +433,7 @@ export default function SectorThesis() {
       </div>
 
       {/* ===== RIGHT PANEL: Framework Viewer/Editor ===== */}
-      <div className="flex-1 flex flex-col bg-[#f8f8f6] overflow-hidden">
+      <div className="flex-1 flex flex-col bg-canvas overflow-hidden">
         {selectedPlaybook ? (
           <>
             {/* Toolbar */}
@@ -394,13 +446,13 @@ export default function SectorThesis() {
                   <ArrowLeft className="h-3.5 w-3.5" />
                 </button>
                 <div>
-                  <h2 className="text-sm font-bold text-neutral-900 flex items-center gap-2">
+                  <h2 className="text-sm font-semibold text-neutral-900 flex items-center gap-2">
                     {selectedPlaybook.sector_name}
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent-100 text-accent-700 text-[10px] font-semibold">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-accent-100 text-accent-700 text-xs font-semibold">
                       <Hash className="h-2.5 w-2.5" /> v{selectedPlaybook.version}
                     </span>
                   </h2>
-                  <p className="text-[10px] text-neutral-400">
+                  <p className="text-xs text-neutral-400">
                     Last updated {selectedPlaybook.last_updated}
                   </p>
                 </div>
@@ -414,14 +466,14 @@ export default function SectorThesis() {
                         setDraft(getFrameworkFromPlaybook(selectedPlaybook));
                         setEditMode(false);
                       }}
-                      className="h-8 px-3 rounded-lg border border-neutral-200 text-xs font-medium text-neutral-600 hover:bg-neutral-50 transition-colors flex items-center gap-1.5"
+                      className="h-8 px-3 rounded-lg border border-neutral-200 text-xs font-medium text-neutral-600 hover:bg-neutral-50 transition-colors flex items-center gap-2"
                     >
                       <X className="h-3.5 w-3.5" /> Cancel
                     </button>
                     <button
                       onClick={handleSave}
                       disabled={saving}
-                      className="h-8 px-4 rounded-lg bg-accent-600 hover:bg-accent-700 text-white text-xs font-medium transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                      className="h-8 px-4 rounded-lg bg-accent-600 hover:bg-accent-700 text-white text-xs font-medium transition-colors flex items-center gap-2 disabled:opacity-50"
                     >
                       {saving ? (
                         <RefreshCw className="h-3.5 w-3.5 animate-spin" />
@@ -437,7 +489,7 @@ export default function SectorThesis() {
                     <button
                       onClick={handleRegenerate}
                       disabled={regenerating}
-                      className="h-8 px-3 rounded-lg border border-neutral-200 text-xs font-medium text-neutral-600 hover:bg-neutral-50 hover:border-neutral-300 transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                      className="h-8 px-3 rounded-lg border border-neutral-200 text-xs font-medium text-neutral-600 hover:bg-neutral-50 hover:border-neutral-300 transition-colors flex items-center gap-2 disabled:opacity-50"
                       title="Regenerate this framework using AI (force refresh)"
                     >
                       {regenerating ? (
@@ -449,7 +501,7 @@ export default function SectorThesis() {
                     </button>
                     <button
                       onClick={() => setEditMode(true)}
-                      className="h-8 px-4 rounded-lg bg-accent-600 hover:bg-accent-700 text-white text-xs font-medium transition-colors flex items-center gap-1.5"
+                      className="h-8 px-4 rounded-lg bg-accent-600 hover:bg-accent-700 text-white text-xs font-medium transition-colors flex items-center gap-2"
                     >
                       <Pencil className="h-3.5 w-3.5" /> Edit Framework
                     </button>
@@ -462,11 +514,11 @@ export default function SectorThesis() {
             {regenerating && regenProgress && (
               <div className="px-6 py-2 bg-accent-50 border-b border-accent-200 shrink-0">
                 <div className="flex items-center justify-between mb-1">
-                  <p className="text-[11px] text-accent-700 flex items-center gap-1.5">
+                  <p className="text-xs text-accent-700 flex items-center gap-2">
                     <Sparkles className="h-3 w-3 animate-pulse" />
                     {regenProgress.message}
                   </p>
-                  <span className="text-[11px] font-medium text-accent-600">{regenProgress.percent}%</span>
+                  <span className="text-xs font-medium text-accent-600">{regenProgress.percent}%</span>
                 </div>
                 <div className="h-1 rounded-full bg-accent-200 overflow-hidden">
                   <div
@@ -483,12 +535,12 @@ export default function SectorThesis() {
                 <div className="max-w-4xl mx-auto">
                   <div className="flex items-center gap-2 mb-3">
                     <Pencil className="h-3.5 w-3.5 text-accent-600" />
-                    <span className="text-[11px] font-semibold text-accent-700 uppercase tracking-wider">Editing Mode</span>
+                    <span className="text-xs font-semibold text-accent-700 uppercase tracking-wider">Editing Mode</span>
                   </div>
                   <textarea
                     value={draft}
                     onChange={(e) => setDraft(e.target.value)}
-                    className="w-full min-h-[calc(100vh-220px)] rounded-xl border border-neutral-300 bg-white p-5 text-[13px] text-neutral-800 font-mono leading-relaxed resize-y focus:outline-none focus:ring-2 focus:ring-accent-500/30 focus:border-accent-400 shadow-sm"
+                    className="w-full min-h-[calc(100vh-220px)] rounded-xl border border-neutral-200 bg-white p-5 text-sm text-neutral-800 font-mono leading-relaxed resize-y focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40 focus-visible:border-accent-400 shadow-sm"
                     spellCheck={false}
                   />
                 </div>
@@ -496,12 +548,12 @@ export default function SectorThesis() {
                 <div className="max-w-4xl mx-auto">
                   <div className="flex items-center gap-2 mb-4">
                     <Eye className="h-3.5 w-3.5 text-neutral-400" />
-                    <span className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">Preview Mode</span>
+                    <span className="text-xs font-semibold text-neutral-400 uppercase tracking-wider">Preview Mode</span>
                   </div>
                   <div
                     className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6 md:p-8"
                     dangerouslySetInnerHTML={{
-                      __html: `<div class="prose prose-sm max-w-none"><p class="text-[13px] text-neutral-700 leading-relaxed">${renderMarkdown(getFrameworkFromPlaybook(selectedPlaybook))}</p></div>`,
+                      __html: `<div class="prose prose-sm max-w-none"><p class="text-sm text-neutral-700 leading-relaxed">${renderMarkdown(getFrameworkFromPlaybook(selectedPlaybook))}</p></div>`,
                     }}
                   />
                 </div>

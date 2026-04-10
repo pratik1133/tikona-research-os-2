@@ -61,7 +61,7 @@ export default function ChartBlock({ content, onChange }: Props) {
         )}
         <button
           onClick={toggleType}
-          className="text-[10px] px-2 py-1 rounded-md bg-neutral-100 text-neutral-500 hover:bg-neutral-200 hover:text-neutral-700 transition-colors opacity-0 group-hover/chart:opacity-100 font-medium"
+          className="text-xs px-2 py-1 rounded-md bg-neutral-100 text-neutral-500 hover:bg-neutral-200 hover:text-neutral-700 transition-colors opacity-0 group-hover/chart:opacity-100 font-medium"
         >
           Switch to {content.chartType === 'bar' ? 'Line' : content.chartType === 'line' ? 'Pie' : 'Bar'}
         </button>

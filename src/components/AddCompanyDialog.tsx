@@ -143,7 +143,7 @@ export default function AddCompanyDialog({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Company Name */}
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <Label htmlFor="company_name">
               Company Name <span className="text-red-500">*</span>
             </Label>
@@ -162,7 +162,7 @@ export default function AddCompanyDialog({
 
           {/* NSE Symbol & BSE Code Row */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label htmlFor="nse_symbol">
                 NSE Symbol <span className="text-red-500">*</span>
               </Label>
@@ -179,7 +179,7 @@ export default function AddCompanyDialog({
               )}
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <Label htmlFor="bse_code">BSE Code</Label>
               <Input
                 id="bse_code"
@@ -196,7 +196,7 @@ export default function AddCompanyDialog({
           </div>
 
           {/* ISIN */}
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <Label htmlFor="isin">ISIN</Label>
             <Input
               id="isin"

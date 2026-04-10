@@ -3,7 +3,7 @@
   "outputDirectory": "dist",
   "framework": "vite",
   "rewrites": [
-    { "source": "/proxy/n8n/:path*", "destination": "http://72.61.226.16:5678/:path*" },
+    { "source": "/proxy/n8n/:path*", "destination": "https://n8n.tikonacapital.com/:path*" },
     { "source": "/proxy/ppt/:path*", "destination": "http://72.61.226.16:8501/:path*" },
     { "source": "/proxy/fm/:path*",  "destination": "http://72.61.226.16:8500/:path*" },
     { "source": "/(.*)", "destination": "/index.html" }

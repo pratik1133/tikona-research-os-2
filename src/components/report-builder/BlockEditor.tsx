@@ -60,7 +60,7 @@ export default function BlockEditor({ blocks, onChange, onRegenerateBlock, activ
                 >
               {/* Block toolbar */}
               <div className="absolute -top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity print:hidden">
-                <span className="text-[9px] px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-400 font-mono">
+                <span className="text-xs px-2 py-0.5 rounded bg-neutral-100 text-neutral-400 font-mono">
                   {BLOCK_LABELS[block.type]}
                 </span>
                 <button

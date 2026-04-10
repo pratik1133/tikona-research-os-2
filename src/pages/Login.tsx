@@ -62,8 +62,8 @@ export default function Login() {
 
         <div className="relative">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent-500">
-              <span className="text-xs font-bold text-white">TC</span>
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white">
+              <img src="/tikona-logo.png" alt="Tikona Capital" className="h-8 w-8 object-contain" />
             </div>
             <span className="text-sm font-semibold tracking-tight">Tikona Capital</span>
           </div>
@@ -88,9 +88,9 @@ export default function Login() {
         <div className="w-full max-w-sm">
           {/* Mobile logo */}
           <div className="lg:hidden mb-10">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent-600">
-                <span className="text-[11px] font-bold text-white">TC</span>
+            <div className="flex items-center gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white">
+                <img src="/tikona-logo.png" alt="Tikona Capital" className="h-7 w-7 object-contain" />
               </div>
               <span className="text-sm font-semibold text-neutral-900">Tikona Capital</span>
             </div>
@@ -99,7 +99,7 @@ export default function Login() {
           <h2 className="text-3xl font-semibold text-neutral-900 tracking-tight">
             Sign in
           </h2>
-          <p className="mt-1.5 text-sm text-neutral-500">
+          <p className="mt-2 text-sm text-neutral-500">
             Continue to your research dashboard
           </p>
 

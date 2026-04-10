@@ -40,7 +40,7 @@ export default function PipelineProgressBar({ status, className, onStepClick }: 
                 onClick={() => isClickable && onStepClick?.(step.stage)}
                 disabled={!isClickable}
                 className={cn(
-                  'flex flex-col items-center gap-1.5 group transition-all',
+                  'flex flex-col items-center gap-2 group transition-all',
                   isClickable && 'cursor-pointer',
                   !isClickable && 'cursor-default',
                 )}
@@ -66,7 +66,7 @@ export default function PipelineProgressBar({ status, className, onStepClick }: 
                 </div>
                 <span
                   className={cn(
-                    'text-[10px] font-semibold tracking-wide uppercase transition-colors',
+                    'text-xs font-semibold tracking-wide uppercase transition-colors',
                     isCurrent && 'text-accent-700',
                     isCompleted && 'text-neutral-600',
                     !isCompleted && !isCurrent && 'text-neutral-400',
@@ -77,7 +77,7 @@ export default function PipelineProgressBar({ status, className, onStepClick }: 
               </button>
 
               {!isLast && (
-                <div className="flex-1 mx-1.5 mb-5">
+                <div className="flex-1 mx-2 mb-5">
                   <div className={cn(
                     'h-[2px] w-full rounded-full transition-colors duration-500',
                     isCompleted ? 'bg-accent-400' : 'bg-neutral-200',
@@ -90,7 +90,7 @@ export default function PipelineProgressBar({ status, className, onStepClick }: 
       </div>
 
       {/* Mobile: compact pill stepper */}
-      <div className="flex sm:hidden items-center gap-1.5 overflow-x-auto pb-1">
+      <div className="flex sm:hidden items-center gap-2 overflow-x-auto pb-1">
         {STEPS.map((step) => {
           const isCompleted = currentStage > step.stage;
           const isCurrent = currentStage === step.stage;
@@ -102,7 +102,7 @@ export default function PipelineProgressBar({ status, className, onStepClick }: 
               type="button"
               onClick={() => (isCompleted || isCurrent) && onStepClick?.(step.stage)}
               className={cn(
-                'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold uppercase tracking-wide whitespace-nowrap transition-all',
+                'flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold uppercase tracking-wide whitespace-nowrap transition-all',
                 isCompleted && 'bg-accent-50 text-accent-700',
                 isCurrent && 'bg-accent-600 text-white shadow-sm',
                 !isCompleted && !isCurrent && 'bg-neutral-100 text-neutral-400',

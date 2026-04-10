@@ -42,6 +42,7 @@ import type { MasterCompany } from '@/types/database';
 import type { VaultDocument } from '@/types/vault';
 import DocumentUploadDialog from '@/components/DocumentUploadDialog';
 import { cn } from '@/lib/utils';
+import { SECTORS } from '@/lib/sectors';
 import {
   Search,
   Building2,
@@ -147,11 +148,14 @@ export default function ResearchPipeline() {
   const { data: companies } = useCompanySearch(debouncedSearch);
   const { data: financials } = useCompanyFinancials(selectedCompany);
 
-  // Auto-fill sector from financials
+  // Auto-fill sector from financials — match to closest SECTORS entry
   useEffect(() => {
     if (financials && !selectedSector) {
-      const sector = financials.sector || financials.broad_sector || '';
-      if (sector) setSelectedSector(sector);
+      const raw = (financials.sector || financials.broad_sector || '').toLowerCase();
+      if (!raw) return;
+      const exact = SECTORS.find(s => s.toLowerCase() === raw);
+      const partial = !exact ? SECTORS.find(s => raw.includes(s.toLowerCase()) || s.toLowerCase().includes(raw)) : undefined;
+      setSelectedSector(exact || partial || financials.sector || financials.broad_sector || '');
     }
   }, [financials, selectedSector]);
 
@@ -739,23 +743,23 @@ export default function ResearchPipeline() {
   // ========================
 
   return (
-    <div className="min-h-screen bg-[#f8f8f6]">
+    <div className="min-h-screen bg-canvas">
       {/* ==================== HEADER ==================== */}
       <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-sm border-b border-neutral-200/80">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-3">
             {hasSession && (
-              <button onClick={handleBackToHome} className="p-1.5 rounded-lg hover:bg-neutral-100 transition-colors text-neutral-400 hover:text-neutral-600">
+              <button onClick={handleBackToHome} className="p-2 rounded-lg hover:bg-neutral-100 transition-colors text-neutral-400 hover:text-neutral-600">
                 <X className="h-4 w-4" />
               </button>
             )}
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-3">
               <div className="h-8 w-8 rounded-lg bg-accent-600 flex items-center justify-center shadow-sm shadow-accent-200">
                 <Sparkles className="h-4 w-4 text-white" />
               </div>
               <div>
                 <h1 className="text-sm font-semibold text-neutral-900 leading-tight">Research Pipeline</h1>
-                {!hasSession && <p className="text-[10px] text-neutral-400 leading-tight">Powered by Claude + Web Search</p>}
+                {!hasSession && <p className="text-xs text-neutral-400 leading-tight">Powered by Claude + Web Search</p>}
               </div>
             </div>
           </div>
@@ -763,12 +767,12 @@ export default function ResearchPipeline() {
           {hasSession && session && (
             <div className="flex items-center gap-4">
               <div className="hidden md:flex items-center gap-2 text-xs">
-                <div className="flex items-center gap-1.5 text-neutral-700 font-medium">
+                <div className="flex items-center gap-2 text-neutral-700 font-medium">
                   <Building2 className="h-3.5 w-3.5 text-neutral-400" />
                   {session.company_name}
                 </div>
                 <span className="text-neutral-300">|</span>
-                <span className="text-neutral-500 font-mono text-[11px]">{session.company_nse_code}</span>
+                <span className="text-neutral-500 font-mono text-xs">{session.company_nse_code}</span>
                 {session.sector && (
                   <>
                     <span className="text-neutral-300">|</span>
@@ -799,7 +803,7 @@ export default function ResearchPipeline() {
               <div className="lg:col-span-3 space-y-4">
                 {/* Company Search */}
                 <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm p-5">
-                  <label className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider mb-2 block">Search Company</label>
+                  <label className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2 block">Search Company</label>
                   <div className="relative" ref={dropdownRef}>
                     <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-neutral-400" />
                     <Input
@@ -813,20 +817,20 @@ export default function ResearchPipeline() {
                       }}
                       onFocus={() => searchInput.length >= 2 && setIsDropdownOpen(true)}
                       placeholder="Search by name or NSE symbol..."
-                      className="pl-10 h-11 rounded-xl border-neutral-200 focus:border-accent-400 focus:ring-accent-100"
+                      className="pl-10 h-11 rounded-xl border-neutral-200 focus-visible:border-accent-400 focus-visible:ring-accent-500/20"
                     />
 
                     {isDropdownOpen && companies && companies.length > 0 && (
-                      <div className="absolute z-50 w-full mt-1.5 bg-white border border-neutral-200 rounded-xl shadow-xl max-h-60 overflow-y-auto">
+                      <div className="absolute z-50 w-full mt-2 bg-white border border-neutral-200 rounded-xl shadow-xl max-h-60 overflow-y-auto">
                         {companies.map((company) => (
                           <button
                             key={company.company_id}
-                            className="w-full text-left px-4 py-2.5 hover:bg-accent-50 border-b border-neutral-50 last:border-0 transition-colors"
+                            className="w-full text-left px-4 py-3 hover:bg-accent-50 border-b border-neutral-50 last:border-0 transition-colors"
                             onClick={() => handleSelectCompany(company)}
                           >
                             <span className="font-medium text-sm text-neutral-900">{company.company_name}</span>
                             {company.nse_symbol && (
-                              <span className="ml-2 text-[10px] text-neutral-400 bg-neutral-100 px-1.5 py-0.5 rounded font-mono">{company.nse_symbol}</span>
+                              <span className="ml-2 text-xs text-neutral-400 bg-neutral-100 px-2 py-0.5 rounded font-mono">{company.nse_symbol}</span>
                             )}
                           </button>
                         ))}
@@ -837,14 +841,14 @@ export default function ResearchPipeline() {
                   {/* Model selection */}
                   {selectedCompany && (
                     <div className="mt-3 flex items-center gap-3">
-                      <label className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">Model</label>
-                      <div className="flex gap-1.5">
+                      <label className="text-xs font-semibold text-neutral-400 uppercase tracking-wider">Model</label>
+                      <div className="flex gap-2">
                         {PIPELINE_MODELS.map(m => (
                           <button
                             key={m.id}
                             onClick={() => setSelectedModel(m.id)}
                             className={cn(
-                              'px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
+                              'px-3 py-2 rounded-lg text-xs font-medium transition-all',
                               selectedModel === m.id
                                 ? 'bg-accent-600 text-white shadow-sm'
                                 : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
@@ -864,12 +868,23 @@ export default function ResearchPipeline() {
                     <div className="p-5">
                       <div className="flex items-start justify-between mb-4">
                         <div>
-                          <h3 className="text-lg font-bold text-neutral-900">{selectedCompany.company_name}</h3>
+                          <h3 className="text-lg font-semibold text-neutral-900">{selectedCompany.company_name}</h3>
                           <div className="flex items-center gap-2 mt-1">
                             <span className="text-xs font-mono text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded">NSE: {selectedCompany.nse_symbol}</span>
-                            {selectedSector && (
+                            {!sessionId ? (
+                              <select
+                                value={selectedSector}
+                                onChange={(e) => setSelectedSector(e.target.value)}
+                                className="text-xs text-accent-700 bg-accent-50 border border-neutral-200 px-2 py-0.5 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40 cursor-pointer"
+                              >
+                                <option value="">Select Sector...</option>
+                                {SECTORS.map(s => (
+                                  <option key={s} value={s}>{s}</option>
+                                ))}
+                              </select>
+                            ) : selectedSector ? (
                               <span className="text-xs text-accent-600 bg-accent-50 px-2 py-0.5 rounded">{selectedSector}</span>
-                            )}
+                            ) : null}
                           </div>
                         </div>
                         <Button
@@ -903,7 +918,7 @@ export default function ResearchPipeline() {
                 <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden">
                   <div className="px-5 py-3 border-b border-neutral-100 flex items-center gap-2">
                     <Clock className="h-3.5 w-3.5 text-neutral-400" />
-                    <h3 className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">Recent Pipelines</h3>
+                    <h3 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider">Recent Pipelines</h3>
                   </div>
                   {recentSessions.length > 0 ? (
                     <div className="divide-y divide-neutral-100">
@@ -917,9 +932,9 @@ export default function ResearchPipeline() {
                           >
                             <div className="min-w-0 flex-1">
                               <p className="text-sm font-medium text-neutral-800 truncate">{s.company_name}</p>
-                              <div className="flex items-center gap-2 mt-0.5">
-                                <span className="text-[10px] font-mono text-neutral-400">{s.company_nse_code}</span>
-                                <span className="text-[10px] text-neutral-300">{new Date(s.created_at).toLocaleDateString()}</span>
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className="text-xs font-mono text-neutral-400">{s.company_nse_code}</span>
+                                <span className="text-xs text-neutral-300">{new Date(s.created_at).toLocaleDateString()}</span>
                               </div>
                             </div>
                             <div className="flex items-center gap-2 shrink-0 ml-3">
@@ -956,19 +971,19 @@ export default function ResearchPipeline() {
 
             {/* Live Progress Indicator */}
             {progress && (
-              <div className="rounded-xl border border-accent-200 bg-accent-50/50 p-4">
+              <div className="rounded-xl border border-neutral-200 bg-accent-50/50 p-4">
                 <div className="flex items-center gap-3">
                   <Globe className="h-5 w-5 text-accent-600 animate-pulse shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-accent-800">{progress.message}</p>
-                    <div className="mt-1.5 h-1 rounded-full bg-accent-100 overflow-hidden">
+                    <div className="mt-2 h-1 rounded-full bg-accent-100 overflow-hidden">
                       <div
                         className="h-full bg-accent-500 rounded-full transition-all duration-700"
                         style={{ width: `${progress.percent}%` }}
                       />
                     </div>
                   </div>
-                  <span className="text-xs font-bold text-accent-600 tabular-nums">{progress.percent}%</span>
+                  <span className="text-xs font-semibold text-accent-600 tabular-nums">{progress.percent}%</span>
                 </div>
               </div>
             )}
@@ -998,7 +1013,7 @@ export default function ResearchPipeline() {
                   <div className="text-center py-6">
                     <p className="text-sm text-red-600 mb-3">Vault creation failed</p>
                     <Button onClick={handleCreateSession} variant="outline" size="sm" className="rounded-lg">
-                      <RefreshCw className="h-3.5 w-3.5 mr-1.5" /> Retry
+                      <RefreshCw className="h-3.5 w-3.5 mr-2" /> Retry
                     </Button>
                   </div>
                 )}
@@ -1007,7 +1022,7 @@ export default function ResearchPipeline() {
                   <>
                     {/* Financial Model row — shown when generated */}
                     {financialModelStatus === 'success' && financialModelFileUrl && (
-                      <div className="mb-3 flex items-center gap-3 rounded-lg bg-accent-50 border border-accent-100 px-4 py-2.5">
+                      <div className="mb-3 flex items-center gap-3 rounded-lg bg-accent-50 border border-accent-100 px-4 py-3">
                         <BarChart3 className="h-4 w-4 text-accent-600 shrink-0" />
                         <span className="text-xs font-medium text-accent-800 flex-1">Financial Model — uploaded to vault</span>
                         <a
@@ -1027,7 +1042,7 @@ export default function ResearchPipeline() {
                         <Spinner size="sm" className="shrink-0" />
                         <div>
                           <p className="text-xs font-medium text-neutral-700">Generating financial model...</p>
-                          <p className="text-[11px] text-neutral-400 mt-0.5">This takes ~10 minutes. You can leave this tab open.</p>
+                          <p className="text-xs text-neutral-400 mt-1">This takes ~10 minutes. You can leave this tab open.</p>
                         </div>
                       </div>
                     )}
@@ -1039,7 +1054,7 @@ export default function ResearchPipeline() {
                           <div key={doc.id} className="flex items-center gap-3 px-3 py-2 hover:bg-neutral-50 transition-colors">
                             <FileText className="h-3.5 w-3.5 text-neutral-300 shrink-0" />
                             <span className="text-xs text-neutral-700 truncate flex-1">{doc.name}</span>
-                            {doc.size > 0 && <span className="text-[10px] text-neutral-400 tabular-nums">{(doc.size / 1024).toFixed(0)} KB</span>}
+                            {doc.size > 0 && <span className="text-xs text-neutral-400 tabular-nums">{(doc.size / 1024).toFixed(0)} KB</span>}
                             {doc.viewUrl && (
                               <a href={doc.viewUrl} target="_blank" rel="noopener noreferrer" className="text-neutral-300 hover:text-accent-500 transition-colors">
                                 <ExternalLink className="h-3 w-3" />
@@ -1056,7 +1071,7 @@ export default function ResearchPipeline() {
 
                     <div className="flex items-center justify-between mt-3 pt-3 border-t border-neutral-100">
                       <Button variant="outline" size="sm" onClick={() => setIsUploadOpen(true)} className="rounded-lg text-xs">
-                        <Upload className="h-3.5 w-3.5 mr-1.5" /> Upload
+                        <Upload className="h-3.5 w-3.5 mr-2" /> Upload
                       </Button>
 
                       {/* Two options at vault_ready */}
@@ -1069,7 +1084,7 @@ export default function ResearchPipeline() {
                               variant="outline"
                               className="rounded-lg text-xs border-accent-200 text-accent-700 hover:bg-accent-50"
                             >
-                              <BarChart3 className="h-3.5 w-3.5 mr-1.5" />
+                              <BarChart3 className="h-3.5 w-3.5 mr-2" />
                               Generate Financial Model
                             </Button>
                           )}
@@ -1081,7 +1096,7 @@ export default function ResearchPipeline() {
                             size="sm"
                             className="rounded-lg bg-accent-600 hover:bg-accent-700 text-xs"
                           >
-                            <Zap className="h-3.5 w-3.5 mr-1.5" />
+                            <Zap className="h-3.5 w-3.5 mr-2" />
                             {financialModelStatus === 'success' || financialModelStatus === 'skipped'
                               ? 'Generate Sector Framework'
                               : 'Skip & Start Research'}
@@ -1096,7 +1111,7 @@ export default function ResearchPipeline() {
 
                       {/* Stage already past vault_ready */}
                       {currentStage > 1 && pipelineStatus !== 'vault_ready' && (
-                        <span className="text-xs text-emerald-600 flex items-center gap-1 font-medium">
+                        <span className="text-xs text-green-600 flex items-center gap-1 font-medium">
                           <Check className="h-3.5 w-3.5" /> Vault ready
                         </span>
                       )}
@@ -1166,7 +1181,7 @@ export default function ResearchPipeline() {
                 actions={
                   pipelineStatus === 'stage0_approved' ? (
                     <Button onClick={handleRunStage1} disabled={isRunning} size="sm" className="rounded-lg bg-accent-600 hover:bg-accent-700">
-                      <Zap className="h-3.5 w-3.5 mr-1.5" /> Generate
+                      <Zap className="h-3.5 w-3.5 mr-2" /> Generate
                     </Button>
                   ) : undefined
                 }
@@ -1208,7 +1223,7 @@ export default function ResearchPipeline() {
                 actions={
                   pipelineStatus === 'stage1_approved' ? (
                     <Button onClick={handleRunStage2} disabled={isRunning} size="sm" className="rounded-lg bg-accent-600 hover:bg-accent-700">
-                      <Zap className="h-3.5 w-3.5 mr-1.5" /> Generate Report
+                      <Zap className="h-3.5 w-3.5 mr-2" /> Generate Report
                     </Button>
                   ) : undefined
                 }
@@ -1240,15 +1255,15 @@ export default function ResearchPipeline() {
                   <div className="flex flex-col md:flex-row">
                     {/* Section sidebar */}
                     <div className="md:w-52 shrink-0 border-b md:border-b-0 md:border-r border-neutral-100 bg-neutral-50/50">
-                      <div className="md:sticky md:top-20 p-2 md:p-2.5">
-                        <p className="text-[10px] font-semibold text-neutral-400 uppercase tracking-wider px-2 py-1.5 hidden md:block">Sections</p>
-                        <div className="flex md:flex-col gap-0.5 overflow-x-auto md:overflow-x-visible">
+                      <div className="md:sticky md:top-20 p-2 md:p-3">
+                        <p className="text-xs font-semibold text-neutral-400 uppercase tracking-wider px-2 py-2 hidden md:block">Sections</p>
+                        <div className="flex md:flex-col gap-1 overflow-x-auto md:overflow-x-visible">
                           {stage2Sections.map((section, i) => (
                             <button
                               key={section.key}
                               onClick={() => setActiveReportTab(i)}
                               className={cn(
-                                'flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[11px] font-medium whitespace-nowrap transition-all text-left w-full',
+                                'flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-all text-left w-full',
                                 activeReportTab === i
                                   ? 'bg-accent-50 text-accent-700'
                                   : 'text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100'
@@ -1296,12 +1311,12 @@ export default function ResearchPipeline() {
             )}
 
             {pipelineStatus === 'published' && (
-              <div className="rounded-2xl border border-emerald-200 bg-gradient-to-b from-emerald-50 to-white p-10 text-center flex flex-col items-center">
-                <div className="inline-flex items-center justify-center h-14 w-14 rounded-2xl bg-emerald-100 mb-4">
-                  <Check className="h-7 w-7 text-emerald-600" strokeWidth={2.5} />
+              <div className="rounded-xl border border-green-200 bg-gradient-to-b from-green-50 to-white p-8 text-center flex flex-col items-center">
+                <div className="inline-flex items-center justify-center h-14 w-14 rounded-2xl bg-green-100 mb-4">
+                  <Check className="h-7 w-7 text-green-600" strokeWidth={2.5} />
                 </div>
-                <h3 className="text-xl font-bold text-emerald-800 mb-1">Report Published</h3>
-                <p className="text-sm text-emerald-600 mb-6">This research report is now live and visible to stakeholders.</p>
+                <h3 className="text-xl font-semibold text-green-800 mb-1">Report Published</h3>
+                <p className="text-sm text-green-600 mb-6">This research report is now live and visible to stakeholders.</p>
 
                 <div className="flex items-center gap-3">
                   {!telegramSent ? (
@@ -1317,7 +1332,7 @@ export default function ResearchPipeline() {
                       )}
                     </Button>
                   ) : (
-                    <div className="flex items-center gap-2 text-emerald-600 font-medium text-sm px-4 py-2 bg-emerald-50 rounded-lg border border-emerald-200">
+                    <div className="flex items-center gap-2 text-green-600 font-medium text-sm px-4 py-2 bg-green-50 rounded-lg border border-green-200">
                       <Check className="h-4 w-4" /> Recommendation Sent
                     </div>
                   )}
@@ -1325,7 +1340,7 @@ export default function ResearchPipeline() {
                   <Button
                     onClick={handleUnpublish}
                     variant="outline"
-                    className="border-emerald-200 text-emerald-800 hover:bg-emerald-50"
+                    className="border-green-200 text-green-800 hover:bg-green-50"
                   >
                     <RefreshCw className="h-4 w-4 mr-2" />
                     Revert to Draft (Unpublish)
@@ -1360,10 +1375,10 @@ export default function ResearchPipeline() {
 
 function StatusBadge({ status }: { status: PipelineStatus }) {
   const colorMap: Record<string, string> = {
-    published: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    published: 'bg-green-50 text-green-700 border-green-200',
     review: 'bg-amber-50 text-amber-700 border-amber-200',
     generating: 'bg-accent-50 text-accent-700 border-accent-200',
-    approved: 'bg-emerald-50 text-emerald-600 border-emerald-200',
+    approved: 'bg-green-50 text-green-600 border-green-200',
   };
 
   const key = status === 'published' ? 'published' :
@@ -1373,7 +1388,7 @@ function StatusBadge({ status }: { status: PipelineStatus }) {
 
   return (
     <span className={cn(
-      'text-[10px] font-semibold px-2 py-0.5 rounded-full border',
+      'text-xs font-semibold px-2 py-0.5 rounded-full border',
       colorMap[key] || 'bg-neutral-50 text-neutral-500 border-neutral-200'
     )}>
       {PIPELINE_STAGE_LABELS[status]}
@@ -1384,8 +1399,8 @@ function StatusBadge({ status }: { status: PipelineStatus }) {
 function MetricCard({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg bg-neutral-50 border border-neutral-100 px-3 py-2">
-      <p className="text-[9px] text-neutral-400 uppercase tracking-wider font-semibold mb-0.5">{label}</p>
-      <p className="text-sm font-bold text-neutral-900 tabular-nums">{value}</p>
+      <p className="text-xs text-neutral-400 uppercase tracking-wider font-semibold mb-1">{label}</p>
+      <p className="text-sm font-semibold text-neutral-900 tabular-nums">{value}</p>
     </div>
   );
 }
@@ -1410,12 +1425,12 @@ function StageBlock({ title, meta, done, isActive, showPrompt, onTogglePrompt, a
   // Collapsed — completed stages show as a compact bar
   if (done && !isActive) {
     return (
-      <div className="flex items-center gap-3 rounded-xl border border-neutral-200 bg-white px-4 py-2.5">
-        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 shrink-0">
+      <div className="flex items-center gap-3 rounded-xl border border-neutral-200 bg-white px-4 py-3">
+        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-green-100 text-green-700 shrink-0">
           <Check className="h-3 w-3" strokeWidth={3} />
         </span>
         <span className="text-sm font-medium text-neutral-600">{title}</span>
-        {meta && <span className="text-[10px] text-neutral-400">{meta}</span>}
+        {meta && <span className="text-xs text-neutral-400">{meta}</span>}
       </div>
     );
   }
@@ -1424,15 +1439,15 @@ function StageBlock({ title, meta, done, isActive, showPrompt, onTogglePrompt, a
     <div className="rounded-xl border border-neutral-200 bg-white shadow-sm overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-100">
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-3">
           <h2 className="text-sm font-semibold text-neutral-900">{title}</h2>
-          {meta && <span className="text-[10px] text-neutral-400">{meta}</span>}
+          {meta && <span className="text-xs text-neutral-400">{meta}</span>}
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={onTogglePrompt}
             className={cn(
-              'text-[11px] flex items-center gap-1 px-2 py-1 rounded-md transition-colors',
+              'text-xs flex items-center gap-1 px-2 py-1 rounded-md transition-colors',
               showPrompt
                 ? 'text-accent-600 bg-accent-50'
                 : 'text-neutral-400 hover:text-neutral-600 hover:bg-neutral-50'
@@ -1477,9 +1492,9 @@ function CollapsibleStage({ title, done, defaultOpen, trailing, children }: Coll
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="w-full flex items-center gap-3 rounded-xl border border-neutral-200 bg-white px-4 py-2.5 hover:bg-neutral-50 transition-colors text-left"
+        className="w-full flex items-center gap-3 rounded-xl border border-neutral-200 bg-white px-4 py-3 hover:bg-neutral-50 transition-colors text-left"
       >
-        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 shrink-0">
+        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-green-100 text-green-700 shrink-0">
           <Check className="h-3 w-3" strokeWidth={3} />
         </span>
         <span className="text-sm font-medium text-neutral-600 flex-1">{title}</span>
@@ -1492,9 +1507,9 @@ function CollapsibleStage({ title, done, defaultOpen, trailing, children }: Coll
   return (
     <div className="rounded-xl border border-neutral-200 bg-white shadow-sm overflow-hidden">
       <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-100">
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-3">
           {done && (
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 shrink-0">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-green-100 text-green-700 shrink-0">
               <Check className="h-3 w-3" strokeWidth={3} />
             </span>
           )}

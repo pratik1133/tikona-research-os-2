@@ -416,7 +416,7 @@ export default function PostProductionPanel({
     if (!reportId || !podcastScript) return;
     setAudioGenerating(true);
     try {
-      const response = await fetch(`${N8N_BASE}/synthesize-audio`, {
+      const response = await fetch(`${N8N_BASE}/synthesize-podcast`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ script_text: podcastScript, report_id: reportId }),
@@ -569,7 +569,7 @@ export default function PostProductionPanel({
       {/* Header */}
       <div className="px-4 py-3 border-b border-neutral-100 bg-neutral-50/50">
         <h2 className="text-sm font-semibold text-neutral-900">Production Workflow</h2>
-        <p className="text-[10px] text-neutral-400 mt-0.5">Generate deliverables from the approved report</p>
+        <p className="text-xs text-neutral-400 mt-1">Generate deliverables from the approved report</p>
       </div>
 
       <div className="divide-y divide-neutral-100">
@@ -591,7 +591,7 @@ export default function PostProductionPanel({
               {reportCreating ? <><Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> Creating...</> : <><FileText className="h-3.5 w-3.5 mr-1.5" /> Create Record</>}
             </Button>
           ) : (
-            <span className="text-[11px] text-emerald-600 font-medium">Report record ready</span>
+            <span className="text-xs text-green-600 font-medium">Report record ready</span>
           )}
         </StepRow>
 
@@ -623,11 +623,11 @@ export default function PostProductionPanel({
                 href={pptFileUrl!.replace('/view', '/edit').replace('file/d/', 'presentation/d/')}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[11px] text-accent-600 hover:text-accent-700 font-medium flex items-center gap-1"
+                className="text-xs text-accent-600 hover:text-accent-700 font-medium flex items-center gap-1"
               >
                 <Edit3 className="h-3 w-3" /> Edit in Slides
               </a>
-              <a href={pptFileUrl!} target="_blank" rel="noopener noreferrer" className="text-[11px] text-neutral-500 hover:text-neutral-700 flex items-center gap-1">
+              <a href={pptFileUrl!} target="_blank" rel="noopener noreferrer" className="text-xs text-neutral-500 hover:text-neutral-700 flex items-center gap-1">
                 <ExternalLink className="h-3 w-3" /> View
               </a>
             </div>
@@ -658,12 +658,12 @@ export default function PostProductionPanel({
             </Button>
           ) : (
             <div className="flex items-center gap-2">
-              <a href={pdfFileUrl!} target="_blank" rel="noopener noreferrer" className="text-[11px] text-accent-600 hover:text-accent-700 font-medium flex items-center gap-1">
+              <a href={pdfFileUrl!} target="_blank" rel="noopener noreferrer" className="text-xs text-accent-600 hover:text-accent-700 font-medium flex items-center gap-1">
                 <ExternalLink className="h-3 w-3" /> View PDF
               </a>
               <a
                 href={pdfFileUrl!.replace('/view', '/export?format=pdf')}
-                className="text-[11px] text-neutral-500 hover:text-neutral-700 flex items-center gap-1"
+                className="text-xs text-neutral-500 hover:text-neutral-700 flex items-center gap-1"
               >
                 <Download className="h-3 w-3" /> Download
               </a>
@@ -699,10 +699,10 @@ export default function PostProductionPanel({
             ) : (
               <>
                 <div className="flex items-center gap-2">
-                  <span className="text-[11px] text-emerald-600 font-medium">Script ready</span>
+                  <span className="text-xs text-green-600 font-medium">Script ready</span>
                   <button
                     onClick={() => setScriptExpanded(!scriptExpanded)}
-                    className="text-[10px] text-neutral-400 hover:text-neutral-600 flex items-center gap-0.5"
+                    className="text-xs text-neutral-400 hover:text-neutral-600 flex items-center gap-1"
                   >
                     {scriptExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
                     {scriptExpanded ? 'Hide' : 'View'}
@@ -713,7 +713,7 @@ export default function PostProductionPanel({
                   <textarea
                     value={podcastScript}
                     onChange={(e) => setPodcastScript(e.target.value)}
-                    className="w-full rounded-lg border border-neutral-200 bg-neutral-50 p-3 text-[11px] text-neutral-800 font-mono leading-relaxed resize-y focus:outline-none focus:ring-2 focus:ring-accent-500/20 focus:border-accent-400"
+                    className="w-full rounded-lg border border-neutral-200 bg-neutral-50 p-3 text-xs text-neutral-800 font-mono leading-relaxed resize-y focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40 focus-visible:border-accent-400"
                     style={{ minHeight: '120px', maxHeight: '300px' }}
                     spellCheck={false}
                   />
@@ -736,7 +736,7 @@ export default function PostProductionPanel({
                 ) : (
                   <div className="flex items-center gap-3">
                     <audio controls src={audioFileUrl} className="h-8 flex-1" />
-                    <a href={audioFileUrl} download className="text-[11px] text-neutral-500 hover:text-neutral-700 flex items-center gap-1 shrink-0">
+                    <a href={audioFileUrl} download className="text-xs text-neutral-500 hover:text-neutral-700 flex items-center gap-1 shrink-0">
                       <Download className="h-3 w-3" /> MP3
                     </a>
                   </div>
@@ -771,7 +771,7 @@ export default function PostProductionPanel({
           ) : (
             <div className="space-y-2">
               <video controls src={videoFileUrl} className="w-full max-h-48 rounded-lg bg-black" />
-              <a href={videoFileUrl} download className="text-[11px] text-neutral-500 hover:text-neutral-700 flex items-center gap-1">
+              <a href={videoFileUrl} download className="text-xs text-neutral-500 hover:text-neutral-700 flex items-center gap-1">
                 <Download className="h-3 w-3" /> Download MP4
               </a>
             </div>
@@ -782,7 +782,7 @@ export default function PostProductionPanel({
       {/* === Publish === */}
       <div className="px-4 py-4 border-t border-neutral-100 bg-neutral-50/30 flex flex-col gap-3">
         {pdfFileId && (
-          <div className="space-y-1.5 focus-within:relative z-10">
+          <div className="space-y-2 focus-within:relative z-10">
             <label className="text-xs font-semibold text-neutral-700">Select Plan to Publish For</label>
             <Select value={selectedPlan} onValueChange={setSelectedPlan}>
               <SelectTrigger className="w-full bg-white text-sm">
@@ -805,18 +805,18 @@ export default function PostProductionPanel({
               className={cn(
                 'w-full h-10 rounded-lg font-semibold text-sm',
                 pdfFileId && selectedPlan
-                  ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm'
+                  ? 'bg-green-600 hover:bg-green-700 text-white shadow-sm'
                   : 'bg-neutral-200 text-neutral-400 cursor-not-allowed'
               )}
             >
               <Shield className="h-4 w-4 mr-2" /> Publish Report
             </Button>
             {!pdfFileId && (
-              <p className="text-[10px] text-neutral-400 text-center mt-1.5 transition-opacity">PDF must be generated before publishing</p>
+              <p className="text-xs text-neutral-400 text-center mt-2 transition-opacity">PDF must be generated before publishing</p>
             )}
           </>
         ) : (
-          <div className="flex items-center gap-2 text-emerald-600 text-sm font-medium">
+          <div className="flex items-center gap-2 text-green-600 text-sm font-medium">
             <Check className="h-4 w-4" /> Report Published
           </div>
         )}
@@ -827,17 +827,17 @@ export default function PostProductionPanel({
         <div className="px-4 py-4 border-t border-neutral-100 bg-gradient-to-b from-blue-50/40 to-white">
           <div className="flex items-start gap-3">
             <div className={cn(
-              'flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold shrink-0 mt-0.5',
-              telegramSent ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'
+              'flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold shrink-0 mt-1',
+              telegramSent ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
             )}>
               {telegramSent ? <Check className="h-3.5 w-3.5" strokeWidth={2.5} /> : 6}
             </div>
 
             <div className="flex-1 min-w-0">
-              <p className={cn('text-sm font-medium', telegramSent ? 'text-emerald-700' : 'text-neutral-900')}>
+              <p className={cn('text-sm font-medium', telegramSent ? 'text-green-700' : 'text-neutral-900')}>
                 Send Recommendation to Telegram
               </p>
-              <p className="text-[10px] text-neutral-400 mb-3">
+              <p className="text-xs text-neutral-400 mb-3">
                 Create a recommendation record and send to subscribers
               </p>
 
@@ -852,8 +852,8 @@ export default function PostProductionPanel({
                   : selectedPlan === 'sme_emerging' ? 'SME Emerging Business' : selectedPlan;
 
                 return (
-                  <div className="rounded-lg border border-neutral-200 bg-white p-3 mb-3 space-y-1.5">
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[11px]">
+                  <div className="rounded-lg border border-neutral-200 bg-white p-3 mb-3 space-y-2">
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
                       <div>
                         <span className="text-neutral-400">Company</span>
                         <p className="font-medium text-neutral-800">{companyName} ({nseSymbol})</p>
@@ -880,7 +880,7 @@ export default function PostProductionPanel({
                       </div>
                     </div>
                     {pdfFileUrl && (
-                      <div className="text-[10px] text-neutral-400 pt-1 border-t border-neutral-100">
+                      <div className="text-xs text-neutral-400 pt-1 border-t border-neutral-100">
                         Report: <a href={pdfFileUrl} target="_blank" rel="noopener noreferrer" className="text-accent-600 hover:underline">PDF attached</a>
                       </div>
                     )}
@@ -902,7 +902,7 @@ export default function PostProductionPanel({
                   )}
                 </Button>
               ) : (
-                <span className="text-[11px] text-emerald-600 font-medium">Recommendation sent to Telegram</span>
+                <span className="text-xs text-green-600 font-medium">Recommendation sent to Telegram</span>
               )}
             </div>
           </div>
@@ -928,11 +928,11 @@ interface StepRowProps {
 
 function StepRow({ number, title, description, done, active, disabled, children }: StepRowProps) {
   return (
-    <div className={cn('px-4 py-3.5 flex items-start gap-3', disabled && 'opacity-50')}>
+    <div className={cn('px-4 py-4 flex items-start gap-3', disabled && 'opacity-50')}>
       {/* Step indicator */}
       <div className={cn(
-        'flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold shrink-0 mt-0.5',
-        done ? 'bg-emerald-100 text-emerald-700' :
+        'flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold shrink-0 mt-1',
+        done ? 'bg-green-100 text-green-700' :
         active ? 'bg-accent-100 text-accent-700' :
         'bg-neutral-100 text-neutral-400'
       )}>
@@ -943,10 +943,10 @@ function StepRow({ number, title, description, done, active, disabled, children 
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-1">
           <div>
-            <p className={cn('text-sm font-medium', done ? 'text-emerald-700' : active ? 'text-neutral-900' : 'text-neutral-500')}>
+            <p className={cn('text-sm font-medium', done ? 'text-green-700' : active ? 'text-neutral-900' : 'text-neutral-500')}>
               {title}
             </p>
-            <p className="text-[10px] text-neutral-400">{description}</p>
+            <p className="text-xs text-neutral-400">{description}</p>
           </div>
         </div>
         <div className="mt-2">

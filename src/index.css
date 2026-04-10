@@ -3,9 +3,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 /* =============================================
-   Accent color system — Indigo palette
+   Design token system
+   Single source of truth for all color, surface,
+   and border values used across the product.
    ============================================= */
 @theme {
+  /* Accent palette (Indigo) — used via bg-accent-*, text-accent-*, etc. */
   --color-accent-50: #eef2ff;
   --color-accent-100: #e0e7ff;
   --color-accent-200: #c7d2fe;
@@ -17,12 +20,78 @@
   --color-accent-800: #3730a3;
   --color-accent-900: #312e81;
   --color-accent-950: #1e1b4b;
+
+  /* Semantic color tokens — use via bg-brand, bg-canvas, bg-surface, etc. */
+  --color-brand:              #4f46e5;   /* primary CTA (= accent-600) */
+  --color-brand-hover:        #4338ca;   /* CTA hover state (= accent-700) */
+
+  --color-canvas:             #f8f8f6;   /* page / body background */
+  --color-surface:            #ffffff;   /* card, panel, modal background */
+  --color-surface-muted:      #f5f5f3;   /* inputs, secondary panels */
+
+  --color-border:             #e5e5e5;   /* default 1px border */
+  --color-border-subtle:      #f0f0ef;   /* very light dividers */
+  --color-border-strong:      #d4d4d4;   /* hover / emphasis border */
+
+  --color-text-primary:       #171717;   /* headings, labels */
+  --color-text-secondary:     #737373;   /* body copy, captions */
+  --color-text-muted:         #a3a3a3;   /* placeholder, disabled */
+
+  /* Semantic states — single color family per state (green = success, not emerald) */
+  --color-success:            #16a34a;   /* green-600 */
+  --color-success-surface:    #f0fdf4;   /* green-50 */
+  --color-success-border:     #bbf7d0;   /* green-200 */
+  --color-success-text:       #15803d;   /* green-700 */
+
+  --color-error:              #dc2626;   /* red-600 */
+  --color-error-surface:      #fef2f2;   /* red-50 */
+  --color-error-border:       #fecaca;   /* red-200 */
+  --color-error-text:         #b91c1c;   /* red-700 */
+
+  --color-warning:            #d97706;   /* amber-600 */
+  --color-warning-surface:    #fffbeb;   /* amber-50 */
+  --color-warning-border:     #fde68a;   /* amber-200 */
+  --color-warning-text:       #b45309;   /* amber-700 */
 }
 
 :root {
   --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
     Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+
+  /* =============================================
+     Spacing tokens — 8px base grid
+     --space-xs  4px   tight icon gaps, decorative
+     --space-sm  8px   internal component padding
+     --space-md  16px  standard content padding
+     --space-lg  24px  card padding, section gaps
+     --space-xl  32px  major section spacing
+     --space-2xl 48px  section-to-section gaps
+     --space-3xl 64px  hero / page-level spacing
+     Exceptions: 4px (icon), 12px (compact inputs/badges)
+     ============================================= */
+  --space-xs:  4px;
+  --space-sm:  8px;
+  --space-md:  16px;
+  --space-lg:  24px;
+  --space-xl:  32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+
+  /* =============================================
+     Type scale — maps to Tailwind text-* utilities
+     text-xs   12px  captions, legal, meta, badges
+     text-sm   14px  secondary labels, table cells, body in dense UI
+     text-base 16px  primary body copy
+     text-lg   18px  card titles, section intros
+     text-xl   20px  page section headings
+     text-2xl  24px  primary page headings
+     text-3xl  30px  hero / display only
+
+     Weights: 400 body, 500 labels/nav, 600 headings
+     NO font-weight: 700 outside document h1 or hero display
+     Line-height: leading-relaxed (1.625) body, leading-tight (1.25) headings
+     ============================================= */
 }
 
 * {
@@ -40,8 +109,8 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  background-color: #f8f8f6;
-  color: #171717;
+  background-color: var(--color-canvas);
+  color: var(--color-text-primary);
 }
 
 #root {
@@ -123,7 +192,7 @@ body {
 }
 
 .skeleton {
-  background: linear-gradient(90deg, #f0f0ee 25%, #e8e8e5 50%, #f0f0ee 75%);
+  background: linear-gradient(90deg, var(--color-border-subtle) 25%, var(--color-border) 50%, var(--color-border-subtle) 75%);
   background-size: 200% 100%;
   animation: skeleton-shimmer 1.5s ease-in-out infinite;
   border-radius: 6px;
@@ -164,7 +233,7 @@ body {
 }
 
 .focus-ring:focus-visible {
-  outline: 2px solid #6366f1;
+  outline: 2px solid var(--color-brand);
 }
 
 /* =============================================
@@ -185,14 +254,14 @@ body {
 /* Premium card base */
 .card-premium {
   border-radius: 0.75rem;
-  border: 1px solid #e5e5e5;
-  background: white;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
   transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 
 .card-premium:hover {
   box-shadow: 0 1px 3px 0 rgba(0,0,0,0.04), 0 4px 14px -2px rgba(0,0,0,0.05);
-  border-color: #d4d4d4;
+  border-color: var(--color-border-strong);
   transform: translateY(-1px);
 }
 
@@ -212,8 +281,8 @@ table {
 
 /* Selection color — accent tinted */
 ::selection {
-  background-color: #c7d2fe;
-  color: #1e1b4b;
+  background-color: var(--color-accent-200);
+  color: var(--color-accent-950);
 }
 
 /* =============================================
@@ -303,7 +372,7 @@ table {
   }
 
   /* Sentiment block formatting */
-  div[class*="bg-emerald"], div[class*="bg-red"], div[class*="bg-amber"] {
+  div[class*="bg-green"], div[class*="bg-red"], div[class*="bg-amber"] {
     break-inside: avoid;
     border: none !important;
     border-left: 4px solid !important;
@@ -314,7 +383,7 @@ table {
     print-color-adjust: exact;
   }
 
-  div[class*="bg-emerald"] { border-left-color: #10b981 !important; background-color: #ecfdf5 !important; }
+  div[class*="bg-green"] { border-left-color: #16a34a !important; background-color: #f0fdf4 !important; }
   div[class*="bg-red"] { border-left-color: #ef4444 !important; background-color: #fef2f2 !important; }
   div[class*="bg-amber"] { border-left-color: #f59e0b !important; background-color: #fffbeb !important; }
 

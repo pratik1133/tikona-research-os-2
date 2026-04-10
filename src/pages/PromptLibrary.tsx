@@ -238,14 +238,14 @@ export default function PromptLibrary() {
           </div>
 
           <Button onClick={openAddDialog} size="sm">
-            <Plus className="h-4 w-4 mr-1.5" />
+            <Plus className="h-4 w-4 mr-2" />
             Add Custom Prompt
           </Button>
         </div>
       </header>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-auto bg-[#f8f8f6] p-7">
+      <div className="flex-1 overflow-auto bg-canvas p-7">
         {isLoading ? (
           <div className="max-w-4xl space-y-4">
             <CardSkeleton />
@@ -296,13 +296,13 @@ export default function PromptLibrary() {
                                   {template.title}
                                 </h3>
                                 {template.is_default && (
-                                  <span className="inline-flex items-center rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-medium text-neutral-600">
+                                  <span className="inline-flex items-center rounded-md bg-neutral-100 px-2 py-0.5 text-xs font-medium text-neutral-600">
                                     Default
                                   </span>
                                 )}
                               </div>
                               {template.heading_prompt && (
-                                <p className="mt-1.5 text-xs text-blue-600/70 leading-relaxed">
+                                <p className="mt-2 text-xs text-blue-600/70 leading-relaxed">
                                   <span className="font-medium text-blue-500">Heading:</span> {template.heading_prompt}
                                 </p>
                               )}
@@ -310,7 +310,7 @@ export default function PromptLibrary() {
                                 {template.search_keywords.slice(0, 8).map((kw) => (
                                   <span
                                     key={kw}
-                                    className="inline-flex rounded bg-accent-50 px-2 py-0.5 text-xs font-medium text-accent-700"
+                                    className="inline-flex rounded-md bg-accent-50 px-2 py-0.5 text-xs font-medium text-accent-700"
                                   >
                                     {kw}
                                   </span>
@@ -328,7 +328,7 @@ export default function PromptLibrary() {
                           </div>
 
                           <div className="flex items-center gap-1">
-                            <div className="flex flex-col gap-0.5 mr-1">
+                            <div className="flex flex-col gap-1 mr-1">
                               <button
                                 onClick={() => handleMoveTemplate(template.id, 'up')}
                                 disabled={!templates || templates.indexOf(template) === 0 || reorderMutation.isPending}
@@ -408,7 +408,7 @@ export default function PromptLibrary() {
                   })
                 }
                 placeholder="e.g., Company Overview, Financial Summary"
-                className="mt-1.5"
+                className="mt-2"
               />
               <p className="mt-1 text-xs text-neutral-500">
                 Section name (e.g. &quot;Valuation Analysis&quot;). Will be normalized to snake_case automatically.
@@ -424,7 +424,7 @@ export default function PromptLibrary() {
                   setFormData({ ...formData, title: e.target.value })
                 }
                 placeholder="e.g., Detailed Company Overview"
-                className="mt-1.5"
+                className="mt-2"
               />
             </div>
 
@@ -438,7 +438,7 @@ export default function PromptLibrary() {
                 }
                 placeholder="e.g., Create a compelling heading that captures the company's core identity and business essence..."
                 rows={3}
-                className="mt-1.5 w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/40 resize-y leading-relaxed"
+                className="mt-2 w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm focus-visible:border-accent-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40 resize-y leading-relaxed"
               />
               <p className="mt-1 text-xs text-neutral-500">
                 Instructions for AI to generate a dynamic heading for this section
@@ -456,7 +456,7 @@ export default function PromptLibrary() {
                   setFormData({ ...formData, search_keywords: e.target.value })
                 }
                 placeholder="company, overview, business, products, management"
-                className="mt-1.5"
+                className="mt-2"
               />
               <p className="mt-1 text-xs text-neutral-500">
                 Keywords used for document retrieval during RAG
@@ -473,7 +473,7 @@ export default function PromptLibrary() {
                 }
                 placeholder="Write a comprehensive section about..."
                 rows={14}
-                className="mt-1.5 w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/40 resize-y font-mono leading-relaxed"
+                className="mt-2 w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm focus-visible:border-accent-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40 resize-y font-mono leading-relaxed"
               />
             </div>
           </div>
@@ -493,17 +493,17 @@ export default function PromptLibrary() {
             >
               {isPending ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   {isEditMode ? 'Saving...' : 'Creating...'}
                 </>
               ) : isEditMode ? (
                 <>
-                  <Save className="h-4 w-4 mr-1.5" />
+                  <Save className="h-4 w-4 mr-2" />
                   Save Changes
                 </>
               ) : (
                 <>
-                  <Plus className="h-4 w-4 mr-1.5" />
+                  <Plus className="h-4 w-4 mr-2" />
                   Create Prompt
                 </>
               )}
