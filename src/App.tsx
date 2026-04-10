@@ -18,6 +18,7 @@ import ResearchPipeline from '@/pages/ResearchPipeline';
 import Recommendations from '@/pages/Recommendations';
 import ReportBuilder from '@/pages/ReportBuilder';
 import SectorThesis from '@/pages/SectorThesis';
+import SystemHealth from '@/pages/SystemHealth';
 
 // Only load devtools in development
 const ReactQueryDevtools = import.meta.env.DEV
@@ -65,6 +66,7 @@ function App() {
                 <Route path="/admin/recommendations" element={<Recommendations />} />
                 <Route path="/admin/report-builder" element={<ReportBuilder />} />
                 <Route path="/admin/sector-thesis" element={<SectorThesis />} />
+                <Route path="/admin/system-health" element={<SystemHealth />} />
               </Route>
             </Route>
 

@@ -9,6 +9,7 @@ import {
   Send,
   FileEdit,
   Layers,
+  Activity,
 } from 'lucide-react';
 import SidebarLayout, { type NavItemConfig } from '@/components/Layout';
 
@@ -23,6 +24,7 @@ const adminNavItems: NavItemConfig[] = [
   { label: 'Sector Thesis',     path: '/admin/sector-thesis',     icon: Layers,          group: 'Research' },
   { label: 'Prompt Library',    path: '/admin/prompts',           icon: BookOpen,        group: 'Research' },
   { label: 'Recommendations',   path: '/admin/recommendations',   icon: Send,            group: 'Distribution' },
+  { label: 'System Health',     path: '/admin/system-health',     icon: Activity,        group: 'System' },
 ];
 
 export default function AdminLayout() {
