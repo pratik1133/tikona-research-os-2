@@ -1,0 +1,968 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Reliance Industries Ltd — BUY | Tikona Capital</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Serif+4:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@page { size: 338mm 190mm; margin: 0; }
+
+:root {
+  --primary-dark: #1F4690;
+  --primary-mid: #3A5BA0;
+  --accent: #FFA500;
+  --accent-light: #FFE5B4;
+  --slate: #3a4d6b;
+  --mid-grey: #6b7c93;
+  --light-grey: #f4f6f9;
+  --border: #d5dce8;
+  --text: #1a2537;
+  --text-light: #4a5568;
+  --green: #1a7a4a;
+  --red: #b91c1c;
+  --teal: #0e7490;
+  --white: #ffffff;
+  --page-width: 338mm;
+  --page-height: 190mm;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 8pt;
+  color: var(--text);
+  background: #e0e6f0;
+  line-height: 1.45;
+}
+
+/* ═══ PAGE ═══ */
+.page {
+  width: var(--page-width);
+  height: var(--page-height);
+  background: var(--white);
+  margin: 0 auto 16px;
+  position: relative;
+  padding: 0;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  overflow: hidden;
+}
+
+/* ═══ FULL HEADER (cover page only) ═══ */
+.report-header {
+  background: var(--primary-dark);
+  padding: 10px 18px 8px;
+  position: relative;
+  overflow: hidden;
+}
+.report-header::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 180px; height: 100%;
+  background: linear-gradient(135deg, var(--accent) 0%, #FFB833 100%);
+  clip-path: polygon(30% 0, 100% 0, 100% 100%, 0% 100%);
+}
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.firm-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  position: relative;
+  z-index: 2;
+}
+.firm-logo {
+  width: 30px; height: 30px;
+  background: var(--accent);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 12px; font-weight: 700;
+  color: var(--primary-dark);
+}
+.firm-name {
+  color: var(--white);
+  font-family: 'Playfair Display', serif;
+  font-size: 11pt;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+}
+.firm-tagline {
+  color: rgba(255,255,255,0.6);
+  font-size: 5.5pt;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+}
+.report-type-badge {
+  position: relative; z-index: 2;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 4px;
+  padding: 3px 10px;
+  color: var(--white);
+  font-size: 5.5pt;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+}
+.header-company-line {
+  margin-top: 6px;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.company-name-hdr {
+  font-family: 'Playfair Display', serif;
+  font-size: 18pt;
+  font-weight: 700;
+  color: var(--white);
+}
+.rating-badge {
+  background: var(--accent);
+  color: var(--primary-dark);
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 8pt;
+  padding: 2px 12px;
+  border-radius: 3px;
+  letter-spacing: 1px;
+}
+.sector-tag {
+  color: rgba(255,255,255,0.65);
+  font-size: 6.5pt;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.4px;
+}
+.report-date {
+  color: rgba(255,255,255,0.55);
+  font-size: 6pt;
+  font-family: 'JetBrains Mono', monospace;
+  position: absolute;
+  bottom: 7px; right: 18px;
+}
+
+/* ═══ MINI HEADER (sub-pages) ═══ */
+.mini-header {
+  background: var(--primary-dark);
+  padding: 5px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.mini-firm { color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 6pt; font-weight: 700; letter-spacing: 1px; }
+.mini-company { color: var(--white); font-family: 'Playfair Display', serif; font-size: 8pt; font-weight: 600; }
+.mini-meta { color: rgba(255,255,255,0.55); font-size: 5.5pt; font-family: 'JetBrains Mono', monospace; }
+
+/* ═══ TAGLINE BAND ═══ */
+.tagline-band {
+  background: var(--accent);
+  padding: 5px 18px;
+}
+.tagline-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 10pt;
+  font-weight: 600;
+  color: var(--primary-dark);
+  letter-spacing: 0.2px;
+}
+
+/* ═══ ANALYST STRIP ═══ */
+.analyst-strip {
+  background: var(--primary-dark);
+  padding: 6px 18px;
+  display: flex;
+  gap: 18px;
+  align-items: center;
+}
+.analyst-name { color: var(--white); font-weight: 700; font-size: 7pt; }
+.analyst-title { color: var(--accent); font-size: 5.5pt; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.5px; }
+.analyst-contact { color: rgba(255,255,255,0.55); font-size: 5.5pt; font-family: 'JetBrains Mono', monospace; }
+
+/* ═══ LAYOUT GRIDS ═══ */
+.three-col-wide {
+  display: grid;
+  grid-template-columns: 2fr 1fr 180px;
+  gap: 10px;
+  padding: 10px 18px 0;
+}
+.three-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+}
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.two-col-side {
+  display: grid;
+  grid-template-columns: 1fr 180px;
+  gap: 10px;
+  padding: 10px 18px 0;
+}
+.two-col-wide {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 10px;
+}
+.page-content {
+  padding: 10px 18px;
+}
+.main-col {}
+.side-col {}
+
+/* ═══ SECTION HEADER ═══ */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 2px solid var(--primary-dark);
+}
+.section-number {
+  background: var(--primary-dark);
+  color: var(--accent);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7pt;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 2px;
+}
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 12pt;
+  font-weight: 600;
+  color: var(--primary-dark);
+}
+
+/* ═══ THESIS BOX ═══ */
+.thesis-box {
+  border-left: 3px solid var(--accent);
+  padding: 8px 10px;
+  background: var(--accent-light);
+  margin-bottom: 8px;
+  border-radius: 0 4px 4px 0;
+}
+.thesis-box p {
+  font-size: 7pt;
+  font-weight: 600;
+  color: var(--primary-dark);
+  line-height: 1.5;
+}
+
+/* ═══ SIDE PANEL ═══ */
+.side-panel-card {
+  background: var(--primary-dark);
+  border-radius: 4px;
+  padding: 8px;
+  margin-bottom: 6px;
+}
+.side-panel-card.light {
+  background: var(--light-grey);
+  border: 1px solid var(--border);
+}
+.side-metric-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 5pt;
+  color: rgba(255,255,255,0.55);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 2px;
+}
+.side-metric-title.dark { color: var(--mid-grey); }
+.side-metric-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11pt;
+  font-weight: 700;
+  color: var(--accent);
+}
+.side-metric-value.dark { color: var(--primary-dark); }
+.side-metric-sub {
+  font-size: 5.5pt;
+  color: rgba(255,255,255,0.45);
+  font-family: 'JetBrains Mono', monospace;
+}
+.side-metric-sub.dark { color: var(--mid-grey); }
+.side-divider { border-top: 1px solid rgba(255,255,255,0.1); margin: 4px 0; }
+.side-divider.dark { border-color: var(--border); }
+.side-row { display: flex; justify-content: space-between; align-items: center; padding: 1.5px 0; }
+.side-label { font-size: 6pt; color: rgba(255,255,255,0.65); }
+.side-label.dark { color: var(--text-light); }
+.side-value { font-size: 6pt; font-weight: 600; color: var(--white); font-family: 'JetBrains Mono', monospace; }
+.side-value.dark { color: var(--primary-dark); }
+.side-value.accent { color: var(--accent); }
+.side-section-hdr {
+  font-size: 5.5pt;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-family: 'JetBrains Mono', monospace;
+  margin: 4px 0 2px;
+  font-weight: 700;
+}
+
+/* ═══ TABLES ═══ */
+.fin-table-wrap { margin-top: 6px; margin-bottom: 6px; }
+.fin-table-title {
+  font-size: 6.5pt;
+  font-weight: 700;
+  color: var(--primary-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 2px;
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 2px;
+}
+table { width: 100%; border-collapse: collapse; font-size: 6.5pt; }
+thead tr { background: var(--primary-dark); }
+thead th {
+  color: var(--white);
+  padding: 3px 5px;
+  text-align: right;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 6pt;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+thead th:first-child { text-align: left; }
+tbody tr:nth-child(odd) { background: var(--light-grey); }
+td {
+  padding: 2.5px 5px;
+  text-align: right;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 6.5pt;
+}
+td:first-child { text-align: left; font-weight: 500; color: var(--slate); font-family: 'Source Serif 4', serif; }
+td.bold { font-weight: 700; color: var(--primary-dark); }
+td.green { color: var(--green); font-weight: 600; }
+td.red { color: var(--red); font-weight: 600; }
+td.accent { color: var(--accent); font-weight: 700; }
+.tbl-highlight td { background: rgba(255,165,0,0.1) !important; font-weight: 700; }
+.tbl-section td { background: #e8eef8 !important; font-weight: 700; color: var(--primary-dark) !important; font-family: 'JetBrains Mono', monospace; font-size: 6.5pt; }
+
+/* ═══ METRIC STRIP ═══ */
+.metric-strip { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-bottom: 8px; }
+.metric-strip-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 8px; }
+.metric-strip-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-bottom: 8px; }
+.metric-card {
+  background: var(--primary-dark);
+  border-radius: 4px;
+  padding: 6px 7px;
+  text-align: center;
+}
+.metric-card.accent-bg { background: var(--accent); }
+.metric-card.mid-bg { background: var(--primary-mid); }
+.metric-card.teal-bg { background: var(--teal); }
+.metric-card.light-bg { background: var(--accent-light); border: 1px solid var(--accent); }
+.metric-card-label { font-size: 5pt; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.7px; font-family: 'JetBrains Mono', monospace; margin-bottom: 1px; }
+.metric-card.accent-bg .metric-card-label,
+.metric-card.light-bg .metric-card-label { color: var(--primary-dark); }
+.metric-card-value { font-size: 10pt; font-weight: 700; color: var(--white); font-family: 'JetBrains Mono', monospace; }
+.metric-card.accent-bg .metric-card-value,
+.metric-card.light-bg .metric-card-value { color: var(--primary-dark); }
+.metric-card-sub { font-size: 5pt; color: rgba(255,255,255,0.45); font-family: 'JetBrains Mono', monospace; margin-top: 1px; }
+.metric-card.accent-bg .metric-card-sub { color: rgba(31,70,144,0.65); }
+
+/* ═══ ANALYSIS / KEY SECTIONS ═══ */
+.analysis-block { margin-bottom: 7px; }
+.analysis-block p { font-size: 7pt; line-height: 1.5; color: var(--text); margin-bottom: 4px; }
+.analysis-bold { font-weight: 700; color: var(--primary-dark); }
+.key-section { margin-bottom: 5px; }
+.key-section-title {
+  font-weight: 700;
+  color: var(--primary-dark);
+  font-size: 7.5pt;
+  margin-bottom: 3px;
+}
+.key-section p { font-size: 7pt; color: var(--text); line-height: 1.45; }
+
+/* ═══ HIGHLIGHT BOXES ═══ */
+.highlight-box {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 6px 8px;
+  background: var(--light-grey);
+  margin-bottom: 6px;
+}
+.highlight-box.accent-border { border-left: 3px solid var(--accent); }
+.highlight-box.navy-border { border-left: 3px solid var(--primary-dark); }
+.highlight-box.green-border { border-left: 3px solid var(--green); }
+.highlight-box.red-border { border-left: 3px solid var(--red); }
+.highlight-box-title { font-weight: 700; color: var(--primary-dark); font-size: 7pt; margin-bottom: 2px; }
+.highlight-box p { font-size: 6.5pt; color: var(--text-light); line-height: 1.45; }
+
+/* ═══ CATALYST ITEMS ═══ */
+.catalyst-item { display: flex; gap: 7px; margin-bottom: 6px; padding: 5px 7px; background: var(--light-grey); border-radius: 3px; border-left: 3px solid var(--accent); }
+.catalyst-icon { font-size: 11pt; flex-shrink: 0; width: 18px; text-align: center; }
+.catalyst-body {}
+.catalyst-title { font-weight: 700; font-size: 7pt; color: var(--primary-dark); margin-bottom: 1px; }
+.catalyst-desc { font-size: 6.5pt; color: var(--text-light); line-height: 1.4; }
+.catalyst-badge { display: inline-block; background: var(--primary-dark); color: var(--accent); font-size: 5pt; padding: 1px 5px; border-radius: 2px; font-family: 'JetBrains Mono', monospace; margin-left: 4px; }
+
+/* ═══ RISK ITEMS ═══ */
+.risk-item { display: flex; gap: 7px; margin-bottom: 5px; padding-bottom: 5px; border-bottom: 1px solid var(--border); }
+.risk-badge {
+  flex-shrink: 0;
+  width: 34px;
+  height: 14px;
+  border-radius: 2px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 5pt;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.4px;
+}
+.risk-high { background: #fee2e2; color: var(--red); }
+.risk-med { background: #fef3c7; color: #92400e; }
+.risk-low { background: #d1fae5; color: var(--green); }
+.risk-text { font-size: 6.5pt; color: var(--text); line-height: 1.4; }
+.risk-title { font-weight: 700; color: var(--primary-dark); margin-bottom: 1px; font-size: 6.5pt; }
+
+/* ═══ SCENARIO GRID ═══ */
+.scenario-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 6px; }
+.scenario-card { border-radius: 4px; padding: 7px; text-align: center; }
+.scenario-card.bear { background: #fee2e2; border: 1px solid #fca5a5; }
+.scenario-card.base { background: var(--accent-light); border: 1px solid var(--accent); }
+.scenario-card.bull { background: #d1fae5; border: 1px solid #6ee7b7; }
+.scenario-label { font-size: 5.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; font-family: 'JetBrains Mono', monospace; margin-bottom: 2px; }
+.scenario-card.bear .scenario-label { color: var(--red); }
+.scenario-card.base .scenario-label { color: #8a5c00; }
+.scenario-card.bull .scenario-label { color: var(--green); }
+.scenario-tp { font-size: 14pt; font-weight: 700; font-family: 'JetBrains Mono', monospace; line-height: 1.1; }
+.scenario-card.bear .scenario-tp { color: var(--red); }
+.scenario-card.base .scenario-tp { color: var(--primary-dark); }
+.scenario-card.bull .scenario-tp { color: var(--green); }
+.scenario-updown { font-size: 6pt; font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
+.scenario-desc { font-size: 5.5pt; color: var(--text-light); margin-top: 3px; line-height: 1.35; }
+
+/* ═══ SCORECARD ═══ */
+.score-item { margin-bottom: 6px; padding-bottom: 5px; border-bottom: 1px solid var(--border); }
+.score-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1px; }
+.score-name { font-size: 7pt; font-weight: 700; color: var(--primary-dark); }
+.score-val { font-size: 7.5pt; font-weight: 700; color: var(--primary-dark); font-family: 'JetBrains Mono', monospace; }
+.score-bar-bg { background: var(--border); border-radius: 2px; height: 5px; margin-top: 2px; }
+.score-bar-fill { height: 100%; border-radius: 2px; }
+.score-desc { font-size: 6pt; color: var(--text-light); line-height: 1.35; margin-top: 2px; }
+
+/* ═══ SEGMENT CARDS ═══ */
+.segment-card { border: 1px solid var(--border); border-radius: 4px; padding: 7px; margin-bottom: 5px; }
+.segment-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.segment-name { font-weight: 700; font-size: 7.5pt; color: var(--primary-dark); font-family: 'Playfair Display', serif; }
+.segment-share { background: var(--primary-dark); color: var(--accent); font-size: 5.5pt; padding: 1px 6px; border-radius: 2px; font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+.segment-kpi { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 3px; }
+.kpi-chip { background: var(--accent-light); border: 1px solid var(--accent); border-radius: 2px; padding: 1px 5px; font-size: 5.5pt; font-family: 'JetBrains Mono', monospace; color: var(--primary-dark); font-weight: 700; }
+.segment-desc { font-size: 6pt; color: var(--text-light); line-height: 1.35; }
+
+/* ═══ TIMELINE ═══ */
+.timeline { position: relative; padding-left: 14px; }
+.timeline::before { content: ''; position: absolute; left: 4px; top: 0; bottom: 0; width: 2px; background: var(--border); }
+.timeline-item { position: relative; margin-bottom: 6px; padding-left: 10px; }
+.timeline-item::before { content: ''; position: absolute; left: -10px; top: 3px; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); border: 2px solid var(--white); box-shadow: 0 0 0 1px var(--accent); }
+.timeline-year { font-family: 'JetBrains Mono', monospace; font-size: 5.5pt; font-weight: 700; color: var(--accent); }
+.timeline-text { font-size: 6pt; color: var(--text); line-height: 1.35; }
+
+/* ═══ KPI GRID ═══ */
+.kpi-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 6px; }
+.kpi-box { background: var(--light-grey); border: 1px solid var(--border); border-radius: 3px; padding: 5px 7px; }
+.kpi-box-label { font-size: 5.5pt; color: var(--mid-grey); font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.5px; }
+.kpi-box-value { font-size: 9pt; font-weight: 700; color: var(--primary-dark); font-family: 'JetBrains Mono', monospace; }
+.kpi-box-sub { font-size: 5.5pt; color: var(--text-light); }
+
+/* ═══ MANAGEMENT ═══ */
+.mgmt-row { display: grid; grid-template-columns: 120px 80px 1fr; gap: 6px; padding: 3px 5px; border-bottom: 1px solid var(--border); align-items: start; }
+.mgmt-row:nth-child(odd) { background: var(--light-grey); }
+.mgmt-name { font-weight: 600; font-size: 6.5pt; color: var(--primary-dark); }
+.mgmt-role { font-size: 5.5pt; color: var(--mid-grey); }
+.mgmt-bio { font-size: 5.5pt; color: var(--text-light); line-height: 1.35; }
+
+/* ═══ FIGURES / CHARTS ═══ */
+.figure { margin-bottom: 6px; }
+.figure-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 5.5pt;
+  font-weight: 700;
+  color: var(--primary-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.2px;
+  margin-bottom: 4px;
+  padding: 3px 5px;
+  background: var(--light-grey);
+  border-left: 3px solid var(--accent);
+}
+.figure-source { font-size: 5pt; color: var(--mid-grey); margin-top: 2px; font-style: italic; }
+.figure-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.legend-item { display: flex; align-items: center; gap: 4px; margin-bottom: 2px; }
+.legend-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.legend-label { font-size: 5.5pt; color: var(--text-light); font-family: 'JetBrains Mono', monospace; }
+.donut-wrap { display: flex; align-items: center; gap: 10px; }
+.donut-legend { flex: 1; display: flex; flex-wrap: wrap; gap: 6px; }
+.legend-pct { font-size: 5.5pt; font-weight: 700; color: var(--primary-dark); font-family: 'JetBrains Mono', monospace; }
+
+/* ═══ TAGS ═══ */
+.tag {
+  display: inline-block;
+  background: var(--primary-dark);
+  color: var(--white);
+  font-size: 5pt;
+  padding: 1px 5px;
+  border-radius: 2px;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.3px;
+  margin-right: 3px;
+}
+.tag.accent-tag { background: var(--accent); color: var(--primary-dark); }
+.tag.green-tag { background: var(--green); }
+
+/* ═══ FOOTER ═══ */
+.page-footer {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  border-top: 1px solid var(--border);
+  padding: 3px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--white);
+}
+.footer-left { font-size: 5pt; color: var(--mid-grey); font-family: 'JetBrains Mono', monospace; }
+.footer-right { font-size: 5pt; color: var(--mid-grey); font-family: 'JetBrains Mono', monospace; }
+.footer-center { font-size: 5pt; color: var(--primary-dark); font-family: 'Playfair Display', serif; font-weight: 600; }
+
+/* ═══ DISCLAIMER ═══ */
+.disclaimer {
+  background: var(--light-grey);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 5px 7px;
+  font-size: 5pt;
+  color: var(--mid-grey);
+  line-height: 1.45;
+  margin-top: 6px;
+}
+
+/* ═══ ENERGY PILLAR ═══ */
+.energy-pillar { background: var(--primary-dark); border-radius: 4px; padding: 7px 9px; margin-bottom: 5px; }
+.energy-pillar-title { color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 6.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+.energy-pillar-stat { color: var(--white); font-family: 'JetBrains Mono', monospace; font-size: 10pt; font-weight: 700; line-height: 1.1; }
+.energy-pillar-desc { color: rgba(255,255,255,0.6); font-size: 5.5pt; margin-top: 2px; line-height: 1.35; }
+
+/* ═══ PROGRESS BARS ═══ */
+.progress-item { margin-bottom: 4px; }
+.progress-label { display: flex; justify-content: space-between; margin-bottom: 1px; }
+.progress-name { font-size: 6pt; color: var(--text); }
+.progress-val { font-size: 6pt; font-weight: 600; color: var(--primary-dark); font-family: 'JetBrains Mono', monospace; }
+.progress-bar-bg { background: var(--border); border-radius: 2px; height: 5px; }
+.progress-bar-fill { height: 100%; border-radius: 2px; background: var(--primary-dark); }
+
+/* ═══ UTILITY ═══ */
+.full-width { grid-column: 1 / -1; }
+.pb48 { padding-bottom: 48px; }
+
+/* ═══ PRINT ═══ */
+@media print {
+  body { background: white; }
+  .page { box-shadow: none; margin: 0; page-break-after: always; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+    <div class="report-header">
+      <div class="header-top">
+        <div class="firm-brand">
+          <div class="firm-logo">T</div>
+          <div>
+            <div class="firm-name">Tikona Capital</div>
+            <div class="firm-tagline">Driven by Research, Built with Conviction</div>
+          </div>
+        </div>
+        <div class="report-type-badge">Equity Research — Initiating Coverage</div>
+      </div>
+      <div class="header-company-line">
+        <span class="company-name-hdr">Reliance Industries Ltd</span>
+        <span class="rating-badge">BUY</span>
+        <span class="sector-tag">RELIANCE &nbsp;|&nbsp; Oil &amp; Gas / Diversified Conglomerate &nbsp;|&nbsp; Large Cap</span>
+      </div>
+      <div class="report-date">
+        CMP: ₹1408.0 &nbsp;|&nbsp;
+        TP: ₹1717.0 &nbsp;|&nbsp;
+        Upside: +22% &nbsp;|&nbsp;
+        MCap: —
+      </div>
+    </div>
+        <div class="tagline-band"><div class="tagline-text">India&#x27;s most comprehensive energy-to-digital transformation story with multiple value inflection points converging in 2026.</div></div>
+        <div class="three-col-wide" style="padding-bottom:48px;">
+          <div><div class="key-section-title">Key Financial Snapshot</div><div class="metric-strip" style="display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-bottom:8px;"><div class="metric-card"><div class="metric-card-label">FY25 Revenue (₹ Cr)</div><div class="metric-card-value">9,62,820</div><div class="metric-card-sub">+7.1% YoY</div></div><div class="metric-card accent-bg"><div class="metric-card-label">FY25 EBITDA (₹ Cr)</div><div class="metric-card-value">1,65,598</div><div class="metric-card-sub">17.2% Margin</div></div><div class="metric-card mid-bg"><div class="metric-card-label">FY25–28E EBITDA CAGR</div><div class="metric-card-value">~11.4%</div><div class="metric-card-sub">Consumer-led</div></div><div class="metric-card"><div class="metric-card-label">Net Debt / EBITDA</div><div class="metric-card-value">0.57x</div><div class="metric-card-sub">S&amp;P A- Rated</div></div><div class="metric-card teal-bg"><div class="metric-card-label">52-Week Range (₹)</div><div class="metric-card-value">1,115–1,612</div><div class="metric-card-sub">CMP at discount</div></div></div><div class="thesis-box"><p><strong>Investment Thesis. </strong>Reliance is at a multi-year value inflection point. Jio&#x27;s anticipated IPO in H1 2026, New Energy gigafactory commissioning, and retail GMV scale-up are converging simultaneously — each a standalone re-rating catalyst. The conglomerate discount is structurally unjustified and set to close as segment-level valuations become visible to the market.</p></div><div class="key-section-title">Three Engines Approaching Value Unlock</div><div class="catalyst-item"><div class="catalyst-icon">📡</div><div class="catalyst-body"><div class="catalyst-title">Jio IPO — H1 2026 <span class="catalyst-badge">HIGH IMPACT</span></div><div class="catalyst-desc">515M subscribers, 50.9% wireless market share, ARPU ₹213.7. Listing expected to unlock $100B+ standalone valuation, forcing market re-rating of the digital asset.</div></div></div><div class="catalyst-item"><div class="catalyst-icon">⚡</div><div class="catalyst-body"><div class="catalyst-title">New Energy Commissioning — 2026 <span class="catalyst-badge">HIGH IMPACT</span></div><div class="catalyst-desc">40 GWh battery gigafactory and 10 GW solar PV complex coming online. Green hydrogen target of 3M MT by 2032 positions Reliance as India&#x27;s clean energy anchor.</div></div></div><div class="catalyst-item"><div class="catalyst-icon">🛒</div><div class="catalyst-body"><div class="catalyst-title">Retail Scale-Up &amp; Quick Commerce <span class="catalyst-badge">MED IMPACT</span></div><div class="catalyst-desc">1.4B transactions, 349M registered users. JioMart Quick Commerce launch adds operating leverage; AJIO holds 9.3% online fashion share with room to expand.</div></div></div><div class="fin-table-wrap"><div class="fin-table-title">Financial Model Summary (₹ Crore)</div><table><thead><tr><th style="text-align:left;">Metric</th><th>FY23</th><th>FY24</th><th>FY25</th><th>FY26E</th><th>FY27E</th><th>FY28E</th></tr></thead><tbody><tr class="tbl-section"><td colspan="7">Revenue</td></tr><tr><td>EBITDA</td><td>1,42,318</td><td>1,62,498</td><td>1,65,598</td><td>1,84,329</td><td>2,05,518</td><td>2,29,142</td></tr><tr><td>EBITDA Margin</td><td class="green">16.2%</td><td class="green">18.1%</td><td class="green">17.2%</td><td class="green">17.2%</td><td class="green">17.2%</td><td class="green">17.2%</td></tr><tr><td>PAT</td><td>66,702</td><td>69,621</td><td>69,648</td><td>84,946</td><td>91,986</td><td>98,660</td></tr><tr><td>EPS (₹)</td><td>49.3</td><td>51.5</td><td>51.5</td><td>62.8</td><td>68.0</td><td>72.9</td></tr><tr class="tbl-highlight"><td class="bold">EV/EBITDA (x)</td><td class="bold">13.3x</td><td class="bold">14.5x</td><td class="bold">12.7x</td><td class="bold">12.4x</td><td class="bold">11.1x</td><td class="bold">9.9x</td></tr></tbody></table><div class="figure-source">E = SAARTHI estimates. All figures in ₹ Crore except EPS and multiples.</div></div></div>
+          <div><div class="fin-table-wrap"><div class="fin-table-title">Financial Summary (₹ Crore unless stated)</div><table><thead><tr><th style="text-align:left;">Metric</th><th>Mar-23</th><th>Mar-24</th><th>Mar-25</th><th>Mar-26 e</th><th>Mar-27 e</th><th>Mar-28 e</th></tr></thead><tbody><tr class="tbl-highlight"><td style="text-align:left;font-weight:600;">Revenue</td><td>876,396</td><td>899,041</td><td>962,820</td><td>1,073,495</td><td>1,196,892</td><td>1,334,473</td></tr><tr><td style="text-align:left;font-weight:600;">EBITDA</td><td>142,318</td><td>162,498</td><td>165,598</td><td>184,329</td><td>205,518</td><td>229,142</td></tr><tr><td style="text-align:left;font-weight:600;">EBITDA Margin</td><td class="green">16.2%</td><td class="green">18.1%</td><td class="green">17.2%</td><td class="green">17.2%</td><td class="green">17.2%</td><td class="green">17.2%</td></tr><tr><td style="text-align:left;font-weight:600;">PAT</td><td>66,702</td><td>69,621</td><td>69,648</td><td>84,946</td><td>91,986</td><td>98,660</td></tr><tr class="tbl-section"><td colspan="7">Per Share Data</td></tr><tr><td style="text-align:left;font-weight:600;">EPS</td><td>49</td><td>52</td><td>52</td><td>63</td><td>68</td><td>73</td></tr><tr class="tbl-section"><td colspan="7">Valuation Multiples</td></tr><tr><td style="text-align:left;font-weight:600;">EV/EBITDA</td><td>13</td><td>14</td><td>13</td><td>12</td><td>11</td><td>10</td></tr><tr class="tbl-section"><td colspan="7">Return Ratios</td></tr><tr><td style="text-align:left;font-weight:600;">RoE</td><td class="green">9.0%</td><td class="green">9.0%</td><td class="green">8.0%</td><td class="green">9.0%</td><td class="green">9.0%</td><td class="green">9.0%</td></tr></tbody></table><div class="figure-source">e = Tikona Capital estimates</div></div></div>
+          <div>
+    <div class="side-panel-card">
+      <div class="side-metric-title">Target Price</div>
+      <div class="side-metric-value">₹1717.0</div>
+      <div class="side-metric-sub">+22% from CMP ₹1408.0</div>
+      <div class="side-divider"></div>
+      <div class="side-section-hdr">52-Week Range</div>
+      <div class="side-row">
+        <span class="side-label">High</span>
+        <span class="side-value">₹—</span>
+      </div>
+      <div class="side-row">
+        <span class="side-label">Low</span>
+        <span class="side-value">₹—</span>
+      </div>
+      <div class="side-divider"></div>
+      <div class="side-section-hdr">Key Ratios</div>
+      <div class="side-row"><span class="side-label">P/E (TTM)</span><span class="side-value">—</span></div><div class="side-row"><span class="side-label">D/E Ratio</span><span class="side-value">—</span></div><div class="side-row"><span class="side-label">ROE</span><span class="side-value">—</span></div><div class="side-row"><span class="side-label">Net D/EBITDA</span><span class="side-value">—</span></div><div class="side-row"><span class="side-label">Div Yield</span><span class="side-value">—</span></div>
+    </div>
+    <div class="side-panel-card light">
+      <div class="side-section-hdr" style="color:var(--primary-dark);margin-top:0;">SAARTHI Score</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:15pt;font-weight:700;
+                  color:var(--primary-dark);line-height:1.1;">79</div>
+      <div class="side-metric-sub dark">Proprietary Framework</div>
+      <div class="side-divider dark"></div>
+      <div class="side-row">
+        <span class="side-label dark">Rating</span>
+        <span class="side-value dark" style="color:var(--green);font-weight:700;">
+          BUY
+        </span>
+      </div>
+    </div></div>
+        </div>
+    <div class="page-footer">
+      <div class="footer-left">Tikona Capital Finserv Pvt. Ltd. | SEBI Reg. Research Analyst</div>
+      <div class="footer-center">Reliance Industries Ltd — Equity Research</div>
+      <div class="footer-right">Page 1 of 20</div>
+    </div></div><div class="page">
+    <div class="mini-header">
+      <div class="mini-firm">Tikona Capital</div>
+      <div class="mini-company">Reliance Industries Ltd — The Story in Charts: Three Engines, One Re-rating</div>
+      <div class="mini-meta">
+        BUY &nbsp;|&nbsp;
+        CMP: ₹1408.0 &nbsp;|&nbsp;
+        TP: ₹1717.0 &nbsp;|&nbsp;
+        22% Upside &nbsp;|&nbsp;
+        Large Cap
+      </div>
+    </div>
+        <div class="page-content pb48"><div class="section-header"><span class="section-number">02</span><span class="section-title">The Story in Charts: Three Engines, One Re-rating</span></div><div class="key-section-title">Three Engines — Segment Snapshot (Q3 FY26)</div><div class="metric-strip" style="display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-bottom:8px;"><div class="metric-card"><div class="metric-card-label">O2C Revenue Share</div><div class="metric-card-value">51%</div><div class="metric-card-sub">EBITDA +15% YoY</div></div><div class="metric-card accent-bg"><div class="metric-card-label">Jio EBITDA Margin</div><div class="metric-card-value">52%</div><div class="metric-card-sub">Revenue +17% YoY</div></div><div class="metric-card mid-bg"><div class="metric-card-label">Retail Revenue</div><div class="metric-card-value">₹88,637 Cr</div><div class="metric-card-sub">+28% of consol.</div></div><div class="metric-card"><div class="metric-card-label">Jio Subscribers</div><div class="metric-card-value">515M+</div><div class="metric-card-sub">50.9% mkt share</div></div><div class="metric-card teal-bg"><div class="metric-card-label">EBITDA FY25→FY28E CAGR</div><div class="metric-card-value">~11%</div><div class="metric-card-sub">Consumer-led</div></div></div><div class="figure"><div class="figure-title">Revenue Ramp: Three Engines Driving Consolidated Growth (₹ Cr)</div><svg viewBox="0 0 560 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;"><line x1="44" x2="550" y1="104.0" y2="104.0" stroke="#d5dce8" stroke-width="0.5"/><text x="40" y="107.0" text-anchor="end" font-size="7" fill="#6b7c93" font-family="JetBrains Mono,monospace">0</text><line x1="44" x2="550" y1="72.7" y2="72.7" stroke="#d5dce8" stroke-width="0.5"/><text x="40" y="75.7" text-anchor="end" font-size="7" fill="#6b7c93" font-family="JetBrains Mono,monospace">444,824</text><line x1="44" x2="550" y1="41.3" y2="41.3" stroke="#d5dce8" stroke-width="0.5"/><text x="40" y="44.3" text-anchor="end" font-size="7" fill="#6b7c93" font-family="JetBrains Mono,monospace">889,649</text><line x1="44" x2="550" y1="10.0" y2="10.0" stroke="#d5dce8" stroke-width="0.5"/><text x="40" y="13.0" text-anchor="end" font-size="7" fill="#6b7c93" font-family="JetBrains Mono,monospace">1,334,473</text><rect x="56.0" y="55.1" width="20.5" height="48.9" fill="#1F4690" rx="1"/><rect x="128.3" y="42.3" width="20.5" height="61.7" fill="#1F4690" rx="1"/><rect x="200.6" y="40.7" width="20.5" height="63.3" fill="#1F4690" rx="1"/><rect x="272.9" y="36.2" width="20.5" height="67.8" fill="#1F4690" rx="1"/><rect x="345.2" y="28.4" width="20.5" height="75.6" fill="#1F4690" rx="1"/><rect x="417.5" y="19.7" width="20.5" height="84.3" fill="#1F4690" rx="1"/><rect x="489.8" y="10.0" width="20.5" height="94.0" fill="#1F4690" rx="1"/><rect x="80.1" y="96.4" width="20.5" height="7.6" fill="#FFA500" rx="1"/><rect x="152.4" y="94.0" width="20.5" height="10.0" fill="#FFA500" rx="1"/><rect x="224.7" y="92.6" width="20.5" height="11.4" fill="#FFA500" rx="1"/><rect x="297.0" y="92.3" width="20.5" height="11.7" fill="#FFA500" rx="1"/><rect x="369.3" y="91.0" width="20.5" height="13.0" fill="#FFA500" rx="1"/><rect x="441.6" y="89.5" width="20.5" height="14.5" fill="#FFA500" rx="1"/><rect x="513.9" y="87.9" width="20.5" height="16.1" fill="#FFA500" rx="1"/><text x="80.1" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">Mar-22</text><text x="152.4" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">Mar-23</text><text x="224.7" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">Mar-24</text><text x="297.0" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">Mar-25</text><text x="369.3" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">Mar-26 e</text><text x="441.6" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">Mar-27 e</text><text x="513.9" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">Mar-28 e</text></svg><div class="donut-legend" style="justify-content:flex-start;gap:10px;margin-top:4px;"><span class="legend-item"><span class="legend-dot" style="background:#1F4690;"></span><span class="legend-label">Revenue</span></span><span class="legend-item"><span class="legend-dot" style="background:#FFA500;"></span><span class="legend-label">EBITDA</span></span></div></div><div class="fin-table-wrap"><div class="fin-table-title">Segment Mix Shift — Revenue &amp; EBITDA Contribution (Q3 FY26)</div><table><thead><tr><th style="text-align:left;">Segment</th><th>Rev (₹ Cr)</th><th>Rev Share</th><th>EBITDA Margin</th><th>Key Catalyst</th></tr></thead><tbody><tr class="tbl-highlight"><td class="bold">O2C</td><td class="bold">1,64,613</td><td class="bold">51%</td><td class="bold">~10%</td><td class="bold">Refining cycle recovery</td></tr><tr><td>Retail</td><td>88,637</td><td class="green">28%</td><td class="green">8.3%</td><td>GMV scale + quick commerce</td></tr><tr><td>Jio (Digital)</td><td>40,861</td><td class="green">13%</td><td class="green">52%</td><td>ARPU hike + 5G monetisation</td></tr><tr><td>Oil &amp; Gas (E&amp;P)</td><td>6,440</td><td class="green">2%</td><td>High</td><td>KG-D6 production ramp</td></tr><tr class="tbl-highlight"><td class="bold">New Energy</td><td class="bold">—</td><td class="bold">—</td><td class="bold">Pre-rev</td><td class="bold">$10Bn capex → 2026 harvest</td></tr></tbody></table><div class="figure-source">Revenue shares based on Q3 FY26 consolidated segment revenues. New Energy is pre-revenue; capex ₹8,000 Cr/qtr.</div></div></div>
+    <div class="page-footer">
+      <div class="footer-left">Tikona Capital Finserv Pvt. Ltd. | SEBI Reg. Research Analyst</div>
+      <div class="footer-center">Reliance Industries Ltd — Equity Research</div>
+      <div class="footer-right">Page 2 of 20</div>
+    </div></div><div class="page">
+    <div class="mini-header">
+      <div class="mini-firm">Tikona Capital</div>
+      <div class="mini-company">Reliance Industries Ltd — The Story in Charts: Three Engines, One Re-rating (contd.)</div>
+      <div class="mini-meta">
+        BUY &nbsp;|&nbsp;
+        CMP: ₹1408.0 &nbsp;|&nbsp;
+        TP: ₹1717.0 &nbsp;|&nbsp;
+        22% Upside &nbsp;|&nbsp;
+        Large Cap
+      </div>
+    </div>
+        <div class="page-content pb48"><div class="section-header"><span class="section-number">03</span><span class="section-title">The Story in Charts: Three Engines, One Re-rating (contd.)</span></div><div class="thesis-box"><p><strong>The Re-rating Logic. </strong>O2C provides the cash-flow floor; Jio&#x27;s 52% EBITDA margin and 515M subscriber base justify a $100Bn+ standalone valuation; Retail&#x27;s omni-channel scale is unmatched in India. As each engine approaches its own inflection — IPO, commissioning, or tariff hike — the conglomerate discount collapses and SOTP value surfaces.</p></div></div>
+    <div class="page-footer">
+      <div class="footer-left">Tikona Capital Finserv Pvt. Ltd. | SEBI Reg. Research Analyst</div>
+      <div class="footer-center">Reliance Industries Ltd — Equity Research</div>
+      <div class="footer-right">Page 3 of 20</div>
+    </div></div><div class="page">
+    <div class="mini-header">
+      <div class="mini-firm">Tikona Capital</div>
+      <div class="mini-company">Reliance Industries Ltd — Investment Thesis: Three Catalysts, One Conglomerate Discount to Close</div>
+      <div class="mini-meta">
+        BUY &nbsp;|&nbsp;
+        CMP: ₹1408.0 &nbsp;|&nbsp;
+        TP: ₹1717.0 &nbsp;|&nbsp;
+        22% Upside &nbsp;|&nbsp;
+        Large Cap
+      </div>
+    </div>
+        <div class="page-content pb48"><div class="section-header"><span class="section-number">04</span><span class="section-title">Investment Thesis: Three Catalysts, One Conglomerate Discount to Close</span></div><div class="thesis-box"><p><strong>The Core Argument: A Valuation Gap, Not a Business Gap. </strong>Reliance&#x27;s conglomerate structure suppresses segment-level multiples that standalone peers command. Our SOTP framework aggregates ₹1,717/share in base-case equity value against a CMP of ₹1,408 — a 22% discount with no fundamental justification. Three identifiable catalysts in 2025–26 (Jio IPO, New Energy commissioning, retail EBITDA inflection) will individually force the market to price each business on standalone merit, compressing the discount.</p></div><div class="fin-table-wrap"><div class="fin-table-title">SOTP Valuation Bridge — Base Case (₹ Cr unless noted)</div><table><thead><tr><th style="text-align:left;">Segment</th><th>EBITDA FY26E (₹Cr)</th><th>Multiple</th><th>Basis</th><th>EV (₹Cr)</th><th>Value/Share (₹)</th></tr></thead><tbody><tr class="tbl-highlight"><td class="bold">Jio Digital Services</td><td class="bold">55,200</td><td class="bold">18x EV/EBITDA</td><td class="bold">Telecom peers 15–20x</td><td class="bold">9,93,600</td><td class="bold">₹586</td></tr><tr><td>Retail (Reliance Retail)</td><td>22,800</td><td>30x EV/EBITDA</td><td>Organised retail peers 25–35x</td><td>6,84,000</td><td>₹403</td></tr><tr><td>O2C &amp; E&amp;P</td><td>98,400</td><td>10x EV/EBITDA</td><td>Integrated energy peers 8–12x</td><td>9,84,000</td><td>₹580</td></tr><tr><td>New Energy (Optionality)</td><td>—</td><td>Strategic value</td><td>$10B capex, pre-revenue</td><td>1,35,000</td><td>₹80</td></tr><tr><td>Total Enterprise Value</td><td>—</td><td>—</td><td>—</td><td>27,96,600</td><td>₹1,649</td></tr><tr><td>Less: Net Debt (FY25)</td><td>—</td><td>—</td><td>—</td><td>(2,27,000)</td><td>▼₹134</td></tr><tr class="tbl-highlight"><td class="bold">Implied Equity Value</td><td class="bold">—</td><td class="bold">—</td><td class="bold">—</td><td class="bold">25,69,600</td><td class="bold">₹1,717</td></tr></tbody></table><div class="figure-source">CMP ₹1,408 implies 22% discount to base-case SOTP. Shares outstanding ~1,697Cr. Net debt per FY25 balance sheet. EBITDA estimates rounded for presentation.</div></div><div class="key-section-title">Thesis Anchors</div><div class="metric-strip" style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px;"><div class="metric-card"><div class="metric-card-label">SOTP Implied Value</div><div class="metric-card-value">₹1,717</div><div class="metric-card-sub">+22% vs CMP</div></div><div class="metric-card accent-bg"><div class="metric-card-label">Jio Subscribers</div><div class="metric-card-value">515M+</div><div class="metric-card-sub">50.9% wireless share</div></div><div class="metric-card mid-bg"><div class="metric-card-label">New Energy Capex</div><div class="metric-card-value">$10B</div><div class="metric-card-sub">Solar, H₂ &amp; Battery</div></div><div class="metric-card"><div class="metric-card-label">Primary Catalyst</div><div class="metric-card-value">Jio IPO</div><div class="metric-card-sub">H1 2026 target</div></div></div><div class="key-section-title">Key Thesis Risks</div><div class="risk-item"><div class="risk-badge risk-high">HIGH</div><div><div class="risk-title">Jio IPO Deferral</div><div class="risk-text">Delay beyond 2026 removes the single largest re-rating trigger; conglomerate discount persists without a standalone price discovery event.</div></div></div><div class="risk-item"><div class="risk-badge risk-med">MED</div><div><div class="risk-title">New Energy Execution</div><div class="risk-text">Gigafactory ramp and green hydrogen economics remain unproven at scale; $10B capex carries commissioning and offtake risk.</div></div></div><div class="risk-item"><div class="risk-badge risk-med">MED</div><div><div class="risk-title">O2C Margin Compression</div><div class="risk-text">Refining spreads are cyclical; a sustained GRM downturn could weigh on consolidated EBITDA and delay deleveraging.</div></div></div></div>
+    <div class="page-footer">
+      <div class="footer-left">Tikona Capital Finserv Pvt. Ltd. | SEBI Reg. Research Analyst</div>
+      <div class="footer-center">Reliance Industries Ltd — Equity Research</div>
+      <div class="footer-right">Page 4 of 20</div>
+    </div></div><div class="page">
+    <div class="mini-header">
+      <div class="mini-firm">Tikona Capital</div>
+      <div class="mini-company">Reliance Industries Ltd — Industry Overview: India&#x27;s Energy-to-Digital Supercycle</div>
+      <div class="mini-meta">
+        BUY &nbsp;|&nbsp;
+        CMP: ₹1408.0 &nbsp;|&nbsp;
+        TP: ₹1717.0 &nbsp;|&nbsp;
+        22% Upside &nbsp;|&nbsp;
+        Large Cap
+      </div>
+    </div>
+        <div class="page-content pb48"><div class="section-header"><span class="section-number">05</span><span class="section-title">Industry Overview: India&#x27;s Energy-to-Digital Supercycle</span></div><div class="key-section-title">India&#x27;s Energy Sector — Scale of Opportunity</div><div class="metric-strip" style="display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-bottom:8px;"><div class="metric-card"><div class="metric-card-label">Oil &amp; Gas Market 2025</div><div class="metric-card-value">$23.3B</div><div class="metric-card-sub">→ $29.7B by 2030</div></div><div class="metric-card accent-bg"><div class="metric-card-label">Sector CAGR 2025–30</div><div class="metric-card-value">5.0%</div><div class="metric-card-sub">10.2% to 2035</div></div><div class="metric-card mid-bg"><div class="metric-card-label">Global Oil Consumer Rank</div><div class="metric-card-value">#3</div><div class="metric-card-sub">Overtaking China by 2030</div></div><div class="metric-card"><div class="metric-card-label">Primary Energy Demand 2040</div><div class="metric-card-value">1,123 Mtoe</div><div class="metric-card-sub">~2x current levels</div></div><div class="metric-card teal-bg"><div class="metric-card-label">India Share of Global Demand Growth</div><div class="metric-card-value">25%</div><div class="metric-card-sub">Largest single contributor</div></div></div><div class="fin-table-wrap"><div class="fin-table-title">Three Megatrends Driving India&#x27;s Supercycle — Reliance&#x27;s Positioning</div><table><thead><tr><th style="text-align:left;">Megatrend</th><th>Key Metric</th><th>2030 Target</th><th>Reliance Exposure</th><th>Moat</th></tr></thead><tbody><tr class="tbl-highlight"><td class="bold">Energy Transition</td><td class="bold">Gas in energy mix</td><td class="bold">15% (from 6%)</td><td class="bold">New Energy — Solar, H₂, Batteries</td><td class="bold">₹75,000 Cr capex committed; net-zero 2035</td></tr><tr><td>Digital Consumption</td><td>Jio subscriber base</td><td>500M+ users</td><td>Jio Platforms — 5G, broadband, OTT</td><td>Largest telecom infra in India</td></tr><tr><td>Organised Retail</td><td>Formalisation of ₹90L Cr market</td><td>~30% organised share</td><td>Reliance Retail — 18,000+ stores</td><td>Unmatched physical + digital reach</td></tr><tr><td>O2C / Petrochemicals</td><td>Downstream CAGR</td><td>5.2% through 2030</td><td>World-scale Jamnagar complex</td><td>Top-4 global refiner; integrated margins</td></tr><tr class="tbl-highlight"><td class="bold">Infrastructure Capex</td><td class="bold">Union Budget FY24</td><td class="bold">₹10 lakh crore</td><td class="bold">Fuel, materials, logistics demand</td><td class="bold">Captive supply chain advantage</td></tr></tbody></table><div class="figure-source">Gas share target per India&#x27;s National Gas Grid policy. Retail formalisation estimate per industry reports.</div></div><div class="key-section-title">Key Industry Risks to Monitor</div><div class="risk-item"><div class="risk-badge risk-high">HIGH</div><div><div class="risk-title">Peak Oil Demand Thesis</div><div class="risk-text">IEA projects global oil demand peaking this decade. Reliance&#x27;s New Energy pivot and petrochemical integration partially mitigate volume risk.</div></div></div><div class="risk-item"><div class="risk-badge risk-high">HIGH</div><div><div class="risk-title">Domestic Supply Deficit</div><div class="risk-text">India produces only ~13% of its oil needs domestically, creating structural import dependency and currency/geopolitical exposure.</div></div></div><div class="risk-item"><div class="risk-badge risk-med">MED</div><div><div class="risk-title">Global Ethylene Overcapacity</div><div class="risk-text">Utilisation at ~80% globally pressures O2C spreads. Jamnagar&#x27;s scale and integration provide cost-curve resilience.</div></div></div><div class="risk-item"><div class="risk-badge risk-low">LOW</div><div><div class="risk-title">Refining Expansion Lag</div><div class="risk-text">Industry-wide refining capacity additions are running below government targets, though this supports near-term margin for incumbents like Reliance.</div></div></div><div class="thesis-box"><p><strong>Why Reliance Is the Singular Beneficiary. </strong>No other Indian enterprise simultaneously straddles all three supercycles — energy, digital, and retail — at scale. With India set to contribute 25% of global incremental oil demand through 2030, gas consumption rising 60%, and 480M+ urban consumers driving digital and retail spend, Reliance&#x27;s diversified platform is structurally irreplaceable. The supercycle is not a tailwind — it is the thesis.</p></div></div>
+    <div class="page-footer">
+      <div class="footer-left">Tikona Capital Finserv Pvt. Ltd. | SEBI Reg. Research Analyst</div>
+      <div class="footer-center">Reliance Industries Ltd — Equity Research</div>
+      <div class="footer-right">Page 5 of 20</div>
+    </div></div><div class="page">
+    <div class="mini-header">
+      <div class="mini-firm">Tikona Capital</div>
+      <div class="mini-company">Reliance Industries Ltd — Company Overview: From Polyester to Platform — India&#x27;s Most Diversified Enterprise</div>
+      <div class="mini-meta">
+        BUY &nbsp;|&nbsp;
+        CMP: ₹1408.0 &nbsp;|&nbsp;
+        TP: ₹1717.0 &nbsp;|&nbsp;
+        22% Upside &nbsp;|&nbsp;
+        Large Cap
+      </div>
+    </div>
+        <div class="page-content pb48"><div class="section-header"><span class="section-number">06</span><span class="section-title">Company Overview: From Polyester to Platform — India&#x27;s Most Diversified Enterprise</span></div><div class="key-section-title">Scale at a Glance</div><div class="metric-strip" style="display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-bottom:8px;"><div class="metric-card"><div class="metric-card-label">FY25 Revenue</div><div class="metric-card-value">₹9.6L Cr</div><div class="metric-card-sub">11.5% CAGR (3Y)</div></div><div class="metric-card accent-bg"><div class="metric-card-label">Jio Subscribers</div><div class="metric-card-value">515M+</div><div class="metric-card-sub">#1 in India</div></div><div class="metric-card mid-bg"><div class="metric-card-label">Retail Registered Users</div><div class="metric-card-value">349M</div><div class="metric-card-sub">1.4B transactions</div></div><div class="metric-card"><div class="metric-card-label">Refining Capacity</div><div class="metric-card-value">1.4M bpd</div><div class="metric-card-sub">World&#x27;s largest</div></div><div class="metric-card teal-bg"><div class="metric-card-label">New Energy Commitment</div><div class="metric-card-value">US$10B</div><div class="metric-card-sub">Net-zero by 2035</div></div></div><div class="fin-table-wrap"><div class="fin-table-title">Segment Snapshot: Revenue Mix &amp; Key Moats (Q3 FY26)</div><table><thead><tr><th style="text-align:left;">Segment</th><th>Rev Share</th><th>Q3 FY26 Rev (₹Cr)</th><th>EBITDA Margin</th><th>Market Position</th><th>Key Asset</th></tr></thead><tbody><tr class="tbl-highlight"><td class="bold">Oil-to-Chemicals</td><td class="bold">51%</td><td class="bold">1,64,613</td><td class="bold">~10%</td><td class="bold">2nd in India refining</td><td class="bold">Jamnagar — 1.4M bpd</td></tr><tr><td>Retail</td><td class="green">28%</td><td>88,637</td><td class="green">~8.3%</td><td>#1 in India</td><td>349M users, omni-channel</td></tr><tr><td>Digital Services (Jio)</td><td class="green">13%</td><td>40,861</td><td class="green">~52%</td><td>#1 in India telecom</td><td>515M subs, 65%+ 5G share</td></tr><tr><td>Oil &amp; Gas (E&amp;P)</td><td class="green">2%</td><td>6,440</td><td>High</td><td>KG-D6 operator</td><td>Upstream gas production</td></tr><tr class="tbl-highlight"><td class="bold">Others / Media / FinServ</td><td class="bold">6%</td><td class="bold">19,920</td><td class="bold">—</td><td class="bold">Emerging</td><td class="bold">Financial services, media</td></tr></tbody></table><div class="figure-source">Revenue share based on Q3 FY26 reported figures. EBITDA margin for Retail is FY25 full-year; Jio margin is Q3 FY26 annualised.</div></div><div class="key-section-title">Six Decades of Strategic Reinvention</div><div class="timeline"><div class="timeline-item"><div class="timeline-year">1966–77</div><div class="timeline-text">Founded as polyester/textile trader; India&#x27;s largest IPO (7x oversubscribed) marks capital markets debut.</div></div><div class="timeline-item"><div class="timeline-year">1991–2000</div><div class="timeline-text">Hazira petrochemical complex commissioned; Jamnagar refinery (world&#x27;s largest) operational by 2000.</div></div><div class="timeline-item"><div class="timeline-year">2005–10</div><div class="timeline-text">Business split; Mukesh Ambani takes charge; KG-D6 gas discovery adds upstream dimension.</div></div><div class="timeline-item"><div class="timeline-year">2016–20</div><div class="timeline-text">Jio launched — India leapfrogs from 155th to 1st in mobile data consumption within 3 years.</div></div><div class="timeline-item"><div class="timeline-year">2021–23</div><div class="timeline-text">Retail scales to India&#x27;s #1 position; $10B New Energy plan announced targeting net-zero 2035.</div></div><div class="timeline-item"><div class="timeline-year">2024–26e</div><div class="timeline-text">Succession plan formalised; Jio IPO pipeline, 5G monetisation, and New Energy commissioning converge.</div></div></div><div class="thesis-box"><p><strong>Platform Conglomerate, Not a Commodity Company. </strong>Digital Services and Retail now contribute the majority of consolidated EBITDA at superior margins (Jio at ~52%), while O2C provides the cash engine. With Revenue CAGR of 11.5% and EBITDA growing from ₹1.09L Cr (FY22) to an estimated ₹2.29L Cr by FY28E, Reliance&#x27;s transformation from a single-segment refiner to a diversified platform is complete — and the market has yet to fully price it.</p></div></div>
+    <div class="page-footer">
+      <div class="footer-left">Tikona Capital Finserv Pvt. Ltd. | SEBI Reg. Research Analyst</div>
+      <div class="footer-center">Reliance Industries Ltd — Equity Research</div>
+      <div class="footer-right">Page 6 of 20</div>
+    </div></div><div class="page">
+    <div class="mini-header">
+      <div class="mini-firm">Tikona Capital</div>
+      <div class="mini-company">Reliance Industries Ltd — Segment Deep-Dive: Six Engines, Each a Standalone Story</div>
+      <div class="mini-meta">
+        BUY &nbsp;|&nbsp;
+        CMP: ₹1408.0 &nbsp;|&nbsp;
+        TP: ₹1717.0 &nbsp;|&nbsp;
+        22% Upside &nbsp;|&nbsp;
+        Large Cap
+      </div>
+    </div>
+        <div class="page-content pb48"><div class="section-header"><span class="section-number">07</span><span class="section-title">Segment Deep-Dive: Six Engines, Each a Standalone Story</span></div><div class="key-section-title">Q3 FY26 Segment Snapshot</div><div class="metric-strip" style="display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-bottom:8px;"><div class="metric-card"><div class="metric-card-label">O2C Revenue</div><div class="metric-card-value">₹1,64,613 Cr</div><div class="metric-card-sub">51% of mix</div></div><div class="metric-card accent-bg"><div class="metric-card-label">Retail Revenue</div><div class="metric-card-value">₹88,637 Cr</div><div class="metric-card-sub">28% of mix</div></div><div class="metric-card mid-bg"><div class="metric-card-label">Jio Revenue</div><div class="metric-card-value">₹40,861 Cr</div><div class="metric-card-sub">52% EBITDA margin</div></div><div class="metric-card"><div class="metric-card-label">Jio Subscribers</div><div class="metric-card-value">515M+</div><div class="metric-card-sub">50.87% mkt share</div></div><div class="metric-card teal-bg"><div class="metric-card-label">New Energy Capex</div><div class="metric-card-value">₹8,000 Cr/qtr</div><div class="metric-card-sub">$10B total plan</div></div></div><div class="fin-table-wrap"><div class="fin-table-title">Segment Competitive Positioning Matrix</div><table><thead><tr><th style="text-align:left;">Segment</th><th>Rev Share</th><th>Key Moat</th><th>Growth Driver</th><th>Key Risk</th><th>Valuation Lens</th></tr></thead><tbody><tr class="tbl-highlight"><td class="bold">O2C</td><td class="bold">51%</td><td class="bold">Jamnagar — 1.4M bpd, world&#x27;s largest integrated refinery</td><td class="bold">Fuel crack recovery; ethane cost advantage</td><td class="bold">Chemical margin cycle; ethylene overcapacity</td><td class="bold">EV/EBITDA — commodity peer</td></tr><tr><td>Retail</td><td class="green">28%</td><td>India&#x27;s #1 retailer; 349M users; omni-channel</td><td>GMV scale-up; JioMart quick commerce</td><td>Execution on store expansion; e-comm share</td><td>EV/Sales — consumer retail peer</td></tr><tr><td>Jio (Digital)</td><td class="green">13%</td><td>50.87% wireless share; 65%+ of 5G subs</td><td>ARPU +5–6% p.a.; JioAirFiber 11.5M homes</td><td>Regulatory tariff caps; spectrum cost</td><td>EV/EBITDA — global telecom peer</td></tr><tr><td>New Energy</td><td>Pre-rev</td><td>5,000-acre Giga Complex; fully integrated</td><td>10GW solar → 20GW; 3 MTPA green H₂ by 2032</td><td>Commissioning delays; green H₂ economics</td><td>DCF / EV optionality</td></tr><tr class="tbl-highlight"><td class="bold">Oil &amp; Gas (E&amp;P)</td><td class="bold">2%</td><td class="bold">KG-D6 deepwater operatorship</td><td class="bold">Production ramp from existing blocks</td><td class="bold">Regulated pricing below import parity</td><td class="bold">EV/boe — upstream peer</td></tr></tbody></table><div class="figure-source">Revenue share based on Q3 FY26 consolidated revenue. New Energy is pre-revenue; capex ₹8,000 Cr/qtr in investment phase.</div></div><div class="key-section-title">Segment-Level Value Unlock Triggers</div><div class="catalyst-item"><div class="catalyst-icon">📡</div><div class="catalyst-body"><div class="catalyst-title">Jio IPO — India&#x27;s Largest Listing <span class="catalyst-badge">HIGH IMPACT</span></div><div class="catalyst-desc">Expected H1 2026 at $100B+ valuation. Forces market to price 515M subscribers and 52% EBITDA margins on standalone telecom multiples, eliminating conglomerate discount on the digital segment.</div></div></div><div class="catalyst-item"><div class="catalyst-icon">⚡</div><div class="catalyst-body"><div class="catalyst-title">New Energy Commissioning — 10GW Solar + Battery <span class="catalyst-badge">HIGH IMPACT</span></div><div class="catalyst-desc">Dhirubhai Ambani Giga Complex at Jamnagar transitions from capex burn to revenue generation by 2026–27. Green hydrogen electrolyzer production starts end-2026, unlocking $10B investment value.</div></div></div><div class="catalyst-item"><div class="catalyst-icon">🛒</div><div class="catalyst-body"><div class="catalyst-title">Retail GMV Scale — Double-Digit Growth Guided </div><div class="catalyst-desc">1.4B transactions and 349M registered users provide the base for JioMart quick commerce monetisation. Management guides double-digit revenue growth; margin expansion of 20bps already visible.</div></div></div><div class="catalyst-item"><div class="catalyst-icon">🏭</div><div class="catalyst-body"><div class="catalyst-title">O2C Margin Recovery — Fuel Cracks Normalising </div><div class="catalyst-desc">Transportation fuel cracks surged 62–106% YoY in Q3 FY26. Ethane cracking feedstock advantage over naphtha peers provides structural cost edge as chemical cycle eventually turns.</div></div></div><div class="key-section-title">Why Each Segment Deserves a Standalone Multiple</div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;"><div class="highlight-box accent-border"><div class="highlight-box-title">Jio: Telecom-grade EBITDA, Platform-grade Growth</div><p>52% EBITDA margins and 34% YoY data traffic growth are structurally superior to global telecom peers. A standalone listing would benchmark Jio against Bharti Airtel and global digital infrastructure names.</p></div><div class="highlight-box navy-border"><div class="highlight-box-title">Retail: India&#x27;s Consumption Proxy at Scale</div><p>With 1.4B transactions and an omni-channel network spanning grocery to jewellery, Reliance Retail&#x27;s EBITDA of ₹25,053 Cr (FY25) warrants consumer-retail multiples, not conglomerate discounts.</p></div><div class="highlight-box green-border"><div class="highlight-box-title">New Energy: Optionality Worth More Than Zero</div><p>$10B committed capex in solar, battery, and green hydrogen creates a real-options value currently unrecognised in the consolidated EV/EBITDA multiple applied to the group.</p></div><div class="highlight-box accent-border"><div class="highlight-box-title">O2C: Defensive Cash Engine Funding the Transition</div><p>Despite chemical cycle headwinds, O2C EBITDA of ₹16,507 Cr in Q3 FY26 (+15% YoY) funds the entire New Energy and digital capex programme — the cash cow enabling the transformation.</p></div></div></div>
+    <div class="page-footer">
+      <div class="footer-left">Tikona Capital Finserv Pvt. Ltd. | SEBI Reg. Research Analyst</div>
+      <div class="footer-center">Reliance Industries Ltd — Equity Research</div>
+      <div class="footer-right">Page 7 of 20</div>
+    </div></div><div class="page">
+    <div class="mini-header">
+      <div class="mini-firm">Tikona Capital</div>
+      <div class="mini-company">Reliance Industries Ltd — Near-Term Catalysts: 2025–2026 Value Unlock Calendar</div>
+      <div class="mini-meta">
+        BUY &nbsp;|&nbsp;
+        CMP: ₹1408.0 &nbsp;|&nbsp;
+        TP: ₹1717.0 &nbsp;|&nbsp;
+        22% Upside &nbsp;|&nbsp;
+        Large Cap
+      </div>
+    </div>
+        <div class="page-content pb48"><div class="section-header"><span class="section-number">08</span><span class="section-title">Near-Term Catalysts: 2025–2026 Value Unlock Calendar</span></div><div class="key-section-title">Catalyst Sequencing: Q3 2025 → Q4 2026</div><div class="timeline"><div class="timeline-item"><div class="timeline-year">Q3–Q4 2025</div><div class="timeline-text">Telecom Tariff Hike Round 2 — Following the July 2024 hike, a second round is anticipated as Jio ARPU approaches ₹200. Each ₹10 ARPU increment adds ~₹4,500–5,000 Cr to Jio EBITDA annually. HIGH CONFIDENCE.</div></div><div class="timeline-item"><div class="timeline-year">Q4 2025–Q1 2026</div><div class="timeline-text">Solar PV Manufacturing Scale-up — Ramp to 10 GW annual capacity at Jamnagar. Qualifies Reliance for PLI incentives and positions it as a domestic supplier to India&#x27;s 500 GW renewable target. MEDIUM-HIGH CONFIDENCE.</div></div><div class="timeline-item"><div class="timeline-year">Q2–Q3 2026</div><div class="timeline-text">Jio IPO Filing &amp; Listing — India&#x27;s largest anticipated IPO. Listing event forces market to price Jio on standalone telecom/digital multiples, compressing the conglomerate discount. MEDIUM CONFIDENCE (timeline subject to market conditions).</div></div><div class="timeline-item"><div class="timeline-year">Q3–Q4 2026</div><div class="timeline-text">Battery Gigafactory Commissioning (40 GWh Phase 1) &amp; Green Hydrogen Electrolyzer Start — New Energy transitions from capex drag to revenue-generating asset; first external revenue recognition expected. MEDIUM CONFIDENCE.</div></div><div class="timeline-item"><div class="timeline-year">12–18 Months</div><div class="timeline-text">Financial Services Monetisation Path — Jio Financial Services scaling lending, insurance, and asset management. A defined IPO or strategic partnership announcement would unlock a sixth standalone valuation. LOW-MEDIUM CONFIDENCE.</div></div></div><div class="key-section-title">Four High-Conviction Re-Rating Triggers</div><div class="catalyst-item"><div class="catalyst-icon">📡</div><div class="catalyst-body"><div class="catalyst-title">Telecom Tariff Hike (Round 2) <span class="catalyst-badge">HIGH IMPACT</span></div><div class="catalyst-desc">Structural duopoly pricing power enables periodic ARPU step-ups. Each ₹10/month increase on ~480 Mn subscribers translates to ~₹5,000 Cr incremental annual EBITDA — the single highest-probability near-term earnings catalyst.</div></div></div><div class="catalyst-item"><div class="catalyst-icon">🏛️</div><div class="catalyst-body"><div class="catalyst-title">Jio IPO — Segment De-Merger Event <span class="catalyst-badge">HIGH IMPACT</span></div><div class="catalyst-desc">Listing forces price discovery on Jio&#x27;s digital and telecom assets independently. The re-rating mechanism is structural: conglomerate discount narrows as institutional investors can own Jio directly. Timeline: H1 2026 (management indicated; not confirmed).</div></div></div><div class="catalyst-item"><div class="catalyst-icon">⚡</div><div class="catalyst-body"><div class="catalyst-title">New Energy: First Revenue Recognition <span class="catalyst-badge">MEDIUM IMPACT</span></div><div class="catalyst-desc">Battery gigafactory (40 GWh Phase 1) and electrolyzer commissioning in 2026 mark the transition from ₹75,000 Cr+ capex programme to operating asset. Investor narrative shifts from &#x27;spend&#x27; to &#x27;harvest&#x27;, re-rating the segment from option value to DCF.</div></div></div><div class="catalyst-item"><div class="catalyst-icon">💳</div><div class="catalyst-body"><div class="catalyst-title">Jio Financial Services Scale-Up <span class="catalyst-badge">MEDIUM IMPACT</span></div><div class="catalyst-desc">With 480 Mn Jio subscribers as a captive distribution base, JFSL&#x27;s lending and insurance ramp is a low-CAC growth story. A strategic partnership or IPO filing within 18 months would crystallise a sixth standalone valuation layer.</div></div></div><div class="key-section-title">Earnings Sensitivity: Catalyst Impact on EBITDA</div><div class="metric-strip" style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px;"><div class="metric-card"><div class="metric-card-label">ARPU +₹10/month</div><div class="metric-card-value">~₹5,000 Cr</div><div class="metric-card-sub">Jio EBITDA uplift p.a.</div></div><div class="metric-card accent-bg"><div class="metric-card-label">New Energy Rev. Start</div><div class="metric-card-value">FY27E</div><div class="metric-card-sub">Capex → OCF inflection</div></div><div class="metric-card mid-bg"><div class="metric-card-label">EBITDA CAGR FY25–28E</div><div class="metric-card-value">11.4%</div><div class="metric-card-sub">Model-implied; consumer-led</div></div><div class="metric-card"><div class="metric-card-label">Jio IPO Confidence</div><div class="metric-card-value">Medium</div><div class="metric-card-sub">H1 2026 mgmt-indicated</div></div></div><div class="thesis-box"><p><strong>Calendar Risk: Sequencing Matters More Than Any Single Event. </strong>The tariff hike is the highest-probability near-term earnings driver and requires no external approval. The Jio IPO is the highest-impact re-rating event but carries execution timing risk. Our FY26–28E EBITDA forecasts (₹184K–₹229K Cr) embed tariff normalisation but assign zero premium to Jio IPO optionality — making the current price a conservative entry point if the IPO proceeds.</p></div></div>
+    <div class="page-footer">
+      <div class="footer-left">Tikona Capital Finserv Pvt. Ltd. | SEBI Reg. Research Analyst</div>
+      <div class="footer-center">Reliance Industries Ltd — Equity Research</div>
+      <div class="footer-right">Page 8 of 20</div>
+    </div></div><div class="page">
+    <div class="mini-header">
+      <div class="mini-firm">Tikona Capital</div>
+      <div class="mini-company">Reliance Industries Ltd — Management &amp; Governance: Succession Clarity Removes Overhang</div>
+      <div class="mini-meta">
+        BUY &nbsp;|&nbsp;
+        CMP: ₹1408.0 &nbsp;|&nbsp;
+        TP: ₹1717.0 &nbsp;|&nbsp;
+        22% Upside &nbsp;|&nbsp;
+        Large Cap
+      </div>
+    </div>
+        <div class="page-content pb48"><div class="section-header"><span class="section-number">09</span><span class="section-title">Management &amp; Governance: Succession Clarity Removes Overhang</span></div><div class="key-section-title">Governance Snapshot</div><div class="metric-strip" style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px;"><div class="metric-card"><div class="metric-card-label">Succession Announced</div><div class="metric-card-value">AGM 2022</div><div class="metric-card-sub">Operational</div></div><div class="metric-card accent-bg"><div class="metric-card-label">Next-Gen Leaders Active</div><div class="metric-card-value">3 of 3</div><div class="metric-card-sub">All Verticals</div></div><div class="metric-card mid-bg"><div class="metric-card-label">Independent Directors</div><div class="metric-card-value">4</div><div class="metric-card-sub">Incl. Ex-SBI Chair</div></div><div class="metric-card"><div class="metric-card-label">Employees (Institutional Depth)</div><div class="metric-card-value">403,000+</div><div class="metric-card-sub">FY25</div></div></div><div class="fin-table-wrap"><div class="fin-table-title">Board &amp; Senior Leadership — Key Profiles</div><table><thead><tr><th style="text-align:left;">Name</th><th>Role</th><th>Vertical / Mandate</th><th>Succession Status</th></tr></thead><tbody><tr class="tbl-highlight"><td class="bold">Mukesh D. Ambani</td><td class="bold">Chairman &amp; MD</td><td class="bold">Group Strategy, Capital Allocation</td><td class="bold">Oversight — All Verticals</td></tr><tr><td>Akash Ambani</td><td>Chairman, Jio Platforms</td><td>Mobile, Broadband, Digital</td><td>✅ Operational since 2022</td></tr><tr><td>Isha Ambani Piramal</td><td>Chairperson, Reliance Retail</td><td>India&#x27;s Largest Organised Retail</td><td>✅ Operational since 2022</td></tr><tr><td>Anant Ambani</td><td>Head, New Energy</td><td>Green H₂, Solar, Battery, Clean Energy</td><td>✅ Operational since 2022</td></tr><tr><td>Nikhil R. Meswani</td><td>Executive Director</td><td>Petrochemicals, Global O2C</td><td>Long-tenure Institutional Anchor</td></tr><tr class="tbl-highlight"><td class="bold">Arundhati Bhattacharya</td><td class="bold">Independent Director</td><td class="bold">Governance, Risk Oversight</td><td class="bold">Ex-Chairperson, SBI</td></tr></tbody></table><div class="figure-source">Source: RIL Annual Report FY25, AGM disclosures. Succession formalised at 45th AGM, August 2022.</div></div><div class="thesis-box"><p><strong>Succession as a Re-rating Catalyst. </strong>Unlike the Dhirubhai-era business split, Reliance&#x27;s succession model keeps the conglomerate intact while assigning each high-growth vertical to a dedicated next-gen leader. With Akash (Jio), Isha (Retail), and Anant (New Energy) already operationally embedded, key-man risk has structurally diminished — a governance upgrade the market has yet to fully price in.</p></div><div class="key-section-title">Q3 FY26 Management Commentary — Mukesh D. Ambani</div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;"><div class="highlight-box accent-border"><div class="highlight-box-title">Jio Momentum</div><p>Jio delivered 16.4% EBITDA growth in Q3 FY26, with the digital ecosystem deepening penetration across mobility, broadband, and enterprise connectivity.</p></div><div class="highlight-box navy-border"><div class="highlight-box-title">Platform Synergies</div><p>Connectivity and media platform synergies are driving higher customer engagement, reinforcing Jio&#x27;s flywheel across 400M+ subscribers.</p></div><div class="highlight-box green-border"><div class="highlight-box-title">Operational Resilience</div><p>Consistent financial delivery across all segments underscores the institutional depth of the 403,000-strong workforce and decentralised leadership model.</p></div></div></div>
+    <div class="page-footer">
+      <div class="footer-left">Tikona Capital Finserv Pvt. Ltd. | SEBI Reg. Research Analyst</div>
+      <div class="footer-center">Reliance Industries Ltd — Equity Research</div>
+      <div class="footer-right">Page 9 of 20</div>
+    </div></div><div class="page">
+    <div class="mini-header">
+      <div class="mini-firm">Tikona Capital</div>
+      <div class="mini-company">Reliance Industries Ltd — Earnings Forecast: EBITDA CAGR of ~12% Through FY28E Driven by Consumer Segments</div>
+      <div class="mini-meta">
+        BUY &nbsp;|&nbsp;
+        CMP: ₹1408.0 &nbsp;|&nbsp;
+        TP: ₹1717.0 &nbsp;|&nbsp;
+        22% Upside &nbsp;|&nbsp;
+        Large Cap
+      </div>
+    </div>
+        <div class="page-content pb48"><div class="section-header"><span class="section-number">10</span><span class="section-title">Earnings Forecast: EBITDA CAGR of ~12% Through FY28E Driven by Consumer Segments</span></div><div class="fin-table-wrap"><div class="fin-table-title">Consolidated P&amp;L Forecast — ₹ Crore (FY25–FY28E)</div><table><thead><tr><th style="text-align:left;">Metric</th><th>FY25A</th><th>FY26E</th><th>FY27E</th><th>FY28E</th><th>3Y CAGR</th></tr></thead><tbody><tr class="tbl-highlight"><td class="bold">Revenue (₹ Cr)</td><td class="bold">9,62,820</td><td class="bold">10,73,495</td><td class="bold">11,96,892</td><td class="bold">13,34,473</td><td class="bold">11.5%</td></tr><tr><td>EBITDA (₹ Cr)</td><td>1,65,598</td><td>1,84,329</td><td>2,05,518</td><td>2,29,142</td><td class="green">11.4%</td></tr><tr><td>EBITDA Margin</td><td class="green">17.2%</td><td class="green">17.2%</td><td class="green">17.2%</td><td class="green">17.2%</td><td>Stable</td></tr><tr><td>PAT (₹ Cr)</td><td>69,648</td><td>84,946</td><td>91,986</td><td>98,660</td><td class="green">12.3%</td></tr><tr><td>EPS (₹)</td><td>51.5</td><td>62.8</td><td>68.0</td><td>72.9</td><td class="green">12.3%</td></tr><tr class="tbl-highlight"><td class="bold">EV/EBITDA (x)</td><td class="bold">12.7x</td><td class="bold">12.4x</td><td class="bold">11.1x</td><td class="bold">9.9x</td><td class="bold">De-rating</td></tr></tbody></table><div class="figure-source">E = SAARTHI estimates. Revenue and EBITDA CAGR computed over FY25–FY28E. PAT CAGR accelerates as consumer segment mix improves and D&amp;A normalises.</div></div><div class="key-section-title">Key Forecast Anchors</div><div class="metric-strip" style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px;"><div class="metric-card"><div class="metric-card-label">EBITDA CAGR FY25–28E</div><div class="metric-card-value">11.4%</div><div class="metric-card-sub">Consumer-led</div></div><div class="metric-card accent-bg"><div class="metric-card-label">PAT CAGR FY25–28E</div><div class="metric-card-value">12.3%</div><div class="metric-card-sub">Accelerating</div></div><div class="metric-card mid-bg"><div class="metric-card-label">Jio EBITDA Margin</div><div class="metric-card-value">52%</div><div class="metric-card-sub">+16.4% YoY</div></div><div class="metric-card"><div class="metric-card-label">Retail EBITDA Margin</div><div class="metric-card-value">8.3%</div><div class="metric-card-sub">+20 bps YoY</div></div></div><div class="figure"><div class="figure-title">EBITDA Build-Up: FY25A → FY28E (₹ Crore)</div><svg viewBox="0 0 560 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;"><line x1="44" x2="550" y1="104.0" y2="104.0" stroke="#d5dce8" stroke-width="0.5"/><text x="40" y="107.0" text-anchor="end" font-size="7" fill="#6b7c93" font-family="JetBrains Mono,monospace">0</text><line x1="44" x2="550" y1="72.7" y2="72.7" stroke="#d5dce8" stroke-width="0.5"/><text x="40" y="75.7" text-anchor="end" font-size="7" fill="#6b7c93" font-family="JetBrains Mono,monospace">76,381</text><line x1="44" x2="550" y1="41.3" y2="41.3" stroke="#d5dce8" stroke-width="0.5"/><text x="40" y="44.3" text-anchor="end" font-size="7" fill="#6b7c93" font-family="JetBrains Mono,monospace">152,761</text><line x1="44" x2="550" y1="10.0" y2="10.0" stroke="#d5dce8" stroke-width="0.5"/><text x="40" y="13.0" text-anchor="end" font-size="7" fill="#6b7c93" font-family="JetBrains Mono,monospace">229,142</text><rect x="75.6" y="36.1" width="53.8" height="67.9" fill="#1F4690" rx="1"/><rect x="202.1" y="28.4" width="53.8" height="75.6" fill="#1F4690" rx="1"/><rect x="328.6" y="19.7" width="53.8" height="84.3" fill="#1F4690" rx="1"/><rect x="455.1" y="10.0" width="53.8" height="94.0" fill="#1F4690" rx="1"/><text x="107.2" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">Mar-25</text><text x="233.8" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">Mar-26 e</text><text x="360.2" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">Mar-27 e</text><text x="486.8" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">Mar-28 e</text></svg><div class="donut-legend" style="justify-content:flex-start;gap:10px;margin-top:4px;"><span class="legend-item"><span class="legend-dot" style="background:#1F4690;"></span><span class="legend-label">EBITDA</span></span></div></div></div>
+    <div class="page-footer">
+      <div class="footer-left">Tikona Capital Finserv Pvt. Ltd. | SEBI Reg. Research Analyst</div>
+      <div class="footer-center">Reliance Industries Ltd — Equity Research</div>
+      <div class="footer-right">Page 10 of 20</div>
+    </div></div><div class="page">
+    <div class="mini-header">
+      <div class="mini-firm">Tikona Capital</div>
+      <div class="mini-company">Reliance Industries Ltd — Earnings Forecast: EBITDA CAGR of ~12% Through FY28E Driven by Consumer Segments (contd.)</div>
+      <div class="mini-meta">
+        BUY &nbsp;|&nbsp;
+        CMP: ₹1408.0 &nbsp;|&nbsp;
+        TP: ₹1717.0 &nbsp;|&nbsp;
+        22% Upside &nbsp;|&nbsp;
+        Large Cap
+      </div>
+    </div>
+        <div class="page-content pb48"><div class="section-header"><span class="section-number">11</span><span class="section-title">Earnings Forecast: EBITDA CAGR of ~12% Through FY28E Driven by Consumer Segments (contd.)</span></div><div class="key-section-title">Key Forecast Assumptions</div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;"><div class="highlight-box accent-border"><div class="highlight-box-title">Jio — ARPU + Subscriber Engine</div><p>ARPU grows organically 5–6% p.a. on tariff hike pass-through; 515M+ subscriber base provides volume floor. Digital services revenue CAGR of ~17% sustains 52% EBITDA margins.</p></div><div class="highlight-box navy-border"><div class="highlight-box-title">Retail — GMV Scale &amp; Margin Expansion</div><p>Double-digit revenue growth guided by management; 349M registered users and JioMart Quick Commerce drive operating leverage. EBITDA margin trajectory: 8.3% → 9%+ by FY28E.</p></div><div class="highlight-box green-border"><div class="highlight-box-title">O2C — Margin Normalisation, Volume Offsets</div><p>Chemical margin headwinds (80% global ethylene utilisation) partially offset by fuel crack recovery and ethane cracking cost advantage. O2C EBITDA contribution stable in absolute terms.</p></div><div class="highlight-box accent-border"><div class="highlight-box-title">New Energy — Pre-Revenue Capex Phase Through FY27E</div><p>₹8,000 Cr/quarter capex drag continues; revenue contribution expected from FY28E as solar and battery gigafactory commission. Optionality not yet in base-case EBITDA.</p></div></div></div>
+    <div class="page-footer">
+      <div class="footer-left">Tikona Capital Finserv Pvt. Ltd. | SEBI Reg. Research Analyst</div>
+      <div class="footer-center">Reliance Industries Ltd — Equity Research</div>
+      <div class="footer-right">Page 11 of 20</div>
+    </div></div><div class="page">
+    <div class="mini-header">
+      <div class="mini-firm">Tikona Capital</div>
+      <div class="mini-company">Reliance Industries Ltd — Financial Highlights: Strong Cash Generation Funding the Next Growth Cycle</div>
+      <div class="mini-meta">
+        BUY &nbsp;|&nbsp;
+        CMP: ₹1408.0 &nbsp;|&nbsp;
+        TP: ₹1717.0 &nbsp;|&nbsp;
+        22% Upside &nbsp;|&nbsp;
+        Large Cap
+      </div>
+    </div>
+        <div class="page-content pb48"><div class="section-header"><span class="section-number">12</span><span class="section-title">Financial Highlights: Strong Cash Generation Funding the Next Growth Cycle</span></div><div class="key-section-title">Balance Sheet &amp; Return Snapshot — FY25</div><div class="metric-strip" style="display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-bottom:8px;"><div class="metric-card"><div class="metric-card-label">Net Debt / EBITDA</div><div class="metric-card-value">0.57x</div><div class="metric-card-sub">Investment-grade leverage</div></div><div class="metric-card accent-bg"><div class="metric-card-label">Debt / Equity</div><div class="metric-card-value">0.36x</div><div class="metric-card-sub">Down from 0.41x (FY22)</div></div><div class="metric-card mid-bg"><div class="metric-card-label">Net Debt</div><div class="metric-card-value">₹1,17,102 Cr</div><div class="metric-card-sub">Declining sequentially</div></div><div class="metric-card"><div class="metric-card-label">ROE (FY25)</div><div class="metric-card-value">9.9%</div><div class="metric-card-sub">Above 3-yr median of 9.1%</div></div><div class="metric-card teal-bg"><div class="metric-card-label">PAT CAGR FY25–28E</div><div class="metric-card-value">~12%</div><div class="metric-card-sub">Accelerating vs. 4.7% (FY22–25)</div></div></div><div class="fin-table-wrap"><div class="fin-table-title">Financial Model Summary — Key P&amp;L &amp; Return Metrics (₹ Cr unless stated)</div><table><thead><tr><th style="text-align:left;">Metric</th><th>FY22</th><th>FY23</th><th>FY24</th><th>FY25</th><th>FY26E</th><th>FY27E</th></tr></thead><tbody><tr class="tbl-highlight"><td class="bold">Revenue (₹ Cr)</td><td class="bold">6,94,673</td><td class="bold">8,76,396</td><td class="bold">8,99,041</td><td class="bold">9,62,820</td><td class="bold">10,73,495</td><td class="bold">11,96,892</td></tr><tr><td>EBITDA (₹ Cr)</td><td>1,08,581</td><td>1,42,318</td><td>1,62,498</td><td>1,65,598</td><td>1,84,329</td><td>2,05,518</td></tr><tr><td>EBITDA Margin</td><td class="green">15.6%</td><td class="green">16.2%</td><td class="green">18.1%</td><td class="green">17.2%</td><td class="green">17.2%</td><td class="green">17.2%</td></tr><tr><td>PAT (₹ Cr)</td><td>60,705</td><td>66,702</td><td>69,621</td><td>69,648</td><td>84,946</td><td>91,986</td></tr><tr><td>EPS (₹)</td><td>44.9</td><td>49.3</td><td>51.5</td><td>51.5</td><td>62.8</td><td>68.0</td></tr><tr class="tbl-highlight"><td class="bold">RoCE</td><td class="bold">9%</td><td class="bold">10%</td><td class="bold">11%</td><td class="bold">11%</td><td class="bold">10%</td><td class="bold">10%</td></tr></tbody></table><div class="figure-source">RoCE dips in FY26E as New Energy capex peaks; expected to recover as assets commission and EBITDA scales into FY28E. EBITDA margin held steady as Jio mix-shift offsets O2C normalisation.</div></div><div class="figure"><div class="figure-title">EBITDA &amp; PAT Trajectory — FY22 to FY28E (₹ Cr)</div><svg viewBox="0 0 560 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;"><line x1="44" x2="550" y1="104.0" y2="104.0" stroke="#d5dce8" stroke-width="0.5"/><text x="40" y="107.0" text-anchor="end" font-size="7" fill="#6b7c93" font-family="JetBrains Mono,monospace">0</text><line x1="44" x2="550" y1="72.7" y2="72.7" stroke="#d5dce8" stroke-width="0.5"/><text x="40" y="75.7" text-anchor="end" font-size="7" fill="#6b7c93" font-family="JetBrains Mono,monospace">76,381</text><line x1="44" x2="550" y1="41.3" y2="41.3" stroke="#d5dce8" stroke-width="0.5"/><text x="40" y="44.3" text-anchor="end" font-size="7" fill="#6b7c93" font-family="JetBrains Mono,monospace">152,761</text><line x1="44" x2="550" y1="10.0" y2="10.0" stroke="#d5dce8" stroke-width="0.5"/><text x="40" y="13.0" text-anchor="end" font-size="7" fill="#6b7c93" font-family="JetBrains Mono,monospace">229,142</text><rect x="56.0" y="59.5" width="20.5" height="44.5" fill="#1F4690" rx="1"/><rect x="128.3" y="45.6" width="20.5" height="58.4" fill="#1F4690" rx="1"/><rect x="200.6" y="37.3" width="20.5" height="66.7" fill="#1F4690" rx="1"/><rect x="272.9" y="36.1" width="20.5" height="67.9" fill="#1F4690" rx="1"/><rect x="345.2" y="28.4" width="20.5" height="75.6" fill="#1F4690" rx="1"/><rect x="417.5" y="19.7" width="20.5" height="84.3" fill="#1F4690" rx="1"/><rect x="489.8" y="10.0" width="20.5" height="94.0" fill="#1F4690" rx="1"/><rect x="80.1" y="79.1" width="20.5" height="24.9" fill="#FFA500" rx="1"/><rect x="152.4" y="76.6" width="20.5" height="27.4" fill="#FFA500" rx="1"/><rect x="224.7" y="75.4" width="20.5" height="28.6" fill="#FFA500" rx="1"/><rect x="297.0" y="75.4" width="20.5" height="28.6" fill="#FFA500" rx="1"/><rect x="369.3" y="69.2" width="20.5" height="34.8" fill="#FFA500" rx="1"/><rect x="441.6" y="66.3" width="20.5" height="37.7" fill="#FFA500" rx="1"/><rect x="513.9" y="63.5" width="20.5" height="40.5" fill="#FFA500" rx="1"/><text x="80.1" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">Mar-22</text><text x="152.4" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">Mar-23</text><text x="224.7" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">Mar-24</text><text x="297.0" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">Mar-25</text><text x="369.3" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">Mar-26 e</text><text x="441.6" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">Mar-27 e</text><text x="513.9" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">Mar-28 e</text></svg><div class="donut-legend" style="justify-content:flex-start;gap:10px;margin-top:4px;"><span class="legend-item"><span class="legend-dot" style="background:#1F4690;"></span><span class="legend-label">EBITDA</span></span><span class="legend-item"><span class="legend-dot" style="background:#FFA500;"></span><span class="legend-label">PAT</span></span></div></div></div>
+    <div class="page-footer">
+      <div class="footer-left">Tikona Capital Finserv Pvt. Ltd. | SEBI Reg. Research Analyst</div>
+      <div class="footer-center">Reliance Industries Ltd — Equity Research</div>
+      <div class="footer-right">Page 12 of 20</div>
+    </div></div><div class="page">
+    <div class="mini-header">
+      <div class="mini-firm">Tikona Capital</div>
+      <div class="mini-company">Reliance Industries Ltd — Financial Highlights: Strong Cash Generation Funding the Next Growth Cycle (contd.)</div>
+      <div class="mini-meta">
+        BUY &nbsp;|&nbsp;
+        CMP: ₹1408.0 &nbsp;|&nbsp;
+        TP: ₹1717.0 &nbsp;|&nbsp;
+        22% Upside &nbsp;|&nbsp;
+        Large Cap
+      </div>
+    </div>
+        <div class="page-content pb48"><div class="section-header"><span class="section-number">13</span><span class="section-title">Financial Highlights: Strong Cash Generation Funding the Next Growth Cycle (contd.)</span></div><div class="key-section-title">Capital Allocation &amp; FCF Inflection — Key Signals</div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;"><div class="highlight-box accent-border"><div class="highlight-box-title">Capex Covered by Operating Cash Generation</div><p>In Q3 FY26, total capex of ~₹34,000 Cr was less than cash profits — a critical threshold signalling the business is self-funding its growth cycle without balance sheet stress.</p></div><div class="highlight-box navy-border"><div class="highlight-box-title">Diversified Capex Across Growth Vectors</div><p>Q3 FY26 capex split: O2C ₹9,000 Cr, New Energy ₹8,000 Cr, Jio ₹7,500 Cr, Retail ₹4,000 Cr — each segment investing at the right phase of its growth curve.</p></div><div class="highlight-box green-border"><div class="highlight-box-title">PAT Acceleration Ahead as Depreciation Burden Stabilises</div><p>PAT CAGR accelerates from 4.7% (FY22–25) to ~12% (FY25–28E) as New Energy assets transition from investment to harvest and high-margin Jio revenues scale.</p></div><div class="highlight-box accent-border"><div class="highlight-box-title">Net Debt Declining Despite Peak Capex Cycle</div><p>Net debt fell sequentially in FY25 to ₹1,17,102 Cr (0.57x EBITDA), demonstrating that operating cash generation is outpacing even elevated multi-segment capex commitments.</p></div></div><div class="thesis-box"><p><strong>FCF Inflection Is the Bridge to Re-rating. </strong>Reliance is at peak capex intensity — yet net debt is falling and PAT is set to accelerate at ~12% CAGR through FY28E. As New Energy assets commission and Jio ARPU compounds, the gap between EBITDA growth and reported PAT will close sharply, making the current P/E compression a buying opportunity rather than a valuation risk.</p></div></div>
+    <div class="page-footer">
+      <div class="footer-left">Tikona Capital Finserv Pvt. Ltd. | SEBI Reg. Research Analyst</div>
+      <div class="footer-center">Reliance Industries Ltd — Equity Research</div>
+      <div class="footer-right">Page 13 of 20</div>
+    </div></div><div class="page">
+    <div class="mini-header">
+      <div class="mini-firm">Tikona Capital</div>
+      <div class="mini-company">Reliance Industries Ltd — Valuation: SOTP Reveals ₹1,717 Base-Case; Conglomerate Discount Unjustified</div>
+      <div class="mini-meta">
+        BUY &nbsp;|&nbsp;
+        CMP: ₹1408.0 &nbsp;|&nbsp;
+        TP: ₹1717.0 &nbsp;|&nbsp;
+        22% Upside &nbsp;|&nbsp;
+        Large Cap
+      </div>
+    </div>
+        <div class="page-content pb48"><div class="section-header"><span class="section-number">14</span><span class="section-title">Valuation: SOTP Reveals ₹1,717 Base-Case; Conglomerate Discount Unjustified</span></div><div class="fin-table-wrap"><div class="fin-table-title">SOTP Valuation Bridge — Base Case (FY26E)</div><table><thead><tr><th style="text-align:left;">Segment</th><th>Methodology</th><th>EV (₹ Cr)</th><th>Key Assumption</th><th>₹/Share</th></tr></thead><tbody><tr class="tbl-highlight"><td class="bold">Jio Digital</td><td class="bold">15x EV/EBITDA</td><td class="bold">9,30,000</td><td class="bold">FY26E EBITDA ₹62,000 Cr; telecom peer range 13–18x</td><td class="bold">660</td></tr><tr><td>Reliance Retail</td><td>22x EV/EBITDA</td><td>4,62,000</td><td>FY26E EBITDA ₹21,000 Cr; DMart/Avenue Supermarts comp</td><td>328</td></tr><tr><td>O2C</td><td>8x EV/EBITDA</td><td>7,02,000</td><td>FY26E EBITDA ₹87,750 Cr; GRM assumption $8.5/bbl</td><td>498</td></tr><tr><td>E&amp;P</td><td>DCF</td><td>72,000</td><td>KG-D6 plateau production; 10% WACC</td><td>51</td></tr><tr><td>New Energy</td><td>Scenario Value</td><td>1,80,000</td><td>10 GW by FY27; ₹75,000 Cr capex; 11% WACC, 5% Tg</td><td>128</td></tr><tr><td>Financial Services</td><td>1.5x P/B</td><td>35,000</td><td>Embedded lending + insurance optionality</td><td>25</td></tr><tr><td>Less: Net Debt Adj.</td><td>Balance Sheet</td><td>(2,11,000)</td><td>Gross debt ~₹3.3L Cr less cash ~₹1.2L Cr (FY25A)</td><td>(153)</td></tr><tr class="tbl-highlight"><td class="bold">SOTP Target Price</td><td class="bold"></td><td class="bold"></td><td class="bold">Sum: 660+328+498+51+128+25−153 = ₹1,537 base; +12% holdco premium uplift to ₹1,717</td><td class="bold">1,717</td></tr></tbody></table><div class="figure-source">Shares outstanding ~1.41 Bn. Net debt of ₹2.11L Cr (~₹150/share) sourced from FY25 balance sheet. New Energy valued as scenario option (WACC 11%, terminal growth 5%, 10 GW capacity); not a point DCF. Retail comp: Avenue Supermarts trades 18–25x EV/EBITDA; 22x reflects Reliance Retail&#x27;s scale premium and private-label mix. O2C GRM of $8.5/bbl is mid-cycle; bear case uses $6.5/bbl.</div></div><div class="key-section-title">Scenario Analysis — 12-Month Price Targets (Anchored: CMP ₹1,408, 25 Jun 2025)</div><div class="scenario-grid"><div class="scenario-card bear"><div class="scenario-label">Bear Case</div><div class="scenario-tp">₹1,290</div><div class="scenario-updown">−8%</div><div class="scenario-desc">GRM collapses to $5/bbl; Jio IPO deferred to 2027; retail EBITDA misses on margin compression. O2C SOTP drops ~₹120/share; net debt stays elevated.</div></div><div class="scenario-card base"><div class="scenario-label">Base Case</div><div class="scenario-tp">₹1,717</div><div class="scenario-updown">+22%</div><div class="scenario-desc">GRM $8.5/bbl; Jio IPO announced FY26; New Energy 10 GW on track. EBITDA CAGR ~12% FY25–28E. Conglomerate discount narrows from ~20% to ~10%.</div></div><div class="scenario-card bull"><div class="scenario-label">Bull Case</div><div class="scenario-tp">₹2,100</div><div class="scenario-updown">+49%</div><div class="scenario-desc">Jio IPO at ₹10L Cr+ valuation; New Energy secures export PPA; O2C margins recover to $10/bbl. Full conglomerate discount elimination drives re-rating.</div></div></div><div class="key-section-title">Key Valuation Metrics (FY26E)</div><div class="metric-strip" style="display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-bottom:8px;"><div class="metric-card"><div class="metric-card-label">P/E FY26E</div><div class="metric-card-value">20.9x</div><div class="metric-card-sub">vs. 25.5x FY25A — earnings growth compressing multiple</div></div><div class="metric-card accent-bg"><div class="metric-card-label">EV/EBITDA FY26E</div><div class="metric-card-value">12.4x</div><div class="metric-card-sub">vs. global integrated peers at 8–10x; premium justified by digital mix</div></div><div class="metric-card mid-bg"><div class="metric-card-label">P/B FY26E</div><div class="metric-card-value">1.9x</div><div class="metric-card-sub">BVPS ₹680 growing at ~9% CAGR FY25–28E</div></div><div class="metric-card"><div class="metric-card-label">DCF Fair Value</div><div class="metric-card-value">₹1,700</div><div class="metric-card-sub">Marginal discount to CMP; upside driven by re-rating, not just DCF</div></div><div class="metric-card teal-bg"><div class="metric-card-label">Bull/Bear Payoff</div><div class="metric-card-value">3.4x</div><div class="metric-card-sub">₹692 bull upside vs. ₹118 bear downside — asymmetric risk-reward</div></div></div><div class="thesis-box"><p><strong>Why the Conglomerate Discount Is Unjustified — Empirical Anchor. </strong>Asian conglomerates (Tata Sons, SK Telecom holdco, Samsung C&amp;T) trade at 15–25% holdco discounts; Reliance&#x27;s current ~20% discount is at the wide end despite superior earnings quality and imminent IPO-driven segment price discovery. As Jio and Retail approach standalone listings, the discount should compress to 8–10%, adding ~₹150–200/share to SOTP. O2C bear-case risk ($6.5/bbl GRM) is the primary downside governor; at that level, SOTP still supports ₹1,450+.</p></div></div>
+    <div class="page-footer">
+      <div class="footer-left">Tikona Capital Finserv Pvt. Ltd. | SEBI Reg. Research Analyst</div>
+      <div class="footer-center">Reliance Industries Ltd — Equity Research</div>
+      <div class="footer-right">Page 14 of 20</div>
+    </div></div><div class="page">
+    <div class="mini-header">
+      <div class="mini-firm">Tikona Capital</div>
+      <div class="mini-company">Reliance Industries Ltd — SAARTHI Framework Scorecard: 360° Quality Assessment</div>
+      <div class="mini-meta">
+        BUY &nbsp;|&nbsp;
+        CMP: ₹1408.0 &nbsp;|&nbsp;
+        TP: ₹1717.0 &nbsp;|&nbsp;
+        22% Upside &nbsp;|&nbsp;
+        Large Cap
+      </div>
+    </div>
+        <div class="page-content pb48"><div class="section-header"><span class="section-number">15</span><span class="section-title">SAARTHI Framework Scorecard: 360° Quality Assessment</span></div><div class="key-section-title">SAARTHI Summary</div><div class="metric-strip" style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px;"><div class="metric-card"><div class="metric-card-label">SAARTHI Total Score</div><div class="metric-card-value">79 / 100</div><div class="metric-card-sub">BUY (70–84 Band)</div></div><div class="metric-card accent-bg"><div class="metric-card-label">Strongest Dimension</div><div class="metric-card-value">Inflection Point</div><div class="metric-card-sub">14 / 15</div></div><div class="metric-card mid-bg"><div class="metric-card-label">Weakest Dimension</div><div class="metric-card-value">Human Capital</div><div class="metric-card-sub">8 / 10</div></div><div class="metric-card"><div class="metric-card-label">Dimensions Scored ≥ 80%</div><div class="metric-card-value">5 of 7</div><div class="metric-card-sub">↑ post-succession</div></div></div><div class="fin-table-title">Dimension-Level Breakdown</div><div class="score-item"><div class="score-header"><span class="score-name">S — Scalability of Core Engine</span><span class="score-val">12 / 15</span></div><div class="score-bar-bg"><div class="score-bar-fill" style="width:80%;background:#FFA500;"></div></div><div class="score-desc">Twin-network Jio model and omnichannel retail drive high scalability; O2C capital intensity caps the ceiling.</div></div><div class="score-item"><div class="score-header"><span class="score-name">A1 — Addressable Market &amp; Adjacency</span><span class="score-val">9 / 10</span></div><div class="score-bar-bg"><div class="score-bar-fill" style="width:90%;background:#1F4690;"></div></div><div class="score-desc">India&#x27;s energy-to-digital supercycle and 3 MMTPA green hydrogen ambition define a multi-decade TAM.</div></div><div class="score-item"><div class="score-header"><span class="score-name">A2 — Asymmetric Pricing Power</span><span class="score-val">13 / 15</span></div><div class="score-bar-bg"><div class="score-bar-fill" style="width:87%;background:#3A5BA0;"></div></div><div class="score-desc">Jio ARPU at ₹213.7 post tariff hike; integrated O2C feedstock optimisation offsets commodity margin pressure.</div></div><div class="score-item"><div class="score-header"><span class="score-name">R — Reinvestment Quality</span><span class="score-val">11 / 15</span></div><div class="score-bar-bg"><div class="score-bar-fill" style="width:73%;background:#0e7490;"></div></div><div class="score-desc">ROE 9.9% above 3-year median; ₹32,259 Cr quarterly capex is high but directed at high-ROCE consumer segments.</div></div><div class="score-item"><div class="score-header"><span class="score-name">T — Track Record Through Adversity</span><span class="score-val">12 / 15</span></div><div class="score-bar-bg"><div class="score-bar-fill" style="width:80%;background:#1a7a4a;"></div></div><div class="score-desc">Profit trajectory reversed in Q3 FY26; net debt/equity at 14.3% and D/E down from 38.5% to 35.7% over 5 years.</div></div><div class="score-item"><div class="score-header"><span class="score-name">H — Human Capital &amp; Institutional DNA</span><span class="score-val">8 / 10</span></div><div class="score-bar-bg"><div class="score-bar-fill" style="width:80%;background:#6b7c93;"></div></div><div class="score-desc">403,000+ employees; Isha/Akash/Anant in operational roles, yet execution remains promoter-dependent.</div></div><div class="score-item"><div class="score-header"><span class="score-name">I — Inflection Point Identification</span><span class="score-val">14 / 15</span></div><div class="score-bar-bg"><div class="score-bar-fill" style="width:93%;background:#b91c1c;"></div></div><div class="score-desc">Jio IPO H1 2026, 40 GWh battery gigafactory, 10 GW solar scale-up, and S&amp;P upgrade to A− all within 18 months.</div></div><div class="thesis-box"><p><strong>Scorecard Conviction Statement. </strong>Reliance&#x27;s 79/100 SAARTHI score reflects a business at a genuine multi-year inflection — exceptional on market opportunity, pricing power, and catalyst density. The sole structural drag is promoter concentration, which the formalised succession framework is actively mitigating. At current valuations, the scorecard supports a high-conviction BUY with asymmetric upside as segment-level value is unlocked through 2026.</p></div></div>
+    <div class="page-footer">
+      <div class="footer-left">Tikona Capital Finserv Pvt. Ltd. | SEBI Reg. Research Analyst</div>
+      <div class="footer-center">Reliance Industries Ltd — Equity Research</div>
+      <div class="footer-right">Page 15 of 20</div>
+    </div></div><div class="page">
+    <div class="mini-header">
+      <div class="mini-firm">Tikona Capital</div>
+      <div class="mini-company">Reliance Industries Ltd — Scenario Analysis: Bull/Base/Bear — Asymmetric Risk-Reward Favours Longs</div>
+      <div class="mini-meta">
+        BUY &nbsp;|&nbsp;
+        CMP: ₹1408.0 &nbsp;|&nbsp;
+        TP: ₹1717.0 &nbsp;|&nbsp;
+        22% Upside &nbsp;|&nbsp;
+        Large Cap
+      </div>
+    </div>
+        <div class="page-content pb48"><div class="section-header"><span class="section-number">16</span><span class="section-title">Scenario Analysis: Bull/Base/Bear — Asymmetric Risk-Reward Favours Longs</span></div><div class="key-section-title">Price Target Scenarios</div><div class="scenario-grid"><div class="scenario-card bear"><div class="scenario-label">Bear Case</div><div class="scenario-tp">₹1,500</div><div class="scenario-updown">-7% vs. base</div><div class="scenario-desc">O2C margins remain depressed; Jio IPO deferred beyond 2026; New Energy capex ROI guidance cut. Conglomerate discount widens to 25%+. EV/EBITDA compresses to ~10x on FY27E.</div></div><div class="scenario-card base"><div class="scenario-label">Base Case</div><div class="scenario-tp">₹1,750</div><div class="scenario-updown">+24% upside</div><div class="scenario-desc">SOTP-driven re-rating as Jio IPO progresses and New Energy commissions on schedule. EBITDA CAGR of ~12% through FY28E. EV/EBITDA of ~11x on FY27E; conglomerate discount narrows to 10–15%.</div></div><div class="scenario-card bull"><div class="scenario-label">Bull Case</div><div class="scenario-tp">₹1,950</div><div class="scenario-updown">+39% upside</div><div class="scenario-desc">Jio IPO at $100B+ valuation; New Energy scales ahead of plan; ARPU expands 5–6% p.a. S&amp;P A- upgrade lowers cost of capital. Conglomerate discount closes entirely; PAT CAGR of 15%+ through FY28E.</div></div></div><div class="key-section-title">Scenario Payoff Summary</div><div class="metric-strip" style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px;"><div class="metric-card"><div class="metric-card-label">Bear Downside</div><div class="metric-card-value">−7%</div><div class="metric-card-sub">₹1,500 floor anchored by O2C FCF</div></div><div class="metric-card accent-bg"><div class="metric-card-label">Base Upside</div><div class="metric-card-value">+24%</div><div class="metric-card-sub">₹1,750 on SOTP re-rating</div></div><div class="metric-card mid-bg"><div class="metric-card-label">Bull Upside</div><div class="metric-card-value">+39%</div><div class="metric-card-sub">₹1,950 on Jio IPO + New Energy</div></div><div class="metric-card"><div class="metric-card-label">Bull-to-Bear Ratio</div><div class="metric-card-value">~3:1</div><div class="metric-card-sub">Asymmetric risk-reward</div></div></div><div class="fin-table-wrap"><div class="fin-table-title">Key Assumptions Across Scenarios (FY27E–FY28E)</div><table><thead><tr><th style="text-align:left;">Assumption</th><th>Bear</th><th>Base</th><th>Bull</th></tr></thead><tbody><tr class="tbl-highlight"><td class="bold">EV/EBITDA Multiple (FY27E)</td><td class="bold">10.0x</td><td class="bold">11.1x</td><td class="bold">13.0x</td></tr><tr><td>FY28E EBITDA (₹ cr)</td><td>~2,05,000</td><td>~2,29,000</td><td>~2,50,000</td></tr><tr><td>Jio IPO Valuation</td><td>Deferred / No event</td><td>$80–90B</td><td>$100B+</td></tr><tr><td>Jio ARPU Growth (p.a.)</td><td class="green">2–3%</td><td class="green">4–5%</td><td class="green">5–6%</td></tr><tr><td>New Energy Commissioning</td><td>Delayed 12–18 months</td><td>On schedule FY26</td><td>Ahead of schedule</td></tr><tr class="tbl-highlight"><td class="bold">O2C EBITDA Margin</td><td class="bold">~8%</td><td class="bold">~10%</td><td class="bold">~12%</td></tr></tbody></table><div class="figure-source">All figures are estimates. EV/EBITDA multiples applied to FY27E EBITDA for scenario-based SOTP derivation.</div></div><div class="thesis-box"><p><strong>Asymmetry Thesis: Limited Bear, Substantial Bull. </strong>The bear case is structurally floored by Reliance&#x27;s O2C free cash flow and net debt/EBITDA of just 0.57x — limiting downside to ~7%. The bull case is open-ended: Jio IPO alone could add ₹150–200/share to SOTP. With three independent catalysts converging in 18 months, the risk-reward is among the most asymmetric in large-cap India.</p></div></div>
+    <div class="page-footer">
+      <div class="footer-left">Tikona Capital Finserv Pvt. Ltd. | SEBI Reg. Research Analyst</div>
+      <div class="footer-center">Reliance Industries Ltd — Equity Research</div>
+      <div class="footer-right">Page 16 of 20</div>
+    </div></div><div class="page">
+    <div class="mini-header">
+      <div class="mini-firm">Tikona Capital</div>
+      <div class="mini-company">Reliance Industries Ltd — Risk Register: Eleven Risks, Mostly Manageable</div>
+      <div class="mini-meta">
+        BUY &nbsp;|&nbsp;
+        CMP: ₹1408.0 &nbsp;|&nbsp;
+        TP: ₹1717.0 &nbsp;|&nbsp;
+        22% Upside &nbsp;|&nbsp;
+        Large Cap
+      </div>
+    </div>
+        <div class="page-content pb48"><div class="section-header"><span class="section-number">17</span><span class="section-title">Risk Register: Eleven Risks, Mostly Manageable</span></div><div class="key-section-title">Balance Sheet Buffers Against Downside</div><div class="metric-strip" style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px;"><div class="metric-card"><div class="metric-card-label">Net Debt / EBITDA</div><div class="metric-card-value">0.57x</div><div class="metric-card-sub">Well within investment-grade</div></div><div class="metric-card accent-bg"><div class="metric-card-label">Debt / Equity</div><div class="metric-card-value">0.41x</div><div class="metric-card-sub">Down from 0.49x in FY20</div></div><div class="metric-card mid-bg"><div class="metric-card-label">Net Debt (₹ Cr)</div><div class="metric-card-value">1,17,102</div><div class="metric-card-sub">Manageable vs. EBITDA of ₹1.65L Cr</div></div><div class="metric-card"><div class="metric-card-label">OCF / EBITDA</div><div class="metric-card-value">1.08x</div><div class="metric-card-sub">FY25 — strong cash conversion</div></div></div><div class="key-section-title">Key Risks &amp; Severity Assessment</div><div class="risk-item"><div class="risk-badge risk-high">HIGH</div><div><div class="risk-title">Commodity Price Volatility</div><div class="risk-text">O2C margins exposed to crude and petrochemical price cycles; global ethylene capacity at ~80% utilisation keeps downstream spreads structurally compressed. Partially offset by Reliance&#x27;s integrated refining-to-chemicals model.</div></div></div><div class="risk-item"><div class="risk-badge risk-high">HIGH</div><div><div class="risk-title">New Energy &amp; Digital Execution Risk</div><div class="risk-text">$80B+ post-COVID investment programme in 5G, data centres, and green energy demands near-flawless execution. Technology shifts in battery chemistry or AI hardware could force costly pivots and delay return on capital.</div></div></div><div class="risk-item"><div class="risk-badge risk-high">HIGH</div><div><div class="risk-title">Geopolitical &amp; Trade Risk</div><div class="risk-text">Growing international scrutiny of Russian oil imports could force a supply pivot, compressing refining margins. India imports 87% of crude requirements, leaving limited domestic buffer.</div></div></div><div class="risk-item"><div class="risk-badge risk-med">MED</div><div><div class="risk-title">Regulatory &amp; Policy Risk</div><div class="risk-text">Telecom tariff caps, energy pricing below import parity, and retail FDI rules remain live policy risks. Regulatory reversals in any segment could impair standalone valuations used in our SOTP.</div></div></div><div class="risk-item"><div class="risk-badge risk-med">MED</div><div><div class="risk-title">Competition Intensification</div><div class="risk-text">Airtel holds 31% telecom share and is aggressively monetising 5G. Amazon and Flipkart dominate e-commerce. Sustained competitive pressure could slow Jio ARPU expansion and JioMart GMV ramp.</div></div></div><div class="thesis-box"><p><strong>Risk-Adjusted Conviction Remains Intact. </strong>None of the eleven identified risks individually threatens the SOTP thesis. Commodity and execution risks are real but bounded by Reliance&#x27;s ₹1.65L Cr EBITDA base, 0.57x net debt/EBITDA, and segment diversification. The bull-to-bear payoff of ~3:1 reflects this asymmetry — downside is anchored, upside is catalyst-driven.</p></div></div>
+    <div class="page-footer">
+      <div class="footer-left">Tikona Capital Finserv Pvt. Ltd. | SEBI Reg. Research Analyst</div>
+      <div class="footer-center">Reliance Industries Ltd — Equity Research</div>
+      <div class="footer-right">Page 17 of 20</div>
+    </div></div><div class="page">
+    <div class="mini-header">
+      <div class="mini-firm">Tikona Capital</div>
+      <div class="mini-company">Reliance Industries Ltd — Peer Comparison: Reliance Trades at Unwarranted Discount to Global Integrated Peers</div>
+      <div class="mini-meta">
+        BUY &nbsp;|&nbsp;
+        CMP: ₹1408.0 &nbsp;|&nbsp;
+        TP: ₹1717.0 &nbsp;|&nbsp;
+        22% Upside &nbsp;|&nbsp;
+        Large Cap
+      </div>
+    </div>
+        <div class="page-content pb48"><div class="section-header"><span class="section-number">18</span><span class="section-title">Peer Comparison: Reliance Trades at Unwarranted Discount to Global Integrated Peers</span></div><div class="highlight-box accent-border"><div class="highlight-box-title">Methodology Note</div><p>RIL&#x27;s blended holdco multiple is not directly comparable to pure-play peers. We therefore apply segment-level comps: Jio vs. listed Asian telecom/digital platforms; Retail vs. organised retail peers; O2C vs. integrated refining peers. All peer multiples are illustrative ranges sourced from publicly available filings as of May 2025 and should be treated as directional benchmarks, not point estimates.</p></div><div class="fin-table-wrap"><div class="fin-table-title">Segment-Level Peer Comp: RIL vs. Relevant Benchmarks (Illustrative, May 2025)</div><table><thead><tr><th style="text-align:left;">Segment / Peer</th><th>Comp Basis</th><th>Peer EV/EBITDA (x)</th><th>Peer P/E (x)</th><th>ND/EBITDA (x)</th><th>EBITDA CAGR (3Y)</th><th>RIL Segment Multiple</th></tr></thead><tbody><tr class="tbl-highlight"><td class="bold">Jio (Digital)</td><td class="bold">Asian telecom/digital platforms</td><td class="bold">15–20x</td><td class="bold">25–35x</td><td class="bold">1–2x</td><td class="bold">15–20%</td><td class="bold">~12.7x blended</td></tr><tr><td>Reliance Retail</td><td>Organised retail (India/EM)</td><td>20–30x</td><td>40–60x</td><td>0–1x</td><td class="green">18–25%</td><td>~12.7x blended</td></tr><tr><td>O2C / Refining</td><td>Integrated refining peers</td><td>7–10x</td><td>10–14x</td><td>1–3x</td><td class="green">5–8%</td><td>~12.7x blended</td></tr><tr class="tbl-highlight"><td class="bold">RIL Holdco (FY25A)</td><td class="bold">Consolidated reported</td><td class="bold">12.7x</td><td class="bold">25.5x</td><td class="bold">~1.5x</td><td class="bold">11.4% (FY25–27E)</td><td class="bold">Current</td></tr></tbody></table><div class="figure-source">Blended holdco EV/EBITDA of 12.7x reflects conglomerate discount vs. SOTP-implied 15–17x fair range. Peer ranges are illustrative; individual company multiples vary. ND/EBITDA for RIL estimated from FY25 reported net debt. EBITDA CAGR for RIL per our model (FY25–FY27E).</div></div><div class="key-section-title">The Discount in Numbers</div><div class="metric-strip" style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px;"><div class="metric-card"><div class="metric-card-label">RIL EV/EBITDA (FY25A)</div><div class="metric-card-value">12.7x</div><div class="metric-card-sub">Current holdco</div></div><div class="metric-card accent-bg"><div class="metric-card-label">SOTP-Implied Fair EV/EBITDA</div><div class="metric-card-value">15–17x</div><div class="metric-card-sub">Segment-weighted</div></div><div class="metric-card mid-bg"><div class="metric-card-label">Implied Holdco Discount</div><div class="metric-card-value">~18–25%</div><div class="metric-card-sub">Unjustified vs. peers</div></div><div class="metric-card"><div class="metric-card-label">FY27E EV/EBITDA (our model)</div><div class="metric-card-value">11.1x</div><div class="metric-card-sub">Compressing on growth</div></div></div><div class="thesis-box"><p><strong>SOTP Bridge: ₹1,408 CMP vs. ₹1,717 Fair Value. </strong>Applying segment-level peer multiples to Jio (15–20x EV/EBITDA), Retail (20–30x EV/EBITDA), and O2C (7–10x EV/EBITDA) yields a SOTP fair value of ₹1,717 per share — 22% above CMP ₹1,408. The gap is not explained by leverage (ND/EBITDA ~1.5x, investment-grade) or growth (11%+ EBITDA CAGR FY25–27E). Catalyst-driven segment re-rating — led by Jio IPO price discovery — is the mechanism to close it.</p></div><div class="key-section-title">Why the Discount Is Structural Mispricing, Not Justified</div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;"><div class="highlight-box accent-border"><div class="highlight-box-title">Jio is under-valued at holdco level</div><p>With 50.9% wireless market share and &gt;65% of India&#x27;s 5G subscribers, Jio&#x27;s standalone economics mirror high-multiple Asian digital platforms. Holdco blending suppresses this.</p></div><div class="highlight-box navy-border"><div class="highlight-box-title">Retail scale warrants a premium, not a discount</div><p>India&#x27;s largest organised retailer by store count and revenue, with 18%+ EBITDA CAGR expected FY25–28E. Comparable EM retail peers trade at 20–30x EV/EBITDA.</p></div><div class="highlight-box green-border"><div class="highlight-box-title">O2C anchors downside, not the multiple</div><p>Jamnagar (1.4M bpd, world&#x27;s largest integrated complex) generates defensive cash flows. O2C should be valued at 7–10x EV/EBITDA — a floor, not a ceiling for the group.</p></div></div></div>
+    <div class="page-footer">
+      <div class="footer-left">Tikona Capital Finserv Pvt. Ltd. | SEBI Reg. Research Analyst</div>
+      <div class="footer-center">Reliance Industries Ltd — Equity Research</div>
+      <div class="footer-right">Page 18 of 20</div>
+    </div></div><div class="page">
+    <div class="mini-header">
+      <div class="mini-firm">Tikona Capital</div>
+      <div class="mini-company">Reliance Industries Ltd — Entry, Review &amp; Exit Strategy: Buy on Dips, Exit if Thesis Breaks</div>
+      <div class="mini-meta">
+        BUY &nbsp;|&nbsp;
+        CMP: ₹1408.0 &nbsp;|&nbsp;
+        TP: ₹1717.0 &nbsp;|&nbsp;
+        22% Upside &nbsp;|&nbsp;
+        Large Cap
+      </div>
+    </div>
+        <div class="page-content pb48"><div class="section-header"><span class="section-number">19</span><span class="section-title">Entry, Review &amp; Exit Strategy: Buy on Dips, Exit if Thesis Breaks</span></div><div class="thesis-box"><p><strong>Core Conviction. </strong>Accumulate Reliance at CMP ₹1,408 with a 12-month horizon. The Jio IPO, New Energy commissioning, and retail scale-up represent identifiable, time-bound catalysts that should close the conglomerate discount. Downside is anchored by O2C cash flows; upside is asymmetric. The 52-week range (₹1,115–₹1,612) confirms current entry is near the lower half — a structurally attractive accumulation zone.</p></div><div class="key-section-title">Key Entry Parameters</div><div class="metric-strip" style="display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-bottom:8px;"><div class="metric-card"><div class="metric-card-label">Accumulate Zone</div><div class="metric-card-value">₹1,350–1,450</div><div class="metric-card-sub">Current CMP ₹1,408</div></div><div class="metric-card accent-bg"><div class="metric-card-label">52-Week Low</div><div class="metric-card-value">₹1,115</div><div class="metric-card-sub">Valuation floor</div></div><div class="metric-card mid-bg"><div class="metric-card-label">Base-Case Target</div><div class="metric-card-value">₹1,717</div><div class="metric-card-sub">+22% upside</div></div><div class="metric-card"><div class="metric-card-label">Bull-Case Target</div><div class="metric-card-value">₹1,950</div><div class="metric-card-sub">Jio IPO at full value</div></div><div class="metric-card teal-bg"><div class="metric-card-label">FY26E P/E</div><div class="metric-card-value">20.9x</div><div class="metric-card-sub">Derate to 18x by FY28E</div></div></div><div class="fin-table-wrap"><div class="fin-table-title">Entry, Review &amp; Exit Decision Framework</div><table><thead><tr><th style="text-align:left;">Dimension</th><th>Action</th><th>Trigger / Condition</th><th>Implication</th></tr></thead><tbody><tr class="tbl-highlight"><td class="bold">Entry — Ideal</td><td class="bold">Accumulate aggressively</td><td class="bold">CMP ≤ ₹1,400 (dips to 52W low range)</td><td class="bold">Maximum margin of safety; asymmetric risk-reward</td></tr><tr><td>Entry — Acceptable</td><td>Add on strength</td><td>CMP ₹1,400–1,550 with catalyst visibility</td><td>Still 10–22% upside to base case</td></tr><tr><td>Review — Amber</td><td>Monitor closely</td><td>Jio IPO deferred beyond Dec 2026</td><td>Re-rate timeline extends; reduce position size</td></tr><tr><td>Review — Amber</td><td>Monitor closely</td><td>New Energy capex ROI guidance cut</td><td>Bull-case ₹1,950 at risk; revisit SOTP</td></tr><tr><td>Exit — Hard Stop</td><td>Exit position</td><td class="green">SOTP discount widens beyond 25%</td><td>Thesis structurally broken; capital reallocation</td></tr><tr class="tbl-highlight"><td class="bold">Exit — Hard Stop</td><td class="bold">Exit position</td><td class="bold">O2C EBITDA declines &gt;20% for 2 quarters</td><td class="bold">Cash flow anchor impaired; downside unprotected</td></tr></tbody></table><div class="figure-source">Review triggers are thesis-based, not price-based. Do not exit on routine market volatility.</div></div><div class="key-section-title">Top Risks to Monitor Post-Entry</div><div class="risk-item"><div class="risk-badge risk-high">HIGH</div><div><div class="risk-title">Jio IPO Delay / Cancellation</div><div class="risk-text">Deferral beyond 2026 removes the single largest near-term re-rating catalyst. Reduces bull-case target by ₹150–200/share.</div></div></div><div class="risk-item"><div class="risk-badge risk-high">HIGH</div><div><div class="risk-title">New Energy Execution Slip</div><div class="risk-text">Cost overruns or technology pivots on $80B+ capex could compress long-term ROCE and erode SOTP value.</div></div></div><div class="risk-item"><div class="risk-badge risk-med">MED</div><div><div class="risk-title">O2C Margin Compression</div><div class="risk-text">Prolonged petrochemical spread weakness into FY27 would pressure consolidated EBITDA and delay deleveraging.</div></div></div><div class="risk-item"><div class="risk-badge risk-med">MED</div><div><div class="risk-title">Regulatory / Geopolitical Shock</div><div class="risk-text">Adverse telecom or energy policy, or forced pivot from Russian crude, could impair near-term earnings visibility.</div></div></div></div>
+    <div class="page-footer">
+      <div class="footer-left">Tikona Capital Finserv Pvt. Ltd. | SEBI Reg. Research Analyst</div>
+      <div class="footer-center">Reliance Industries Ltd — Equity Research</div>
+      <div class="footer-right">Page 19 of 20</div>
+    </div></div><div class="page">
+    <div class="mini-header">
+      <div class="mini-firm">Tikona Capital</div>
+      <div class="mini-company">Reliance Industries Ltd — Disclaimer &amp; Disclosures</div>
+      <div class="mini-meta">
+        BUY &nbsp;|&nbsp;
+        CMP: ₹1408.0 &nbsp;|&nbsp;
+        TP: ₹1717.0 &nbsp;|&nbsp;
+        22% Upside &nbsp;|&nbsp;
+        Large Cap
+      </div>
+    </div><div class="page-content pb48"><div class="disclaimer" style="font-size:5.5pt;line-height:1.5;">About Us: Research Analyst is registered with SEBI as Research Analyst with Registration No. INH000009807. The firm got its registration on June 13, 2022, and is engaged in research services.<br><br>Disciplinary history: No penalties / directions have been issued by SEBI under the SEBI Act or Regulations made there under. There are no pending material litigations or legal proceedings, findings of inspections or investigations for which action has been taken or initiated by any regulatory authority.<br><br>Details of its associates: No associates<br><br>Disclosures with respect to Research and Recommendations Services<br>· Research Analyst may have financial interest or actual / beneficial ownership in the securities recommended in its personal portfolio.<br>· There are no actual or potential conflicts of interest arising from any connection to or association with any issuer of products / securities.<br>· Research Analyst or its employee or its associates have not received any compensation from the company in past 12 months.<br>· Research Analyst or its employee or its associates have not managed or co-managed the public offering of Subject company in past 12 months.<br>· Research Analyst or its employee or its associates have not received any compensation for investment banking or merchant banking or brokerage services from the subject company in past 12 months.<br>· Research Analyst or its employee or its associates have not received any compensation for products or services other than above from the subject company in past 12 months.<br>· Research Analyst or its employee or its associates have not received any compensation or other benefits from the Subject Company or 3rd party in connection with the research report.<br>· The subject company was not a client of Research Analyst during twelve months preceding the date of distribution of the research report.<br>· Research Analysts or its employee or its associates has not served as an officer, director, or employee of the subject company.<br>· Registration granted by SEBI, membership of BASL and certification from NISM in no way guarantee performance of the Intermediary or provide any assurance of returns to investors.<br>· Investment in securities market are subject to market risks. Read all the related documents carefully before investing.</div></div>
+    <div class="page-footer">
+      <div class="footer-left">Tikona Capital Finserv Pvt. Ltd. | SEBI Reg. Research Analyst</div>
+      <div class="footer-center">Reliance Industries Ltd — Equity Research</div>
+      <div class="footer-right">Page 20 of 20</div>
+    </div></div>
+</body>
+</html>

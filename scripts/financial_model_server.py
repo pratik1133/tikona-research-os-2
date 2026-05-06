@@ -20,6 +20,7 @@ from pathlib import Path
 from fastapi import FastAPI, BackgroundTasks
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel
+import requests
 import uvicorn
 
 # ── Make sure financial_model_v3 is importable from the same directory ──
@@ -30,6 +31,9 @@ app = FastAPI(title="Financial Model Generator", version="1.0")
 # Output directory for generated models
 OUTPUT_DIR = os.environ.get("MODEL_OUTPUT_DIR", "/tmp/financial_models")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "").rstrip("/")
+SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY", "")
+MODEL_STORAGE_BUCKET = os.environ.get("SUPABASE_FINANCIAL_MODEL_BUCKET", "research-reports-html")
 
 # Track job status for async mode
 jobs: dict[str, dict] = {}
@@ -50,6 +54,8 @@ class GenerateResponse(BaseModel):
     status: str  # "success" | "error"
     file_name: str | None = None
     file_path: str | None = None
+    storage_path: str | None = None
+    storage_url: str | None = None
     message: str | None = None
     duration_seconds: int | None = None
 
@@ -59,8 +65,19 @@ class JobStatus(BaseModel):
     status: str  # "processing" | "completed" | "failed"
     file_name: str | None = None
     file_path: str | None = None
+    storage_path: str | None = None
+    storage_url: str | None = None
     message: str | None = None
     duration_seconds: int | None = None
+
+
+class StorageMirrorResponse(BaseModel):
+    status: str  # "success" | "error"
+    file_name: str | None = None
+    file_path: str | None = None
+    storage_path: str | None = None
+    storage_url: str | None = None
+    message: str | None = None
 
 
 # ========================
@@ -69,12 +86,67 @@ class JobStatus(BaseModel):
 
 @app.get("/health")
 def health():
-    has_key = bool(os.environ.get("ANTHROPIC_API_KEY"))
     return {
         "status": "ok",
-        "anthropic_key_set": has_key,
+        "model_version": "v5",
+        "anthropic_key_set": bool(os.environ.get("ANTHROPIC_API_KEY")),
+        "screener_creds_set": bool(os.environ.get("SCREENER_USERNAME") and os.environ.get("SCREENER_PASSWORD")),
         "output_dir": OUTPUT_DIR,
     }
+
+
+def _storage_public_url(path: str) -> str:
+    return f"{SUPABASE_URL}/storage/v1/object/public/{MODEL_STORAGE_BUCKET}/{path}"
+
+
+def upload_model_to_supabase(file_path: str, ticker: str) -> tuple[str, str]:
+    """Upload the v5 xlsx and (when present) the .json sidecar produced by
+    financial_model_v5.generate_financial_model. The html-report pipeline
+    prefers the JSON sidecar because the xlsx is formula-only and openpyxl
+    can't read computed cell values without Excel having recalculated them.
+    """
+    if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
+        raise RuntimeError("SUPABASE_URL / SUPABASE_SERVICE_KEY not configured")
+
+    ticker_u = ticker.upper()
+    path = f"financial-models/{ticker_u}/{ticker_u}_model.xlsx"
+    url = f"{SUPABASE_URL}/storage/v1/object/{MODEL_STORAGE_BUCKET}/{path}"
+    headers = {
+        "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}",
+        "apikey": SUPABASE_SERVICE_KEY,
+        "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "x-upsert": "true",
+        "Cache-Control": "no-cache",
+    }
+
+    with open(file_path, "rb") as f:
+        resp = requests.put(url, data=f, headers=headers, timeout=120)
+
+    if resp.status_code >= 400:
+        raise RuntimeError(f"Supabase storage upload failed: {resp.status_code} {resp.text[:400]}")
+
+    # Also upload the JSON sidecar if it exists alongside the xlsx
+    json_local = os.path.splitext(file_path)[0] + ".json"
+    if os.path.exists(json_local):
+        json_path = f"financial-models/{ticker_u}/{ticker_u}_model.json"
+        json_url = f"{SUPABASE_URL}/storage/v1/object/{MODEL_STORAGE_BUCKET}/{json_path}"
+        json_headers = {
+            **headers,
+            "Content-Type": "application/json; charset=utf-8",
+        }
+        try:
+            with open(json_local, "rb") as f:
+                jr = requests.put(json_url, data=f, headers=json_headers, timeout=60)
+            if jr.status_code >= 400:
+                print(f"  WARN: JSON sidecar upload returned {jr.status_code}: {jr.text[:200]}")
+            else:
+                print(f"  Uploaded JSON sidecar -> {json_path}")
+        except Exception as e:  # noqa: BLE001
+            print(f"  WARN: JSON sidecar upload failed ({type(e).__name__}: {e})")
+    else:
+        print(f"  NOTE: no JSON sidecar at {json_local}; html pipeline will fall back to CSV/xlsx")
+
+    return path, _storage_public_url(path)
 
 
 # ========================
@@ -101,53 +173,52 @@ def generate_sync(req: GenerateRequest):
         )
 
     try:
-        # Import the generator
-        from financial_model_v3 import generate_financial_model
+        # v5: formula-based, year-agnostic, cost-tracked
+        from financial_model_v5 import generate_financial_model
 
-        # Patch the output directory
         out_dir = os.path.join(OUTPUT_DIR, ticker)
         os.makedirs(out_dir, exist_ok=True)
 
-        # Run the 10-turn pipeline — write directly to output dir
-        generate_financial_model(
+        result = generate_financial_model(
+            nse_code=ticker,
             company_name=req.company_name,
-            ticker=ticker,
-            exchange="NSE",
             sector=req.sector,
-            out_dir=out_dir,
+            output_dir=out_dir,
         )
 
-        # Check where the file landed
-        possible_paths = [
-            f"{out_dir}/{ticker}_model.xlsx",
-            f"{OUTPUT_DIR}/{ticker}_model.xlsx",
-        ]
+        file_path = result["file_path"]
+        json_src = result.get("json_path")
 
-        file_path = None
-        for p in possible_paths:
-            if os.path.exists(p):
-                file_path = p
-                break
-
-        if not file_path:
-            return GenerateResponse(
-                status="error",
-                message=f"Model generated but output file not found. Checked: {possible_paths}",
-                duration_seconds=int(time.time() - start),
-            )
-
-        # Move to output dir if not already there
+        # Copy xlsx + JSON sidecar into the canonical OUTPUT_DIR slot so
+        # upload_model_to_supabase can find both side-by-side.
         final_path = os.path.join(OUTPUT_DIR, f"{ticker}_model.xlsx")
+        final_json = os.path.join(OUTPUT_DIR, f"{ticker}_model.json")
         if file_path != final_path:
             import shutil
             shutil.copy2(file_path, final_path)
             file_path = final_path
+        if json_src and os.path.exists(json_src) and json_src != final_json:
+            import shutil
+            shutil.copy2(json_src, final_json)
+
+        storage_path = None
+        storage_url = None
+        try:
+            storage_path, storage_url = upload_model_to_supabase(file_path, ticker)
+        except Exception:
+            traceback.print_exc()
 
         return GenerateResponse(
             status="success",
             file_name=f"{ticker}_model.xlsx",
             file_path=file_path,
+            storage_path=storage_path,
+            storage_url=storage_url,
             duration_seconds=int(time.time() - start),
+            message=(
+                f"rating={result.get('rating')} target={result.get('target_price')} "
+                f"upside={result.get('upside_pct')}% cost=${result['cost_summary']['cost_usd']}"
+            ),
         )
 
     except Exception as e:
@@ -200,42 +271,46 @@ def _run_generation(job_id: str, req: GenerateRequest):
     start = time.time()
 
     try:
-        from financial_model_v3 import generate_financial_model
+        from financial_model_v5 import generate_financial_model
 
-        generate_financial_model(
+        result = generate_financial_model(
+            nse_code=ticker,
             company_name=req.company_name,
-            ticker=ticker,
-            exchange="NSE",
             sector=req.sector,
-            out_dir=os.path.join(OUTPUT_DIR, ticker),
+            output_dir=os.path.join(OUTPUT_DIR, ticker),
         )
+        file_path = result["file_path"]
+        json_src = result.get("json_path")
 
-        # Find the output file
-        possible_paths = [
-            f"{OUTPUT_DIR}/{ticker}/{ticker}_model.xlsx",
-            f"{OUTPUT_DIR}/{ticker}_model.xlsx",
-        ]
-        file_path = next((p for p in possible_paths if os.path.exists(p)), None)
+        final_path = os.path.join(OUTPUT_DIR, f"{ticker}_model.xlsx")
+        final_json = os.path.join(OUTPUT_DIR, f"{ticker}_model.json")
+        if file_path != final_path:
+            import shutil
+            shutil.copy2(file_path, final_path)
+            file_path = final_path
+        if json_src and os.path.exists(json_src) and json_src != final_json:
+            import shutil
+            shutil.copy2(json_src, final_json)
 
-        if file_path:
-            final_path = os.path.join(OUTPUT_DIR, f"{ticker}_model.xlsx")
-            if file_path != final_path:
-                import shutil
-                shutil.copy2(file_path, final_path)
-                file_path = final_path
+        storage_path = None
+        storage_url = None
+        try:
+            storage_path, storage_url = upload_model_to_supabase(file_path, ticker)
+        except Exception:
+            traceback.print_exc()
 
-            jobs[job_id] = {
-                "status": "completed",
-                "file_name": f"{ticker}_model.xlsx",
-                "file_path": file_path,
-                "duration_seconds": int(time.time() - start),
-            }
-        else:
-            jobs[job_id] = {
-                "status": "failed",
-                "message": "Output file not found after generation",
-                "duration_seconds": int(time.time() - start),
-            }
+        jobs[job_id] = {
+            "status": "completed",
+            "file_name": f"{ticker}_model.xlsx",
+            "file_path": file_path,
+            "storage_path": storage_path,
+            "storage_url": storage_url,
+            "duration_seconds": int(time.time() - start),
+            "rating": result.get("rating"),
+            "target_price": result.get("target_price"),
+            "upside_pct": result.get("upside_pct"),
+            "cost_usd": result["cost_summary"]["cost_usd"],
+        }
 
     except Exception as e:
         traceback.print_exc()
@@ -264,6 +339,36 @@ def download_model(ticker: str):
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         filename=f"{ticker}_model.xlsx",
     )
+
+
+@app.post("/storage/{ticker}", response_model=StorageMirrorResponse)
+def mirror_model_to_storage(ticker: str):
+    ticker = ticker.upper()
+    file_path = os.path.join(OUTPUT_DIR, f"{ticker}_model.xlsx")
+
+    if not os.path.exists(file_path):
+        return StorageMirrorResponse(
+            status="error",
+            message=f"No model found for {ticker}",
+        )
+
+    try:
+        storage_path, storage_url = upload_model_to_supabase(file_path, ticker)
+        return StorageMirrorResponse(
+            status="success",
+            file_name=f"{ticker}_model.xlsx",
+            file_path=file_path,
+            storage_path=storage_path,
+            storage_url=storage_url,
+        )
+    except Exception as e:
+        traceback.print_exc()
+        return StorageMirrorResponse(
+            status="error",
+            file_name=f"{ticker}_model.xlsx",
+            file_path=file_path,
+            message=str(e),
+        )
 
 
 # ========================

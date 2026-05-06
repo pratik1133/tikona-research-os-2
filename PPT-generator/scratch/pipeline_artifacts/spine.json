@@ -1,0 +1,157 @@
+{
+  "thesis_north_star": "Reliance is on the cusp of a major value unlocking cycle, driven by the monetization of its digital and retail assets and the emergence of its New Energy business as a third growth engine.",
+  "tone": "Constructive and forward-looking",
+  "pages": [
+    {
+      "page_number": 1,
+      "page_type": "cover",
+      "title": "Reliance Industries: Three Engines, One Vision",
+      "key_message": "Initiating with a BUY rating and a ₹1717 target price, as Reliance's twin consumer engines (Jio, Retail) approach monetization and its New Energy venture offers significant long-term optionality.",
+      "data_slices": [
+        "company",
+        "ticker",
+        "rating",
+        "target_price",
+        "cmp",
+        "upside_potential_pct",
+        "tagline",
+        "recommendation_summary"
+      ]
+    },
+    {
+      "page_number": 2,
+      "page_type": "story_charts",
+      "title": "The Story in Charts: From Oil Major to Tech-Energy Behemoth",
+      "key_message": "Reliance's decade-long transformation has diversified its earnings base from a pure O2C play to a consumer and green energy-focused conglomerate.",
+      "data_slices": [
+        "segment_analysis",
+        "market_share",
+        "financials.ratios"
+      ]
+    },
+    {
+      "page_number": 3,
+      "page_type": "thesis",
+      "title": "Investment Thesis: On the Cusp of Value Unlocking",
+      "key_message": "Our BUY thesis is anchored on a compelling SOTP valuation, with near-term catalysts from potential listings of Jio and Retail, and the long-term value creation from the New Energy Giga Complex.",
+      "data_slices": [
+        "investment_thesis",
+        "catalysts",
+        "risks"
+      ]
+    },
+    {
+      "page_number": 4,
+      "page_type": "industry",
+      "title": "Operating Across India's Core Growth Pillars",
+      "key_message": "Reliance is uniquely positioned across India's highest-growth sectors—Energy, Telecom, and Retail—benefiting from structural tailwinds in each.",
+      "data_slices": [
+        "industry_analysis",
+        "market_share"
+      ]
+    },
+    {
+      "page_number": 5,
+      "page_type": "company_overview",
+      "title": "From Polyester to Pixels and Photons",
+      "key_message": "Reliance is India's largest conglomerate with market-leading positions in its legacy Oil-to-Chemicals (O2C) business and its new-age Digital Services (Jio) and Retail platforms.",
+      "data_slices": [
+        "company_background",
+        "business_summary.overview",
+        "business_summary.segments"
+      ]
+    },
+    {
+      "page_number": 6,
+      "page_type": "business_segments",
+      "title": "Consumer Platforms: The Twin Growth Engines",
+      "key_message": "Jio and Reliance Retail are dominant consumer platforms poised for continued market share gains and significant value unlocking through impending public listings.",
+      "data_slices": [
+        "segment_analysis",
+        "market_share.telecom",
+        "market_share.retail",
+        "jio_ipo_plan"
+      ]
+    },
+    {
+      "page_number": 7,
+      "page_type": "business_segments",
+      "title": "O2C & New Energy: Funding the Green Future",
+      "key_message": "The highly profitable and stable O2C business provides the cash flow to fund the ambitious New Energy Giga Complex, which represents the company's next major growth frontier.",
+      "data_slices": [
+        "segment_analysis",
+        "new_energy_vision",
+        "competitive_advantages"
+      ]
+    },
+    {
+      "page_number": 8,
+      "page_type": "management",
+      "title": "Navigating a Generational Transition",
+      "key_message": "A well-defined succession plan ensures leadership continuity as the next generation takes charge of new growth engines under Mukesh Ambani's strategic oversight.",
+      "data_slices": [
+        "management",
+        "succession_plan",
+        "recent_management_commentary"
+      ]
+    },
+    {
+      "page_number": 9,
+      "page_type": "earnings_forecast",
+      "title": "Forecasting the Triple-Engine Growth",
+      "key_message": "We project a 15% consolidated EBITDA CAGR over FY24-27E, driven by tariff hikes in Jio, robust store expansion in Retail, and the initial ramp-up of New Energy revenues.",
+      "data_slices": [
+        "financials.income_statement",
+        "financials.cash_flow",
+        "segment_analysis"
+      ]
+    },
+    {
+      "page_number": 10,
+      "page_type": "financial_highlights",
+      "title": "Financials: Deleveraged and Ready to Invest",
+      "key_message": "A deleveraged balance sheet with net-debt-to-EBITDA below 1.0x and strong operating cash flows provide ample firepower for the next capex cycle in green energy.",
+      "data_slices": [
+        "financials.income_statement",
+        "financials.balance_sheet",
+        "financials.cash_flow",
+        "financials.ratios",
+        "financial_health_assessment"
+      ]
+    },
+    {
+      "page_number": 11,
+      "page_type": "valuation",
+      "title": "Valuation: Sum-of-the-Parts Reveals Deep Value",
+      "key_message": "Our Sum-of-the-Parts (SOTP) valuation yields a target price of ₹1717, implying a 22% upside, with the New Energy business currently representing a significant, unpriced option.",
+      "data_slices": [
+        "valuation.sotp_peer_multiples",
+        "valuation.dcf_analysis",
+        "valuation.relative_valuation",
+        "target_price",
+        "cmp",
+        "upside_potential_pct"
+      ]
+    },
+    {
+      "page_number": 12,
+      "page_type": "scenario_analysis",
+      "title": "Scenario Analysis: Exploring the Path to ₹2,100",
+      "key_message": "Our bull case valuation of ₹2,100 is predicated on accelerated monetization of consumer businesses and a higher valuation for New Energy, while our bear case of ₹1,250 assumes execution delays.",
+      "data_slices": [
+        "bull_case",
+        "bear_case",
+        "valuation.target_price_range"
+      ]
+    },
+    {
+      "page_number": 13,
+      "page_type": "scorecard",
+      "title": "SAARTHI Scorecard: Strong on Vision and Execution",
+      "key_message": "Reliance scores an impressive 8.5/10, with high marks on Strategy, Adaptability, and Leadership reflecting its successful business transformation and stellar execution track record.",
+      "data_slices": [
+        "saarthi_scorecard"
+      ]
+    }
+  ]
+}

@@ -399,11 +399,23 @@ export interface ResearchReport {
   target_price: number | null;
   recommendation_rationale: string | null;
 
-  // PPT/PDF Files
+  // PPTX Report (reportgen library output — uploaded to research-reports-pptx bucket)
+  pptx_file_path: string | null;
+  pptx_file_url: string | null;
+  pptx_pdf_file_path: string | null;  // companion PDF (LibreOffice/PowerPoint conversion)
+  pptx_pdf_file_url: string | null;
+  pptx_generated_at: string | null;
+  pptx_status: 'generating' | 'ready' | 'error' | null;
+
+  // @deprecated — legacy HTML/PDF/PPT flow (columns retained for back-compat with /admin/pipelinea and /admin/generate-research).
+  // The active flow at /admin/pipeline uses pptx_* fields above.
   ppt_file_id: string | null;
   ppt_file_url: string | null;
   pdf_file_id: string | null;
   pdf_file_url: string | null;
+  html_file_path: string | null;
+  html_file_url: string | null;
+  html_last_edited_at: string | null;
 
   // Media / Podcast
   podcast_script: string | null;

@@ -9,26 +9,19 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-import { supabase, getCurrentUserEmail } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import {
-  createResearchReport,
-  updateReportSection,
-  addReportSectionColumn,
-  updateCustomSection,
-  updateSectionHeading,
-  finalizeReport,
   getReportBySession,
   publishReport,
+  generatePptx,
+  PPT_SERVICE_URL,
 } from '@/lib/api';
 import { createRecommendation } from '@/lib/recommendations-api';
-import type { TextSectionKey, ResearchReport } from '@/types/database';
+import type { ResearchReport } from '@/types/database';
 import type { RecommendationRating } from '@/types/recommendations';
 import {
   Check,
   Loader2,
-  FileText,
-  Presentation,
-  FileDown,
   Mic,
   Video,
   ExternalLink,
@@ -37,85 +30,51 @@ import {
   ChevronDown,
   ChevronUp,
   Shield,
-  Edit3,
   Send,
+  Presentation,
+  Wifi,
+  WifiOff,
+  RefreshCw,
 } from 'lucide-react';
 
-// ========================
-// Constants
-// ========================
-
 const N8N_BASE = 'https://n8n.tikonacapital.com/webhook';
-const PPT_SERVICE_URL = import.meta.env.VITE_PPT_SERVICE_URL || N8N_BASE;
-
-// Standard research_reports columns (7 text sections)
-const STANDARD_SECTION_KEYS: TextSectionKey[] = [
-  'company_background',
-  'business_model',
-  'management_analysis',
-  'industry_overview',
-  'industry_tailwinds',
-  'demand_drivers',
-  'industry_risks',
-];
-
-// Pipeline sections that don't have a standard column — use cs_ custom mechanism
-const CUSTOM_SECTION_KEYS = [
-  'investment_rationale',
-  'corporate_governance',
-  'saarthi_framework',
-  'entry_review_exit_strategy',
-  'scenario_analysis',
-  'rating',
-  'target_price',
-  'upside_percentage',
-  'market_cap',
-  'market_cap_category',
-  'current_market_price',
-];
-
-// ========================
-// Props
-// ========================
 
 interface PostProductionPanelProps {
   sessionId: string;
   companyName: string;
   nseSymbol: string;
+  sector?: string | null;
   vaultId: string | null;
+  financialModelFileUrl?: string | null;
   userEmail: string;
   stage2Sections: Array<{ id?: string; key: string; title: string; content: string }>;
+  initialReport?: ResearchReport | null;
   onPublished: () => void;
 }
-
-// ========================
-// Component
-// ========================
 
 export default function PostProductionPanel({
   sessionId,
   companyName,
   nseSymbol,
-  vaultId,
+  // sector / vaultId / financialModelFileUrl are now resolved server-side from sessionId
   userEmail,
   stage2Sections,
+  initialReport = null,
   onPublished,
 }: PostProductionPanelProps) {
   // --- Report ---
   const [reportId, setReportId] = useState<string | null>(null);
-  const [reportCreating, setReportCreating] = useState(false);
 
-  // --- PPT ---
-  const [pptGenerating, setPptGenerating] = useState(false);
-  const [pptElapsedSeconds, setPptElapsedSeconds] = useState(0);
-  const [pptFileId, setPptFileId] = useState<string | null>(null);
-  const [pptFileUrl, setPptFileUrl] = useState<string | null>(null);
-  const pptTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // --- PPTX generation ---
+  const [pptxGenerating, setPptxGenerating] = useState(false);
+  const [pptxElapsedSeconds, setPptxElapsedSeconds] = useState(0);
+  const [pptxFileUrl, setPptxFileUrl] = useState<string | null>(null);
+  const [pptxPdfFileUrl, setPptxPdfFileUrl] = useState<string | null>(null);
+  const [useMock, setUseMock] = useState(false);
+  const pptxTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // --- PDF ---
-  const [pdfGenerating, setPdfGenerating] = useState(false);
-  const [pdfFileId, setPdfFileId] = useState<string | null>(null);
-  const [pdfFileUrl, setPdfFileUrl] = useState<string | null>(null);
+  // --- Service health ---
+  const [serviceHealth, setServiceHealth] = useState<'checking' | 'ok' | 'down'>('checking');
 
   // --- Podcast ---
   const [scriptGenerating, setScriptGenerating] = useState(false);
@@ -137,32 +96,46 @@ export default function PostProductionPanel({
   const [telegramSending, setTelegramSending] = useState(false);
   const [telegramSent, setTelegramSent] = useState(false);
 
-  // Refs for stable reportId in polling callbacks
   const reportIdRef = useRef(reportId);
   reportIdRef.current = reportId;
 
-  // Cleanup timer on unmount
   useEffect(() => {
     return () => {
-      if (pptTimerRef.current) clearInterval(pptTimerRef.current);
+      if (pptxTimerRef.current) clearInterval(pptxTimerRef.current);
     };
   }, []);
 
-  // --- Restore state from existing report on mount ---
+  // Health check
   useEffect(() => {
+    let cancelled = false;
+    setServiceHealth('checking');
+    fetch(`${PPT_SERVICE_URL}/health`, { signal: AbortSignal.timeout(5000) })
+      .then((r) => {
+        if (!cancelled) setServiceHealth(r.ok ? 'ok' : 'down');
+      })
+      .catch(() => {
+        if (!cancelled) setServiceHealth('down');
+      });
+    return () => { cancelled = true; };
+  }, []);
+
+  // Restore from existing report
+  useEffect(() => {
+    if (initialReport) {
+      restoreFromReport(initialReport);
+      return;
+    }
     getReportBySession(sessionId).then((report) => {
-      if (report) {
-        restoreFromReport(report);
-      }
-    }).catch(() => {});
-  }, [sessionId]);
+      if (report) restoreFromReport(report);
+    }).catch((error) => {
+      console.error('[PostProduction] Failed to load report by session', { sessionId, error });
+    });
+  }, [initialReport, sessionId]);
 
   function restoreFromReport(report: ResearchReport) {
     setReportId(report.report_id);
-    if (report.ppt_file_id) setPptFileId(report.ppt_file_id);
-    if (report.ppt_file_url) setPptFileUrl(report.ppt_file_url);
-    if (report.pdf_file_id) setPdfFileId(report.pdf_file_id);
-    if (report.pdf_file_url) setPdfFileUrl(report.pdf_file_url);
+    if (report.pptx_file_url) setPptxFileUrl(report.pptx_file_url);
+    if (report.pptx_pdf_file_url) setPptxPdfFileUrl(report.pptx_pdf_file_url);
     if (report.podcast_script) setPodcastScript(report.podcast_script);
     if (report.audio_file_url) setAudioFileUrl(report.audio_file_url);
     if (report.video_file_url) setVideoFileUrl(report.video_file_url);
@@ -173,7 +146,7 @@ export default function PostProductionPanel({
   }
 
   // ========================
-  // Extract recommendation data from stage2 sections
+  // Stage2 helpers
   // ========================
 
   function getSectionValue(key: string): string {
@@ -183,7 +156,6 @@ export default function PostProductionPanel({
 
   function parseNumber(val: string): number | null {
     if (!val) return null;
-    // Match first number in string (handles "₹1,234.56 per share" etc.)
     const match = val.match(/[\d,]+\.?\d*/);
     if (!match) return null;
     const n = parseFloat(match[0].replace(/,/g, ''));
@@ -191,7 +163,7 @@ export default function PostProductionPanel({
   }
 
   // ========================
-  // Poll Supabase column (async n8n pattern)
+  // Polling helper for n8n async columns
   // ========================
 
   const pollSupabaseColumn = useCallback(async (
@@ -213,7 +185,6 @@ export default function PostProductionPanel({
       if (!error && record?.[column]) {
         return record[column] as string;
       }
-
       if (attempt < maxAttempts) {
         await new Promise((r) => setTimeout(r, intervalMs));
       }
@@ -222,167 +193,62 @@ export default function PostProductionPanel({
   }, []);
 
   // ========================
-  // Step 1: Create report record from stage2 sections
+  // Step 1: Generate PPTX
   // ========================
 
-  const handleCreateReport = async () => {
-    if (reportId || stage2Sections.length === 0) return;
-    setReportCreating(true);
+  const handleGeneratePptx = useCallback(async () => {
+    if (!reportId) {
+      toast.error('Report not yet created — approve stage 2 first.');
+      return;
+    }
+
+    setPptxGenerating(true);
+    setPptxElapsedSeconds(0);
+    pptxTimerRef.current = setInterval(
+      () => setPptxElapsedSeconds((prev) => prev + 1),
+      1000,
+    );
 
     try {
-      // Get fresh email from auth session to prevent RLS failures
-      const freshEmail = await getCurrentUserEmail();
-      const emailToUse = freshEmail || userEmail;
-
-      // Create the research_reports row
-      const report = await createResearchReport({
-        session_id: sessionId,
-        user_email: emailToUse,
-        company_name: companyName,
-        nse_symbol: nseSymbol,
+      const result = await generatePptx({
+        reportId,
+        sessionId,
+        useMock,
       });
-      const rid = report.report_id;
-      setReportId(rid);
-      reportIdRef.current = rid;
 
-      // Ensure custom columns exist
-      for (const key of CUSTOM_SECTION_KEYS) {
-        try {
-          await addReportSectionColumn(key);
-        } catch {
-          // Column may already exist — safe to ignore
+      if (result.status !== 'success' || !result.pptx_file_url) {
+        throw new Error(result.message || 'PPTX generation failed');
+      }
+
+      if (result.warnings && result.warnings.length > 0) {
+        for (const w of result.warnings) {
+          toast.warning(w);
         }
       }
 
-      // Populate sections
-      for (const section of stage2Sections) {
-        if (STANDARD_SECTION_KEYS.includes(section.key as TextSectionKey)) {
-          await updateReportSection(rid, section.key as TextSectionKey, section.content);
-          await updateSectionHeading(rid, section.key, section.title, false);
-        } else if (CUSTOM_SECTION_KEYS.includes(section.key)) {
-          await updateCustomSection(rid, section.key, section.content);
-          await updateSectionHeading(rid, section.key, section.title, true);
-        }
-      }
+      setPptxFileUrl(result.pptx_file_url);
+      setPptxPdfFileUrl(result.pptx_pdf_file_url ?? null);
 
-      // Finalize
-      await finalizeReport(rid, 0, 0);
-      toast.success('Report record created — ready for production');
-    } catch (err) {
-      toast.error(`Failed to create report: ${err instanceof Error ? err.message : 'Unknown error'}`);
-      setReportId(null);
-    } finally {
-      setReportCreating(false);
-    }
-  };
-
-  // ========================
-  // Step 2: Generate PPT
-  // ========================
-
-  const handleCreatePPT = useCallback(async () => {
-    if (!reportId) return;
-
-    setPptGenerating(true);
-    setPptElapsedSeconds(0);
-
-    pptTimerRef.current = setInterval(() => {
-      setPptElapsedSeconds((prev) => prev + 1);
-    }, 1000);
-
-    try {
-      const sections = stage2Sections.reduce<Record<string, string>>(
-        (acc, s) => ({ ...acc, [s.key]: s.content }), {}
-      );
-      const sectionHeadings = stage2Sections.reduce<Record<string, string>>(
-        (acc, s) => ({ ...acc, [s.key]: s.title }), {}
-      );
-
-      const response = await fetch(`${PPT_SERVICE_URL}/generate-ppt`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          reportId,
-          sessionId,
-          sections,
-          sectionHeadings,
-          companyName,
-          nseSymbol,
-          vaultId,
-        }),
-      });
-
-      if (!response.ok) throw new Error(`PPT generation failed: ${response.statusText}`);
-
-      const responseText = await response.text();
-      if (!responseText) throw new Error('Empty response from PPT webhook');
-
-      const data = JSON.parse(responseText);
-      const row = Array.isArray(data) ? data[0] : data;
-      const fileId = row?.ppt_file_id || row?.id;
-
-      if (!fileId) throw new Error('PPT generation returned invalid file data');
-
-      const fileUrl = row?.ppt_file_url || `https://drive.google.com/file/d/${fileId}/view`;
-      setPptFileId(fileId);
-      setPptFileUrl(fileUrl);
-      toast.success('PPT created successfully!');
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'PPT generation failed');
-    } finally {
-      if (pptTimerRef.current) {
-        clearInterval(pptTimerRef.current);
-        pptTimerRef.current = null;
-      }
-      setPptGenerating(false);
-    }
-  }, [reportId, vaultId, stage2Sections, sessionId, companyName, nseSymbol]);
-
-  // ========================
-  // Step 3: Convert to PDF
-  // ========================
-
-  const handleConvertPDF = useCallback(async () => {
-    if (!reportId || !pptFileId) return;
-
-    setPdfGenerating(true);
-    try {
-      const response = await fetch(`${N8N_BASE}/convert-to-pdf`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reportId, pptFileId, companyName, vaultId }),
-      });
-
-      if (!response.ok) throw new Error(`PDF conversion failed: ${response.statusText}`);
-
-      const responseText = await response.text();
-      if (!responseText) throw new Error('Empty response from PDF webhook');
-
-      const data = JSON.parse(responseText);
-      const pdfFile = Array.isArray(data) ? data[0] : data;
-
-      if (!pdfFile?.id) throw new Error('PDF conversion returned invalid file data');
-
-      const pdfUrl = `https://drive.google.com/file/d/${pdfFile.id}/view`;
-      setPdfFileId(pdfFile.id);
-      setPdfFileUrl(pdfUrl);
-
-      // Save to DB
       await supabase
         .from('research_reports')
-        .update({ pdf_file_id: pdfFile.id, pdf_file_url: pdfUrl, status: 'completed', updated_at: new Date().toISOString() })
+        .update({ status: 'completed', updated_at: new Date().toISOString() })
         .eq('report_id', reportId);
 
-      toast.success('PDF generated!');
+      const dur = result.duration_seconds ? `${Math.round(result.duration_seconds)}s` : '?';
+      toast.success(`PPTX generated in ${dur}${result.pptx_pdf_file_url ? ' (PDF included)' : ''}`);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'PDF conversion failed');
+      toast.error(error instanceof Error ? error.message : 'PPTX generation failed');
     } finally {
-      setPdfGenerating(false);
+      if (pptxTimerRef.current) {
+        clearInterval(pptxTimerRef.current);
+        pptxTimerRef.current = null;
+      }
+      setPptxGenerating(false);
     }
-  }, [reportId, pptFileId, companyName, vaultId]);
+  }, [reportId, sessionId, useMock]);
 
   // ========================
-  // Step 4: Generate Podcast Script → Audio
+  // Step 2: Podcast
   // ========================
 
   const handleGenerateScript = useCallback(async () => {
@@ -440,17 +306,14 @@ export default function PostProductionPanel({
   }, [reportId, podcastScript, pollSupabaseColumn]);
 
   // ========================
-  // Step 5: Generate Video
+  // Step 3: Video
   // ========================
 
   const handleGenerateVideo = useCallback(async () => {
     if (!reportId) return;
     setVideoGenerating(true);
     setVideoElapsedSeconds(0);
-
-    const timer = setInterval(() => {
-      setVideoElapsedSeconds((prev) => prev + 1);
-    }, 1000);
+    const timer = setInterval(() => setVideoElapsedSeconds((p) => p + 1), 1000);
 
     try {
       const response = await fetch(`${N8N_BASE}/generate-video`, {
@@ -462,7 +325,6 @@ export default function PostProductionPanel({
           nse_symbol: nseSymbol,
         }),
       });
-
       if (!response.ok) throw new Error('Video generation failed');
 
       toast.info('Video generation started — may take 3-5 minutes...');
@@ -501,7 +363,7 @@ export default function PostProductionPanel({
   };
 
   // ========================
-  // Step 6: Send Recommendation to Telegram
+  // Telegram recommendation
   // ========================
 
   const handleSendRecommendation = async () => {
@@ -509,9 +371,8 @@ export default function PostProductionPanel({
     setTelegramSending(true);
 
     try {
-      // Fetch report record to get cs_ columns
       const report = await getReportBySession(sessionId);
-      const reportData = report as any;
+      const reportData = report as Record<string, unknown> | null;
 
       const rawRating = String(reportData?.cs_rating || getSectionValue('rating') || '').toUpperCase();
       const rating: RecommendationRating = rawRating.includes('SELL') ? 'SELL' : 'BUY';
@@ -526,6 +387,9 @@ export default function PostProductionPanel({
         return;
       }
 
+      // Prefer the companion PDF (better for inline preview in Telegram), fall back to PPTX.
+      const reportFileUrl = pptxPdfFileUrl || pptxFileUrl || null;
+
       await createRecommendation({
         company_name: companyName,
         nse_symbol: nseSymbol,
@@ -534,13 +398,13 @@ export default function PostProductionPanel({
         target_price: targetPrice,
         validity_type: '1_year',
         validity_date: null,
-        plans: [selectedPlan as any],
+        plans: [selectedPlan as never],
         trade_notes: null,
-        report_file_url: pdfFileUrl || null,
+        report_file_url: reportFileUrl,
         session_id: sessionId,
         send_telegram: true,
         created_by: userEmail,
-        pdf_file_id: pdfFileId,
+        pdf_file_id: null,
       });
 
       setTelegramSent(true);
@@ -557,8 +421,7 @@ export default function PostProductionPanel({
   // ========================
 
   const formatTime = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`;
-
-  const isAnyGenerating = pptGenerating || pdfGenerating || scriptGenerating || audioGenerating || videoGenerating || reportCreating;
+  const isAnyGenerating = pptxGenerating || scriptGenerating || audioGenerating || videoGenerating;
 
   // ========================
   // RENDER
@@ -566,114 +429,130 @@ export default function PostProductionPanel({
 
   return (
     <div className="rounded-xl border border-neutral-200 bg-white shadow-sm overflow-hidden">
-      {/* Header */}
-      <div className="px-4 py-3 border-b border-neutral-100 bg-neutral-50/50">
-        <h2 className="text-sm font-semibold text-neutral-900">Production Workflow</h2>
-        <p className="text-xs text-neutral-400 mt-1">Generate deliverables from the approved report</p>
+      <div className="px-4 py-3 border-b border-neutral-100 bg-neutral-50/50 flex items-center justify-between">
+        <div>
+          <h2 className="text-sm font-semibold text-neutral-900">Production Workflow</h2>
+          <p className="text-xs text-neutral-400 mt-1">Generate deliverables from the approved report</p>
+        </div>
+        <div
+          className={cn(
+            'flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full border',
+            serviceHealth === 'ok'
+              ? 'bg-green-50 text-green-700 border-green-200'
+              : serviceHealth === 'down'
+              ? 'bg-red-50 text-red-700 border-red-200'
+              : 'bg-neutral-50 text-neutral-400 border-neutral-200'
+          )}
+          title={`PPT service: ${serviceHealth}`}
+        >
+          {serviceHealth === 'ok' ? (
+            <><Wifi className="h-3 w-3" /> Service ✓</>
+          ) : serviceHealth === 'down' ? (
+            <><WifiOff className="h-3 w-3" /> Service ✗</>
+          ) : (
+            <><Loader2 className="h-3 w-3 animate-spin" /> Checking…</>
+          )}
+        </div>
       </div>
 
       <div className="divide-y divide-neutral-100">
-        {/* === Step 1: Create Report Record === */}
+        {/* === Step 1: Generate PPTX === */}
         <StepRow
           number={1}
-          title="Create Report Record"
-          description="Split sections into research_reports table"
-          done={!!reportId}
-          active={!reportId}
+          title="Generate PPTX Report"
+          description="Build the PowerPoint deck via the reportgen pipeline"
+          done={!!pptxFileUrl}
+          active={!pptxFileUrl}
         >
-          {!reportId ? (
-            <Button
-              onClick={handleCreateReport}
-              disabled={reportCreating || stage2Sections.length === 0}
-              size="sm"
-              className="rounded-lg bg-accent-600 hover:bg-accent-700"
-            >
-              {reportCreating ? <><Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> Creating...</> : <><FileText className="h-3.5 w-3.5 mr-1.5" /> Create Record</>}
-            </Button>
+          {!pptxFileUrl ? (
+            <div className="space-y-2">
+              <div className="flex items-center gap-3">
+                <Button
+                  onClick={handleGeneratePptx}
+                  disabled={!reportId || pptxGenerating || isAnyGenerating || stage2Sections.length === 0}
+                  size="sm"
+                  className="rounded-lg bg-accent-600 hover:bg-accent-700"
+                >
+                  {pptxGenerating ? (
+                    <><Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> Generating ({formatTime(pptxElapsedSeconds)})...</>
+                  ) : (
+                    <><Presentation className="h-3.5 w-3.5 mr-1.5" /> Generate PPTX</>
+                  )}
+                </Button>
+                <label className="flex items-center gap-1.5 text-xs text-neutral-500 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={useMock}
+                    onChange={(e) => setUseMock(e.target.checked)}
+                    className="h-3.5 w-3.5 rounded border-neutral-300 text-accent-600"
+                  />
+                  Mock planner (skip OpenRouter)
+                </label>
+              </div>
+              {!reportId && (
+                <p className="text-[11px] text-neutral-400">Approve stage 2 first to create the report row.</p>
+              )}
+            </div>
           ) : (
-            <span className="text-xs text-green-600 font-medium">Report record ready</span>
+            <div className="space-y-3">
+              <div className="flex flex-wrap items-center gap-3">
+                <a
+                  href={pptxFileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-accent-600 hover:bg-accent-700 text-white text-xs font-medium h-8 px-3"
+                >
+                  <Download className="h-3.5 w-3.5" /> Download PPTX
+                </a>
+                {pptxPdfFileUrl && (
+                  <a
+                    href={pptxPdfFileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 hover:bg-neutral-50 text-neutral-700 text-xs font-medium h-8 px-3"
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" /> View PDF
+                  </a>
+                )}
+                <Button
+                  onClick={handleGeneratePptx}
+                  disabled={pptxGenerating || isAnyGenerating}
+                  size="sm"
+                  variant="ghost"
+                  className="h-7 text-xs text-neutral-500 hover:text-neutral-800"
+                >
+                  {pptxGenerating ? (
+                    <><Loader2 className="h-3 w-3 mr-1.5 animate-spin" /> Regenerating ({formatTime(pptxElapsedSeconds)})</>
+                  ) : (
+                    <><RefreshCw className="h-3 w-3 mr-1.5" /> Regenerate</>
+                  )}
+                </Button>
+              </div>
+
+              {pptxPdfFileUrl ? (
+                <iframe
+                  key={pptxPdfFileUrl}
+                  src={pptxPdfFileUrl}
+                  title={`${companyName} report preview`}
+                  className="w-full rounded-lg border border-neutral-200 bg-white"
+                  style={{ height: '520px' }}
+                />
+              ) : (
+                <iframe
+                  key={pptxFileUrl}
+                  src={`https://docs.google.com/viewer?url=${encodeURIComponent(pptxFileUrl)}&embedded=true`}
+                  title={`${companyName} report preview`}
+                  className="w-full rounded-lg border border-neutral-200 bg-white"
+                  style={{ height: '520px' }}
+                />
+              )}
+            </div>
           )}
         </StepRow>
 
-        {/* === Step 2: Generate PPT === */}
+        {/* === Step 2: Podcast === */}
         <StepRow
           number={2}
-          title="Generate Presentation"
-          description="Create PPT from report sections via n8n"
-          done={!!pptFileId}
-          active={!!reportId && !pptFileId}
-          disabled={!reportId}
-        >
-          {!pptFileId ? (
-            <Button
-              onClick={handleCreatePPT}
-              disabled={!reportId || pptGenerating || isAnyGenerating}
-              size="sm"
-              className="rounded-lg bg-accent-600 hover:bg-accent-700"
-            >
-              {pptGenerating ? (
-                <><Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> Generating ({formatTime(pptElapsedSeconds)})...</>
-              ) : (
-                <><Presentation className="h-3.5 w-3.5 mr-1.5" /> Generate PPT</>
-              )}
-            </Button>
-          ) : (
-            <div className="flex items-center gap-2">
-              <a
-                href={pptFileUrl!.replace('/view', '/edit').replace('file/d/', 'presentation/d/')}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-accent-600 hover:text-accent-700 font-medium flex items-center gap-1"
-              >
-                <Edit3 className="h-3 w-3" /> Edit in Slides
-              </a>
-              <a href={pptFileUrl!} target="_blank" rel="noopener noreferrer" className="text-xs text-neutral-500 hover:text-neutral-700 flex items-center gap-1">
-                <ExternalLink className="h-3 w-3" /> View
-              </a>
-            </div>
-          )}
-        </StepRow>
-
-        {/* === Step 3: Convert to PDF === */}
-        <StepRow
-          number={3}
-          title="Convert to PDF"
-          description="Convert the PPT to PDF for distribution"
-          done={!!pdfFileId}
-          active={!!pptFileId && !pdfFileId}
-          disabled={!pptFileId}
-        >
-          {!pdfFileId ? (
-            <Button
-              onClick={handleConvertPDF}
-              disabled={!pptFileId || pdfGenerating || isAnyGenerating}
-              size="sm"
-              className="rounded-lg bg-accent-600 hover:bg-accent-700"
-            >
-              {pdfGenerating ? (
-                <><Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> Converting...</>
-              ) : (
-                <><FileDown className="h-3.5 w-3.5 mr-1.5" /> Convert to PDF</>
-              )}
-            </Button>
-          ) : (
-            <div className="flex items-center gap-2">
-              <a href={pdfFileUrl!} target="_blank" rel="noopener noreferrer" className="text-xs text-accent-600 hover:text-accent-700 font-medium flex items-center gap-1">
-                <ExternalLink className="h-3 w-3" /> View PDF
-              </a>
-              <a
-                href={pdfFileUrl!.replace('/view', '/export?format=pdf')}
-                className="text-xs text-neutral-500 hover:text-neutral-700 flex items-center gap-1"
-              >
-                <Download className="h-3 w-3" /> Download
-              </a>
-            </div>
-          )}
-        </StepRow>
-
-        {/* === Step 4: Podcast === */}
-        <StepRow
-          number={4}
           title="Generate Podcast"
           description="Create script, then synthesize audio"
           done={!!audioFileUrl}
@@ -681,7 +560,6 @@ export default function PostProductionPanel({
           disabled={!reportId}
         >
           <div className="space-y-3">
-            {/* Script */}
             {!podcastScript ? (
               <Button
                 onClick={handleGenerateScript}
@@ -719,7 +597,6 @@ export default function PostProductionPanel({
                   />
                 )}
 
-                {/* Audio */}
                 {!audioFileUrl ? (
                   <Button
                     onClick={handleGenerateAudio}
@@ -746,9 +623,9 @@ export default function PostProductionPanel({
           </div>
         </StepRow>
 
-        {/* === Step 5: Video === */}
+        {/* === Step 3: Video === */}
         <StepRow
-          number={5}
+          number={3}
           title="Generate Video"
           description="Create video summary from report"
           done={!!videoFileUrl}
@@ -781,7 +658,7 @@ export default function PostProductionPanel({
 
       {/* === Publish === */}
       <div className="px-4 py-4 border-t border-neutral-100 bg-neutral-50/30 flex flex-col gap-3">
-        {pdfFileId && (
+        {pptxFileUrl && (
           <div className="space-y-2 focus-within:relative z-10">
             <label className="text-xs font-semibold text-neutral-700">Select Plan to Publish For</label>
             <Select value={selectedPlan} onValueChange={setSelectedPlan}>
@@ -801,18 +678,18 @@ export default function PostProductionPanel({
           <>
             <Button
               onClick={handlePublish}
-              disabled={!pdfFileId || !selectedPlan || isAnyGenerating}
+              disabled={!pptxFileUrl || !selectedPlan || isAnyGenerating}
               className={cn(
                 'w-full h-10 rounded-lg font-semibold text-sm',
-                pdfFileId && selectedPlan
+                pptxFileUrl && selectedPlan
                   ? 'bg-green-600 hover:bg-green-700 text-white shadow-sm'
                   : 'bg-neutral-200 text-neutral-400 cursor-not-allowed'
               )}
             >
               <Shield className="h-4 w-4 mr-2" /> Publish Report
             </Button>
-            {!pdfFileId && (
-              <p className="text-xs text-neutral-400 text-center mt-2 transition-opacity">PDF must be generated before publishing</p>
+            {!pptxFileUrl && (
+              <p className="text-xs text-neutral-400 text-center mt-2">PPTX must be generated before publishing</p>
             )}
           </>
         ) : (
@@ -822,7 +699,7 @@ export default function PostProductionPanel({
         )}
       </div>
 
-      {/* === Step 6: Send Recommendation to Telegram === */}
+      {/* === Telegram === */}
       {isPublished && (
         <div className="px-4 py-4 border-t border-neutral-100 bg-gradient-to-b from-blue-50/40 to-white">
           <div className="flex items-start gap-3">
@@ -830,7 +707,7 @@ export default function PostProductionPanel({
               'flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold shrink-0 mt-1',
               telegramSent ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
             )}>
-              {telegramSent ? <Check className="h-3.5 w-3.5" strokeWidth={2.5} /> : 6}
+              {telegramSent ? <Check className="h-3.5 w-3.5" strokeWidth={2.5} /> : 4}
             </div>
 
             <div className="flex-1 min-w-0">
@@ -841,7 +718,6 @@ export default function PostProductionPanel({
                 Create a recommendation record and send to subscribers
               </p>
 
-              {/* Preview auto-filled data */}
               {(() => {
                 const rating = getSectionValue('rating').toUpperCase().includes('SELL') ? 'SELL' : 'BUY';
                 const cmp = parseNumber(getSectionValue('current_market_price'));
@@ -850,6 +726,9 @@ export default function PostProductionPanel({
                 const planLabel = selectedPlan === 'midcap_wealth' ? 'Mid Cap Wealth Builders'
                   : selectedPlan === 'smallcap_alpha' ? 'Smallcap Alpha Picks'
                   : selectedPlan === 'sme_emerging' ? 'SME Emerging Business' : selectedPlan;
+
+                const attachedUrl = pptxPdfFileUrl || pptxFileUrl;
+                const attachedLabel = pptxPdfFileUrl ? 'PDF attached' : 'PPTX attached';
 
                 return (
                   <div className="rounded-lg border border-neutral-200 bg-white p-3 mb-3 space-y-2">
@@ -879,9 +758,9 @@ export default function PostProductionPanel({
                         <p className="font-medium text-neutral-800">{planLabel}</p>
                       </div>
                     </div>
-                    {pdfFileUrl && (
+                    {attachedUrl && (
                       <div className="text-xs text-neutral-400 pt-1 border-t border-neutral-100">
-                        Report: <a href={pdfFileUrl} target="_blank" rel="noopener noreferrer" className="text-accent-600 hover:underline">PDF attached</a>
+                        Report: <a href={attachedUrl} target="_blank" rel="noopener noreferrer" className="text-accent-600 hover:underline">{attachedLabel}</a>
                       </div>
                     )}
                   </div>
@@ -929,7 +808,6 @@ interface StepRowProps {
 function StepRow({ number, title, description, done, active, disabled, children }: StepRowProps) {
   return (
     <div className={cn('px-4 py-4 flex items-start gap-3', disabled && 'opacity-50')}>
-      {/* Step indicator */}
       <div className={cn(
         'flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold shrink-0 mt-1',
         done ? 'bg-green-100 text-green-700' :
@@ -938,16 +816,12 @@ function StepRow({ number, title, description, done, active, disabled, children 
       )}>
         {done ? <Check className="h-3.5 w-3.5" strokeWidth={2.5} /> : number}
       </div>
-
-      {/* Content */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between mb-1">
-          <div>
-            <p className={cn('text-sm font-medium', done ? 'text-green-700' : active ? 'text-neutral-900' : 'text-neutral-500')}>
-              {title}
-            </p>
-            <p className="text-xs text-neutral-400">{description}</p>
-          </div>
+        <div>
+          <p className={cn('text-sm font-medium', done ? 'text-green-700' : active ? 'text-neutral-900' : 'text-neutral-500')}>
+            {title}
+          </p>
+          <p className="text-xs text-neutral-400">{description}</p>
         </div>
         <div className="mt-2">
           {children}

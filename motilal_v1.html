@@ -1,0 +1,2650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Motilal Oswal Financial Services Ltd — Equity Research | Tikona Capital</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Serif+4:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@page { size: A4 landscape; margin: 8mm; }
+
+:root {
+  --primary-dark: #1F4690;
+  --primary-mid: #3A5BA0;
+  --accent: #FFA500;
+  --accent-light: #FFE5B4;
+  --slate: #3a4d6b;
+  --mid-grey: #6b7c93;
+  --light-grey: #f4f6f9;
+  --border: #d5dce8;
+  --text: #1a2537;
+  --text-light: #4a5568;
+  --green: #1a7a4a;
+  --red: #b91c1c;
+  --teal: #0e7490;
+  --white: #ffffff;
+  --page-width: 297mm;
+  --page-height: 210mm;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 8pt;
+  color: var(--text);
+  background: #e0e6f0;
+  line-height: 1.45;
+}
+
+.page {
+  width: var(--page-width);
+  min-height: var(--page-height);
+  background: var(--white);
+  margin: 0 auto 16px;
+  position: relative;
+  padding: 0;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  overflow: hidden;
+}
+
+/* ===== COVER HEADER ===== */
+.report-header {
+  background: var(--primary-dark);
+  padding: 11px 18px 9px;
+  position: relative;
+  overflow: hidden;
+}
+.report-header::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 220px; height: 100%;
+  background: linear-gradient(135deg, var(--accent) 0%, #FFB833 100%);
+  clip-path: polygon(30% 0, 100% 0, 100% 100%, 0% 100%);
+}
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.firm-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  position: relative;
+  z-index: 2;
+}
+.firm-logo {
+  width: 32px; height: 32px;
+  background: var(--accent);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 13px; font-weight: 700;
+  color: var(--primary-dark);
+}
+.firm-name {
+  color: var(--white);
+  font-family: 'Playfair Display', serif;
+  font-size: 12pt;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+}
+.firm-tagline {
+  color: rgba(255,255,255,0.6);
+  font-size: 6pt;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+}
+.report-type-badge {
+  position: relative; z-index: 2;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 4px;
+  padding: 3px 10px;
+  color: var(--white);
+  font-size: 6pt;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+}
+.header-company-line {
+  margin-top: 8px;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.company-name-hdr {
+  font-family: 'Playfair Display', serif;
+  font-size: 20pt;
+  font-weight: 700;
+  color: var(--white);
+}
+.rating-badge {
+  background: var(--accent);
+  color: var(--primary-dark);
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 8.5pt;
+  padding: 2px 12px;
+  border-radius: 3px;
+  letter-spacing: 1px;
+}
+.sector-tag {
+  color: rgba(255,255,255,0.65);
+  font-size: 7pt;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.4px;
+}
+
+/* ===== HEADER STATS BAR (Cover) ===== */
+.header-stats-bar {
+  display: flex;
+  gap: 0;
+  margin-top: 10px;
+  border-top: 1px solid rgba(255,255,255,0.15);
+  padding-top: 7px;
+  position: relative; z-index: 2;
+}
+.hstat {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding-right: 18px;
+  margin-right: 18px;
+  border-right: 1px solid rgba(255,255,255,0.18);
+}
+.hstat:last-child { border-right: none; }
+.hstat-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 5.5pt;
+  color: rgba(255,255,255,0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+.hstat-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11pt;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1.1;
+}
+.hstat-value.white { color: var(--white); }
+.hstat-sub {
+  font-size: 6pt;
+  color: rgba(255,255,255,0.45);
+  font-family: 'JetBrains Mono', monospace;
+}
+.report-date {
+  color: rgba(255,255,255,0.45);
+  font-size: 6pt;
+  font-family: 'JetBrains Mono', monospace;
+  position: absolute;
+  bottom: 8px; right: 18px;
+  z-index: 2;
+}
+
+/* ===== MINI HEADER (sub-pages) ===== */
+.mini-header {
+  background: var(--primary-dark);
+  padding: 5px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.mini-firm { color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 6.5pt; font-weight: 700; letter-spacing: 1px; }
+.mini-company { color: var(--white); font-family: 'Playfair Display', serif; font-size: 8pt; font-weight: 600; }
+
+/* ===== MINI HEADER STATS ===== */
+.mini-stats {
+  display: flex;
+  gap: 0;
+  align-items: center;
+}
+.mini-stat {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 10px;
+  border-right: 1px solid rgba(255,255,255,0.2);
+}
+.mini-stat:last-child { border-right: none; padding-right: 0; }
+.mini-stat-label { font-size: 5.5pt; color: rgba(255,255,255,0.5); font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.5px; }
+.mini-stat-value { font-size: 7.5pt; font-weight: 700; color: var(--white); font-family: 'JetBrains Mono', monospace; }
+.mini-stat-value.accent { color: var(--accent); }
+.mini-stat-value.green-v { color: #6ee7b7; }
+.mini-stat-value.buy { background: var(--accent); color: var(--primary-dark); padding: 1px 6px; border-radius: 2px; font-size: 6.5pt; }
+
+/* TAGLINE BAND */
+.tagline-band {
+  background: var(--accent);
+  padding: 6px 18px;
+}
+.tagline-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 10.5pt;
+  font-weight: 600;
+  color: var(--primary-dark);
+  letter-spacing: 0.2px;
+}
+
+/* THREE-COL LAYOUT */
+.three-col-wide {
+  display: grid;
+  grid-template-columns: 2fr 1fr 180px;
+  gap: 12px;
+  padding: 12px 18px 0;
+}
+.three-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 14px;
+}
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.two-col-wide {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 14px;
+}
+
+/* PAGE CONTENT */
+.page-content {
+  padding: 12px 18px;
+}
+
+/* SECTION HEADER */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 9px;
+  padding-bottom: 5px;
+  border-bottom: 2px solid var(--primary-dark);
+}
+.section-number {
+  background: var(--primary-dark);
+  color: var(--accent);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7.5pt;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 2px;
+}
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 13pt;
+  font-weight: 600;
+  color: var(--primary-dark);
+}
+
+/* THESIS BOX */
+.thesis-box {
+  border-left: 3px solid var(--accent);
+  padding: 9px 12px;
+  background: var(--accent-light);
+  margin-bottom: 10px;
+  border-radius: 0 4px 4px 0;
+}
+.thesis-box p {
+  font-size: 7.5pt;
+  font-weight: 600;
+  color: var(--primary-dark);
+  line-height: 1.55;
+}
+
+/* SIDE PANEL */
+.side-panel-card {
+  background: var(--primary-dark);
+  border-radius: 4px;
+  padding: 9px;
+  margin-bottom: 8px;
+}
+.side-panel-card.light {
+  background: var(--light-grey);
+  border: 1px solid var(--border);
+}
+.side-metric-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 5.5pt;
+  color: rgba(255,255,255,0.55);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 2px;
+}
+.side-metric-title.dark { color: var(--mid-grey); }
+.side-metric-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12pt;
+  font-weight: 700;
+  color: var(--accent);
+}
+.side-metric-value.dark { color: var(--primary-dark); }
+.side-metric-sub {
+  font-size: 6pt;
+  color: rgba(255,255,255,0.45);
+  font-family: 'JetBrains Mono', monospace;
+}
+.side-metric-sub.dark { color: var(--mid-grey); }
+.side-divider { border-top: 1px solid rgba(255,255,255,0.1); margin: 5px 0; }
+.side-divider.dark { border-color: var(--border); }
+.side-row { display: flex; justify-content: space-between; align-items: center; padding: 2px 0; }
+.side-label { font-size: 6.5pt; color: rgba(255,255,255,0.65); }
+.side-label.dark { color: var(--text-light); }
+.side-value { font-size: 6.5pt; font-weight: 600; color: var(--white); font-family: 'JetBrains Mono', monospace; }
+.side-value.dark { color: var(--primary-dark); }
+.side-value.accent { color: var(--accent); }
+.side-section-hdr {
+  font-size: 6pt;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-family: 'JetBrains Mono', monospace;
+  margin: 5px 0 3px;
+  font-weight: 700;
+}
+
+/* TABLES */
+.fin-table-wrap { margin-top: 8px; }
+.fin-table-title {
+  font-size: 7pt;
+  font-weight: 700;
+  color: var(--primary-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 3px;
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 2px;
+}
+table { width: 100%; border-collapse: collapse; font-size: 6.5pt; }
+thead tr { background: var(--primary-dark); }
+thead th {
+  color: var(--white);
+  padding: 3.5px 5px;
+  text-align: right;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 6pt;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+thead th:first-child { text-align: left; }
+tbody tr:nth-child(odd) { background: var(--light-grey); }
+td {
+  padding: 2.5px 5px;
+  text-align: right;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 6.5pt;
+}
+td:first-child { text-align: left; font-weight: 500; color: var(--slate); font-family: 'Source Serif 4', serif; font-size: 6.5pt; }
+td.bold { font-weight: 700; color: var(--primary-dark); }
+td.green { color: var(--green); font-weight: 600; }
+td.red { color: var(--red); font-weight: 600; }
+td.accent { color: var(--accent); font-weight: 700; }
+.tbl-highlight td { background: rgba(255,165,0,0.1) !important; font-weight: 700; }
+.tbl-section td { background: #e8eef8 !important; font-weight: 700; color: var(--primary-dark) !important; font-family: 'JetBrains Mono', monospace; font-size: 6.5pt; }
+
+/* METRIC CARDS */
+.metric-strip { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 10px; }
+.metric-strip-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 10px; }
+.metric-strip-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px; }
+.metric-card {
+  background: var(--primary-dark);
+  border-radius: 4px;
+  padding: 7px 8px;
+  text-align: center;
+}
+.metric-card.accent-bg { background: var(--accent); }
+.metric-card.mid-bg { background: var(--primary-mid); }
+.metric-card.teal-bg { background: var(--teal); }
+.metric-card.light-bg { background: var(--accent-light); border: 1px solid var(--accent); }
+.metric-card-label { font-size: 5.5pt; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.7px; font-family: 'JetBrains Mono', monospace; margin-bottom: 2px; }
+.metric-card.accent-bg .metric-card-label { color: var(--primary-dark); }
+.metric-card.light-bg .metric-card-label { color: var(--primary-dark); }
+.metric-card-value { font-size: 11pt; font-weight: 700; color: var(--white); font-family: 'JetBrains Mono', monospace; }
+.metric-card.accent-bg .metric-card-value { color: var(--primary-dark); }
+.metric-card.light-bg .metric-card-value { color: var(--primary-dark); }
+.metric-card-sub { font-size: 5.5pt; color: rgba(255,255,255,0.45); font-family: 'JetBrains Mono', monospace; margin-top: 1px; }
+.metric-card.accent-bg .metric-card-sub { color: rgba(31,70,144,0.65); }
+.metric-card.light-bg .metric-card-sub { color: rgba(31,70,144,0.65); }
+
+/* ANALYSIS BLOCKS */
+.analysis-block { margin-bottom: 9px; }
+.analysis-block p { font-size: 7.5pt; line-height: 1.55; color: var(--text); margin-bottom: 5px; }
+.analysis-bold { font-weight: 700; color: var(--primary-dark); }
+.analysis-block ul { margin-left: 11px; margin-bottom: 5px; }
+.analysis-block li { font-size: 7.5pt; line-height: 1.5; color: var(--text); margin-bottom: 2px; }
+
+/* HIGHLIGHT BOXES */
+.highlight-box {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 7px 9px;
+  background: var(--light-grey);
+  margin-bottom: 8px;
+}
+.highlight-box.accent-border { border-left: 3px solid var(--accent); }
+.highlight-box.navy-border { border-left: 3px solid var(--primary-dark); }
+.highlight-box.green-border { border-left: 3px solid var(--green); }
+.highlight-box.red-border { border-left: 3px solid var(--red); }
+.highlight-box-title { font-weight: 700; color: var(--primary-dark); font-size: 7.5pt; margin-bottom: 3px; }
+.highlight-box p { font-size: 7pt; color: var(--text-light); line-height: 1.5; }
+
+/* CATALYST ITEMS */
+.catalyst-item { display: flex; gap: 7px; margin-bottom: 7px; padding: 5px 7px; background: var(--light-grey); border-radius: 3px; border-left: 3px solid var(--accent); }
+.catalyst-icon { font-size: 12pt; flex-shrink: 0; width: 20px; text-align: center; }
+.catalyst-title { font-weight: 700; font-size: 7.5pt; color: var(--primary-dark); margin-bottom: 1px; }
+.catalyst-desc { font-size: 6.5pt; color: var(--text-light); line-height: 1.4; }
+.catalyst-badge { display: inline-block; background: var(--primary-dark); color: var(--accent); font-size: 5.5pt; padding: 1px 5px; border-radius: 2px; font-family: 'JetBrains Mono', monospace; margin-left: 4px; }
+
+/* RISK ITEMS */
+.risk-item { display: flex; gap: 7px; margin-bottom: 5px; padding-bottom: 5px; border-bottom: 1px solid var(--border); }
+.risk-badge {
+  flex-shrink: 0;
+  width: 36px;
+  height: 15px;
+  border-radius: 2px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 5pt;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.4px;
+}
+.risk-high { background: #fee2e2; color: var(--red); }
+.risk-med { background: #fef3c7; color: #92400e; }
+.risk-low { background: #d1fae5; color: var(--green); }
+.risk-text { font-size: 6.5pt; color: var(--text); line-height: 1.4; }
+.risk-title { font-weight: 700; color: var(--primary-dark); margin-bottom: 1px; font-size: 7pt; }
+
+/* SCENARIO */
+.scenario-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 7px; margin-top: 7px; }
+.scenario-card { border-radius: 4px; padding: 8px; text-align: center; }
+.scenario-card.bear { background: #fee2e2; border: 1px solid #fca5a5; }
+.scenario-card.base { background: var(--accent-light); border: 1px solid var(--accent); }
+.scenario-card.bull { background: #d1fae5; border: 1px solid #6ee7b7; }
+.scenario-label { font-size: 6pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; font-family: 'JetBrains Mono', monospace; margin-bottom: 3px; }
+.scenario-card.bear .scenario-label { color: var(--red); }
+.scenario-card.base .scenario-label { color: #8a5c00; }
+.scenario-card.bull .scenario-label { color: var(--green); }
+.scenario-tp { font-size: 16pt; font-weight: 700; font-family: 'JetBrains Mono', monospace; line-height: 1.1; }
+.scenario-card.bear .scenario-tp { color: var(--red); }
+.scenario-card.base .scenario-tp { color: var(--primary-dark); }
+.scenario-card.bull .scenario-tp { color: var(--green); }
+.scenario-updown { font-size: 6.5pt; font-family: 'JetBrains Mono', monospace; margin-top: 3px; }
+.scenario-desc { font-size: 6pt; color: var(--text-light); margin-top: 4px; line-height: 1.4; }
+
+/* MANAGEMENT */
+.mgmt-row { display: grid; grid-template-columns: 140px 110px 1fr; gap: 7px; padding: 4px 5px; border-bottom: 1px solid var(--border); align-items: start; }
+.mgmt-row:nth-child(odd) { background: var(--light-grey); }
+.mgmt-name { font-weight: 600; font-size: 7pt; color: var(--primary-dark); }
+.mgmt-role { font-size: 6pt; color: var(--mid-grey); }
+.mgmt-bio { font-size: 6pt; color: var(--text-light); line-height: 1.4; }
+
+/* SCORECARD */
+.score-bar-bg { background: var(--border); border-radius: 2px; height: 6px; margin-top: 2px; }
+.score-bar-fill { height: 100%; border-radius: 2px; }
+.score-item { margin-bottom: 7px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+.score-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1px; }
+.score-name { font-size: 7.5pt; font-weight: 700; color: var(--primary-dark); }
+.score-val { font-size: 8pt; font-weight: 700; color: var(--primary-dark); font-family: 'JetBrains Mono', monospace; }
+.score-desc { font-size: 6.5pt; color: var(--text-light); line-height: 1.4; margin-top: 2px; }
+
+/* SEGMENT CARDS */
+.segment-card { border: 1px solid var(--border); border-radius: 4px; padding: 8px; margin-bottom: 7px; }
+.segment-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.segment-name { font-weight: 700; font-size: 8pt; color: var(--primary-dark); font-family: 'Playfair Display', serif; }
+.segment-share { background: var(--primary-dark); color: var(--accent); font-size: 6pt; padding: 1px 6px; border-radius: 2px; font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+.segment-kpi { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 4px; }
+.kpi-chip { background: var(--accent-light); border: 1px solid var(--accent); border-radius: 2px; padding: 1px 5px; font-size: 6pt; font-family: 'JetBrains Mono', monospace; color: var(--primary-dark); font-weight: 700; }
+.segment-desc { font-size: 6.5pt; color: var(--text-light); line-height: 1.4; }
+
+/* FIGURE */
+.figure-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 6pt;
+  font-weight: 700;
+  color: var(--primary-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.2px;
+  margin-bottom: 5px;
+  padding: 3px 5px;
+  background: var(--light-grey);
+  border-left: 3px solid var(--accent);
+}
+.figure-source { font-size: 5.5pt; color: var(--mid-grey); margin-top: 2px; font-style: italic; }
+
+/* BAR CHART */
+.bar-chart-container { display: flex; align-items: flex-end; gap: 5px; height: 75px; padding: 0 2px; border-bottom: 1.5px solid var(--border); }
+.bar-grp { display: flex; align-items: flex-end; gap: 2px; flex: 1; }
+.bar { flex: 1; border-radius: 2px 2px 0 0; min-width: 8px; }
+.bar-blue { background: var(--primary-dark); }
+.bar-accent { background: var(--accent); }
+.bar-mid { background: var(--primary-mid); }
+.bar-green { background: var(--green); }
+.bar-teal { background: var(--teal); }
+.bar-chart-labels { display: flex; margin-top: 3px; }
+.bar-lbl { font-size: 5.5pt; color: var(--mid-grey); font-family: 'JetBrains Mono', monospace; flex: 1; text-align: center; }
+
+/* LEGEND */
+.chart-legend { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+.legend-item { display: flex; align-items: center; gap: 4px; }
+.legend-dot { width: 7px; height: 7px; border-radius: 50%; }
+.legend-label { font-size: 6pt; color: var(--text-light); font-family: 'JetBrains Mono', monospace; }
+
+/* TAGS */
+.tag {
+  display: inline-block;
+  background: var(--primary-dark);
+  color: var(--white);
+  font-size: 5.5pt;
+  padding: 1px 5px;
+  border-radius: 2px;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.3px;
+  margin-right: 3px;
+}
+.tag.accent-tag { background: var(--accent); color: var(--primary-dark); }
+.tag.green-tag { background: var(--green); }
+
+/* FOOTER */
+.page-footer {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  border-top: 1px solid var(--border);
+  padding: 3px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--white);
+}
+.footer-left { font-size: 5.5pt; color: var(--mid-grey); font-family: 'JetBrains Mono', monospace; }
+.footer-right { font-size: 5.5pt; color: var(--mid-grey); font-family: 'JetBrains Mono', monospace; }
+.footer-center { font-size: 5.5pt; color: var(--primary-dark); font-family: 'Playfair Display', serif; font-weight: 600; }
+
+/* DISCLAIMER */
+.disclaimer {
+  background: var(--light-grey);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-size: 5.5pt;
+  color: var(--mid-grey);
+  line-height: 1.5;
+  margin-top: 8px;
+}
+
+/* TIMELINE */
+.timeline { position: relative; padding-left: 14px; }
+.timeline::before { content: ''; position: absolute; left: 4px; top: 0; bottom: 0; width: 2px; background: var(--border); }
+.timeline-item { position: relative; margin-bottom: 7px; padding-left: 10px; }
+.timeline-item::before { content: ''; position: absolute; left: -10px; top: 3px; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); border: 2px solid var(--white); box-shadow: 0 0 0 1px var(--accent); }
+.timeline-year { font-family: 'JetBrains Mono', monospace; font-size: 6pt; font-weight: 700; color: var(--accent); }
+.timeline-text { font-size: 6.5pt; color: var(--text); line-height: 1.4; }
+
+/* PROGRESS */
+.progress-item { margin-bottom: 5px; }
+.progress-label { display: flex; justify-content: space-between; margin-bottom: 2px; }
+.progress-name { font-size: 6.5pt; color: var(--text); }
+.progress-val { font-size: 6.5pt; font-weight: 600; color: var(--primary-dark); font-family: 'JetBrains Mono', monospace; }
+.progress-bar-bg { background: var(--border); border-radius: 2px; height: 5px; }
+.progress-bar-fill { height: 100%; border-radius: 2px; background: var(--primary-dark); }
+
+/* KPI GRID */
+.kpi-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.kpi-box { background: var(--light-grey); border: 1px solid var(--border); border-radius: 3px; padding: 5px 7px; }
+.kpi-box-label { font-size: 6pt; color: var(--mid-grey); font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.5px; }
+.kpi-box-value { font-size: 10pt; font-weight: 700; color: var(--primary-dark); font-family: 'JetBrains Mono', monospace; }
+.kpi-box-sub { font-size: 6pt; color: var(--text-light); }
+
+.full-width { grid-column: 1 / -1; }
+
+/* SPACING */
+.mb4 { margin-bottom: 4px; }
+.mb6 { margin-bottom: 6px; }
+.mb8 { margin-bottom: 8px; }
+.mb10 { margin-bottom: 10px; }
+.mt6 { margin-top: 6px; }
+.mt8 { margin-top: 8px; }
+.pb48 { padding-bottom: 48px; }
+
+/* VAL TABLE */
+.val-table-wrapper { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 10px; }
+.val-table-hdr { background: var(--primary-dark); color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 6.5pt; font-weight: 700; padding: 4px 9px; text-transform: uppercase; letter-spacing: 0.4px; }
+
+@media print {
+  body { background: white; }
+  .page { box-shadow: none; margin: 0; page-break-after: always; }
+}
+
+/* PARAGRAPH JUSTIFICATION */
+.page-content p, .analysis-block p, .highlight-box p, .thesis-box p,
+.segment-desc, .catalyst-desc, .risk-text, .score-desc, .mgmt-bio,
+.timeline-text, .highlight-box-title + p, .disclaimer { text-align: justify; }
+
+/* FONT SIZE INCREASE */
+.analysis-block p { font-size: 8pt !important; line-height: 1.6; }
+.analysis-block li { font-size: 8pt !important; line-height: 1.6; }
+.thesis-box p { font-size: 8pt !important; line-height: 1.6; }
+.segment-desc { font-size: 7pt !important; line-height: 1.55; }
+.catalyst-desc { font-size: 7pt !important; line-height: 1.55; }
+.highlight-box p { font-size: 7.5pt !important; line-height: 1.55; }
+.risk-text { font-size: 7pt !important; line-height: 1.5; }
+.score-desc { font-size: 7pt !important; line-height: 1.5; }
+.mgmt-bio { font-size: 6.5pt !important; line-height: 1.5; }
+.timeline-text { font-size: 7pt !important; line-height: 1.5; }
+.disclaimer { font-size: 6pt !important; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<!-- ============================================================ -->
+<!-- PAGE 1: COVER PAGE -->
+<!-- ============================================================ -->
+<div class="page">
+  <div class="report-header">
+    <div class="header-top">
+      <div class="firm-brand">
+        <div class="firm-logo">T</div>
+        <div>
+          <div class="firm-name">Tikona Capital</div>
+          <div class="firm-tagline">Institutional Equity Research</div>
+        </div>
+      </div>
+      <div class="report-type-badge">Initiating Coverage — Q2 FY25-26</div>
+    </div>
+    <div class="header-company-line">
+      <span class="company-name-hdr">Motilal Oswal Financial Services</span>
+      <span class="rating-badge">BUY</span>
+      <span class="sector-tag">NSE: MOFSL &nbsp;|&nbsp; BSE: 532892 &nbsp;|&nbsp; Mid Cap — Financial Services / Capital Markets</span>
+    </div>
+    <div class="header-stats-bar">
+      <div class="hstat">
+        <div class="hstat-label">CMP</div>
+        <div class="hstat-value">₹822.90</div>
+        <div class="hstat-sub">As of Sep 30, 2025</div>
+      </div>
+      <div class="hstat">
+        <div class="hstat-label">Target Price</div>
+        <div class="hstat-value white">₹1,127</div>
+        <div class="hstat-sub">+37% Upside</div>
+      </div>
+      <div class="hstat">
+        <div class="hstat-label">Market Cap</div>
+        <div class="hstat-value white">₹49,079 Cr</div>
+        <div class="hstat-sub">+24.8% YoY</div>
+      </div>
+      <div class="hstat">
+        <div class="hstat-label">Market Cap Category</div>
+        <div class="hstat-value white">Mid Cap</div>
+        <div class="hstat-sub">Financial Services Leader</div>
+      </div>
+      <div class="hstat">
+        <div class="hstat-label">SAARTHI Score</div>
+        <div class="hstat-value">72/100</div>
+        <div class="hstat-sub">BUY Range (70–84)</div>
+      </div>
+      <div class="hstat">
+        <div class="hstat-label">Prob. Weighted TP</div>
+        <div class="hstat-value white">₹1,109</div>
+        <div class="hstat-sub">30%×₹1,400 + 50%×₹1,127 + 20%×₹630</div>
+      </div>
+    </div>
+    <div class="report-date">Report Reference: Q2 FY2025-26 | April 21, 2026</div>
+  </div>
+
+  <div class="tagline-band">
+    <div class="tagline-text">"India's premier research-driven financial services platform, transforming from cyclical broking into a high-quality annuity-revenue powerhouse at an inflection point."</div>
+  </div>
+
+  <div class="three-col-wide" style="padding-bottom:0;">
+
+    <!-- COL 1: THESIS + HIGHLIGHTS -->
+    <div>
+      <div class="thesis-box">
+        <p><span class="analysis-bold">Investment Thesis:</span> BUY with SAARTHI Score of 72/100. Motilal Oswal Financial Services represents a compelling investment opportunity driven by its accelerating transformation from a cyclical broking firm into a high-quality, annuity-driven financial services platform. Annual Recurring Revenue (ARR) now constitutes 65% of total net revenues — with management guiding for further increases — fundamentally re-rating the quality of the earnings base. The highest-scoring SAARTHI dimensions are Reinvestment Quality (13/15) and Scalability (12/15), reflecting disciplined capital allocation into fee-based, asset-light businesses. The share price at ₹822.90 offers a 37% discount to analyst consensus target of ₹1,126.67, and credit rating upgraded to AA+ (Stable) by ICRA.</p>
+      </div>
+
+      <div class="two-col">
+        <div>
+          <div class="highlight-box accent-border">
+            <div class="highlight-box-title">📈 ARR Transformation at Inflection</div>
+            <p>ARR now 65% of total net revenues (up from 61%), fee-based revenue at 45% of total. Management guiding for further increases — this structural shift reduces historical broking volatility and improves cash flow predictability for reinvestment and shareholder returns.</p>
+          </div>
+          <div class="highlight-box navy-border">
+            <div class="highlight-box-title">💰 AUM Scale & Outperformance</div>
+            <p>Total AUM at ₹1.77 lakh crore (+46% YoY). AMC AUM ₹1.89 lakh crore (+33% YoY) with net flows ₹11,610 crore. Critically, 91% of AUM outperforming benchmarks over 3 years — key for premium fee retention and client acquisition.</p>
+          </div>
+          <div class="highlight-box green-border">
+            <div class="highlight-box-title">⬆️ Upgraded to AA+ (Stable) — ICRA</div>
+            <p>Long-term credit rating upgrade to AA+ (Stable) by ICRA. Net worth ₹12,871 crore (+16% YoY). Strong balance sheet enables continued investment in distribution, technology, and talent without excessive leverage, supporting the business transformation trajectory.</p>
+          </div>
+        </div>
+        <div>
+          <div class="highlight-box accent-border">
+            <div class="highlight-box-title">🏛 Private Wealth Momentum</div>
+            <p>Private Wealth AUM ₹1.96 lakh crore (+31% YoY), family count up 41% YoY, PAT up 14% for 9 months. Distribution book up 34% YoY to ₹42,775 crore. Alternates AUM growing with new private credit fund and recurring carry income of ₹58 crore.</p>
+          </div>
+          <div class="highlight-box navy-border">
+            <div class="highlight-box-title">📊 Valuation Opportunity</div>
+            <p>CMP ₹822.90 vs. analyst consensus ₹1,126.67 (max ₹1,200) — 37% upside. P/E of 24.20 and P/B of 3.82 attractive relative to quality of recurring revenue base. Entry range ₹800-850 represents 15-20% discount to consensus. Bull case ₹1,400 on full ARR re-rating.</p>
+          </div>
+          <div class="highlight-box" style="border-left:3px solid var(--teal);">
+            <div class="highlight-box-title">📡 Profitability Momentum</div>
+            <p>Q2FY25 profits ₹1,242 crore (+123% YoY), 46% revenue growth, 48% ROE. H1FY26 operating PAT ₹1,088 crore (+11% YoY). Asset and Private Wealth businesses leading at 32% YoY growth — annuity engine sustaining through regulatory headwinds.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COL 2: FINANCIAL SUMMARY TABLE -->
+    <div>
+      <div class="fin-table-wrap" style="margin-top:0;">
+        <div class="fin-table-title">Financial Summary (₹ Crore)</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th>FY22A</th>
+              <th>FY23A</th>
+              <th>FY24A</th>
+              <th>FY25A</th>
+              <th>FY26E</th>
+              <th>FY27E</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="tbl-section"><td colspan="7">Income Statement</td></tr>
+            <tr><td>Revenue (Cr)</td><td>4,298</td><td>4,178</td><td>7,106</td><td>8,340</td><td>10,402</td><td>12,973</td></tr>
+            <tr><td>Rev. Growth</td><td>—</td><td class="red">–2.8%</td><td class="green">70.1%</td><td class="green">17.4%</td><td class="green">24.7%</td><td class="green">24.7%</td></tr>
+            <tr><td>EBITDA (Cr)</td><td>2,120</td><td>1,877</td><td>4,082</td><td>4,546</td><td>5,439</td><td>6,784</td></tr>
+            <tr><td>EBITDA Margin</td><td>49.3%</td><td>44.9%</td><td>57.4%</td><td>54.5%</td><td>52.3%</td><td>52.3%</td></tr>
+            <tr class="tbl-highlight"><td>PAT (Cr)</td><td>1,310</td><td>932</td><td>2,441</td><td>2,502</td><td>3,066</td><td>3,983</td></tr>
+            <tr><td>PAT Margin</td><td>30.5%</td><td>22.3%</td><td>34.4%</td><td>30.0%</td><td>29.5%</td><td>30.7%</td></tr>
+            <tr class="tbl-section"><td colspan="7">Per Share &amp; Multiples</td></tr>
+            <tr><td>EPS (₹)</td><td>22.0</td><td>15.7</td><td>41.0</td><td>41.7</td><td class="green">51.2</td><td class="green">66.5</td></tr>
+            <tr><td>P/E (x)</td><td>37.5x</td><td>52.3x</td><td>20.1x</td><td>19.7x</td><td class="green">16.1x</td><td class="green">12.4x</td></tr>
+            <tr><td>EV/EBITDA (x)</td><td>9.0x</td><td>10.3x</td><td>9.5x</td><td>11.4x</td><td class="green">12.7x</td><td class="green">10.5x</td></tr>
+            <tr><td>P/B (x)</td><td>8.7x</td><td>7.8x</td><td>5.6x</td><td>4.5x</td><td class="green">3.6x</td><td class="green">2.9x</td></tr>
+            <tr class="tbl-section"><td colspan="7">Return Ratios</td></tr>
+            <tr><td>ROE</td><td>23%</td><td>15%</td><td>28%</td><td>23%</td><td>22%</td><td>23%</td></tr>
+            <tr><td>ROCE</td><td>19%</td><td>13%</td><td>21%</td><td>19%</td><td>18%</td><td>18%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="fin-table-wrap" style="margin-top:6px;">
+        <div class="fin-table-title">H1 FY26 Snapshot</div>
+        <table>
+          <tbody>
+            <tr><td>Consol. Net Revenue</td><td class="bold">₹2,888 Cr</td></tr>
+            <tr><td>Revenue YoY</td><td class="green">+15%</td></tr>
+            <tr><td>Operating PAT</td><td class="bold">₹1,088 Cr (+11% YoY)</td></tr>
+            <tr><td>ARR % of Net Revenue</td><td class="bold">65%</td></tr>
+            <tr><td>Fee-Based % of Revenue</td><td class="bold">45%</td></tr>
+            <tr><td>EPS (FY25 Annual)</td><td class="bold">₹41.83</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- COL 3: SIDEBAR -->
+    <div>
+      <div class="side-panel-card">
+        <div class="side-metric-title">Key Valuation Metrics</div>
+        <div class="side-row"><span class="side-label">P/E (TTM)</span><span class="side-value">24.20x</span></div>
+        <div class="side-row"><span class="side-label">P/B Ratio</span><span class="side-value">3.82x</span></div>
+        <div class="side-row"><span class="side-label">EPS (FY25A)</span><span class="side-value">₹41.83</span></div>
+        <div class="side-row"><span class="side-label">EPS (Q2 FY26)</span><span class="side-value">₹9.42</span></div>
+        <div class="side-divider"></div>
+        <div class="side-section-hdr">Analyst Consensus</div>
+        <div class="side-row"><span class="side-label">Consensus TP</span><span class="side-value">₹1,126.67</span></div>
+        <div class="side-row"><span class="side-label">Max Target</span><span class="side-value">₹1,200</span></div>
+        <div class="side-row"><span class="side-label">Upside to Cons.</span><span class="side-value" style="color:#6ee7b7;">+37%</span></div>
+      </div>
+      <div class="side-panel-card light">
+        <div class="side-section-hdr" style="color:var(--primary-dark); margin-top:0;">Key Operating Stats</div>
+        <div class="side-row"><span class="side-label dark">Total AUM</span><span class="side-value dark">₹1.77L Cr</span></div>
+        <div class="side-row"><span class="side-label dark">AMC AUM</span><span class="side-value dark">₹1.89L Cr</span></div>
+        <div class="side-row"><span class="side-label dark">Pvt Wealth AUM</span><span class="side-value dark">₹1.96L Cr</span></div>
+        <div class="side-divider dark"></div>
+        <div class="side-section-hdr" style="color:var(--primary-dark);">Credit Rating</div>
+        <div class="side-row"><span class="side-label dark">ICRA Rating</span><span class="side-value accent">AA+</span></div>
+        <div class="side-row"><span class="side-label dark">Outlook</span><span class="side-value dark">Stable</span></div>
+        <div class="side-row"><span class="side-label dark">Net Worth</span><span class="side-value dark">₹12,871 Cr</span></div>
+      </div>
+      <div class="side-panel-card" style="background:linear-gradient(135deg,#1F4690 0%,#3A5BA0 100%);">
+        <div class="side-section-hdr">ARR Inflection Watch</div>
+        <div style="color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:13pt;font-weight:700;line-height:1.1;">65%</div>
+        <div style="color:rgba(255,255,255,0.65);font-size:6pt;margin-top:2px;">ARR of Total Net Revenues</div>
+        <div style="color:rgba(255,255,255,0.55);font-size:6pt;margin-top:4px;">Up from 61% last year</div>
+        <div style="color:rgba(255,255,255,0.55);font-size:6pt;">Guiding for 70%+ target</div>
+        <div style="color:rgba(255,255,255,0.55);font-size:6pt;">Re-rating trigger: 70% ARR</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div class="footer-left">SEBI Reg. No.: INH000009807</div>
+    <div class="footer-center">Motilal Oswal Financial Services Ltd — Equity Research</div>
+    <div class="footer-right">Page 1 of 15</div>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- PAGE 2: STORY IN CHARTS -->
+<!-- ============================================================ -->
+<div class="page">
+  <div class="mini-header">
+    <div class="mini-firm">Tikona Capital</div>
+    <div class="mini-company">Motilal Oswal Financial Services — Story in Charts</div>
+    <div class="mini-stats">
+      <div class="mini-stat"><span class="mini-stat-label">CMP</span><span class="mini-stat-value">₹822.90</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">TP</span><span class="mini-stat-value accent">₹1,127</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Upside</span><span class="mini-stat-value green-v">+37%</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Mkt Cap</span><span class="mini-stat-value">₹49,079 Cr | Mid Cap</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Rating</span><span class="mini-stat-value buy">BUY</span></div>
+    </div>
+  </div>
+
+  <div style="padding:10px 18px 48px;">
+    <div class="section-header">
+      <span class="section-number">02</span>
+      <span class="section-title">Story in Charts — MOFSL's Financial &amp; Operational Journey</span>
+    </div>
+
+    <!-- ROW 1: 3 charts -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:10px;">
+
+      <!-- CHART 1: Revenue Trend -->
+      <div style="border:1px solid #d5dce8;border-radius:4px;padding:8px;">
+        <div class="figure-title" style="margin-bottom:6px;">Revenue (₹ Crore) — FY22 to FY28E</div>
+        <svg viewBox="0 0 220 110" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+          <line x1="32" y1="8" x2="32" y2="88" stroke="#d5dce8" stroke-width="0.5"/>
+          <line x1="32" y1="88" x2="215" y2="88" stroke="#d5dce8" stroke-width="0.5"/>
+          <line x1="32" y1="68" x2="215" y2="68" stroke="#d5dce8" stroke-width="0.3" stroke-dasharray="2,2"/>
+          <line x1="32" y1="48" x2="215" y2="48" stroke="#d5dce8" stroke-width="0.3" stroke-dasharray="2,2"/>
+          <line x1="32" y1="28" x2="215" y2="28" stroke="#d5dce8" stroke-width="0.3" stroke-dasharray="2,2"/>
+          <line x1="32" y1="8"  x2="215" y2="8"  stroke="#d5dce8" stroke-width="0.3" stroke-dasharray="2,2"/>
+          <text x="29" y="91" text-anchor="end" font-size="5" fill="#6b7c93" font-family="monospace">0</text>
+          <text x="29" y="71" text-anchor="end" font-size="5" fill="#6b7c93" font-family="monospace">5K</text>
+          <text x="29" y="51" text-anchor="end" font-size="5" fill="#6b7c93" font-family="monospace">10K</text>
+          <text x="29" y="31" text-anchor="end" font-size="5" fill="#6b7c93" font-family="monospace">14K</text>
+          <text x="29" y="11" text-anchor="end" font-size="5" fill="#6b7c93" font-family="monospace">18K</text>
+          <!-- FY22=4298→19px, FY23=4178→19px, FY24=7106→32px, FY25=8340→37px, FY26E=10402→46px, FY27E=12973→58px, FY28E=16181→72px; scale: 0-18000=80px -->
+          <rect x="36"  y="70" width="20" height="18" fill="#1F4690" rx="1"/>
+          <rect x="62"  y="70" width="20" height="18" fill="#1F4690" rx="1"/>
+          <rect x="88"  y="56" width="20" height="32" fill="#1F4690" rx="1"/>
+          <rect x="114" y="51" width="20" height="37" fill="#1F4690" rx="1"/>
+          <rect x="140" y="42" width="20" height="46" fill="#FFA500" rx="1"/>
+          <rect x="166" y="30" width="20" height="58" fill="#FFA500" rx="1"/>
+          <rect x="192" y="16" width="20" height="72" fill="#FFA500" rx="1"/>
+          <text x="46"  y="68" text-anchor="middle" font-size="4.5" fill="white" font-family="monospace" font-weight="bold">4.3K</text>
+          <text x="72"  y="68" text-anchor="middle" font-size="4.5" fill="white" font-family="monospace" font-weight="bold">4.2K</text>
+          <text x="98"  y="54" text-anchor="middle" font-size="4.5" fill="white" font-family="monospace" font-weight="bold">7.1K</text>
+          <text x="124" y="49" text-anchor="middle" font-size="4.5" fill="white" font-family="monospace" font-weight="bold">8.3K</text>
+          <text x="150" y="40" text-anchor="middle" font-size="4.5" fill="#1F4690" font-family="monospace" font-weight="bold">10.4K</text>
+          <text x="176" y="28" text-anchor="middle" font-size="4.5" fill="#1F4690" font-family="monospace" font-weight="bold">13.0K</text>
+          <text x="202" y="14" text-anchor="middle" font-size="4.5" fill="#1F4690" font-family="monospace" font-weight="bold">16.2K</text>
+          <text x="46"  y="97" text-anchor="middle" font-size="5" fill="#6b7c93" font-family="monospace">FY22</text>
+          <text x="72"  y="97" text-anchor="middle" font-size="5" fill="#6b7c93" font-family="monospace">FY23</text>
+          <text x="98"  y="97" text-anchor="middle" font-size="5" fill="#6b7c93" font-family="monospace">FY24</text>
+          <text x="124" y="97" text-anchor="middle" font-size="5" fill="#6b7c93" font-family="monospace">FY25</text>
+          <text x="150" y="97" text-anchor="middle" font-size="5" fill="#FFA500" font-family="monospace">FY26E</text>
+          <text x="176" y="97" text-anchor="middle" font-size="5" fill="#FFA500" font-family="monospace">FY27E</text>
+          <text x="202" y="97" text-anchor="middle" font-size="5" fill="#FFA500" font-family="monospace">FY28E</text>
+          <rect x="36" y="103" width="6" height="4" fill="#1F4690" rx="0.5"/>
+          <text x="44" y="107" font-size="5" fill="#6b7c93" font-family="monospace">Historical</text>
+          <rect x="100" y="103" width="6" height="4" fill="#FFA500" rx="0.5"/>
+          <text x="108" y="107" font-size="5" fill="#6b7c93" font-family="monospace">TCF Estimates</text>
+        </svg>
+        <div class="figure-source">Revenue 3Y CAGR FY25–28E: 24.7% | Source: MOFSL, Tikona Capital</div>
+      </div>
+
+      <!-- CHART 2: PAT Trend -->
+      <div style="border:1px solid #d5dce8;border-radius:4px;padding:8px;">
+        <div class="figure-title" style="margin-bottom:6px;">PAT (₹ Crore) — FY22 to FY28E</div>
+        <svg viewBox="0 0 220 110" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+          <line x1="36" y1="8" x2="36" y2="88" stroke="#d5dce8" stroke-width="0.5"/>
+          <line x1="36" y1="88" x2="215" y2="88" stroke="#d5dce8" stroke-width="0.5"/>
+          <line x1="36" y1="68" x2="215" y2="68" stroke="#d5dce8" stroke-width="0.3" stroke-dasharray="2,2"/>
+          <line x1="36" y1="48" x2="215" y2="48" stroke="#d5dce8" stroke-width="0.3" stroke-dasharray="2,2"/>
+          <line x1="36" y1="28" x2="215" y2="28" stroke="#d5dce8" stroke-width="0.3" stroke-dasharray="2,2"/>
+          <line x1="36" y1="8"  x2="215" y2="8"  stroke="#d5dce8" stroke-width="0.3" stroke-dasharray="2,2"/>
+          <text x="33" y="91" text-anchor="end" font-size="4.5" fill="#6b7c93" font-family="monospace">0</text>
+          <text x="33" y="71" text-anchor="end" font-size="4.5" fill="#6b7c93" font-family="monospace">1.3K</text>
+          <text x="33" y="51" text-anchor="end" font-size="4.5" fill="#6b7c93" font-family="monospace">2.5K</text>
+          <text x="33" y="31" text-anchor="end" font-size="4.5" fill="#6b7c93" font-family="monospace">3.8K</text>
+          <text x="33" y="11" text-anchor="end" font-size="4.5" fill="#6b7c93" font-family="monospace">5K</text>
+          <!-- scale: 0-5128=80px. FY22=1310→20px, FY23=932→15px, FY24=2441→38px, FY25=2502→39px, FY26E=3066→48px, FY27E=3983→62px, FY28E=5128→80px -->
+          <rect x="40"  y="68" width="20" height="20" fill="#1F4690" rx="1"/>
+          <rect x="66"  y="73" width="20" height="15" fill="#1F4690" rx="1"/>
+          <rect x="92"  y="50" width="20" height="38" fill="#1F4690" rx="1"/>
+          <rect x="118" y="49" width="20" height="39" fill="#1F4690" rx="1"/>
+          <rect x="144" y="40" width="20" height="48" fill="#FFA500" rx="1"/>
+          <rect x="170" y="26" width="20" height="62" fill="#FFA500" rx="1"/>
+          <rect x="196" y="8"  width="20" height="80" fill="#FFA500" rx="1"/>
+          <text x="50"  y="66" text-anchor="middle" font-size="4" fill="white" font-family="monospace">1.3K</text>
+          <text x="76"  y="71" text-anchor="middle" font-size="4" fill="white" font-family="monospace">0.9K</text>
+          <text x="102" y="48" text-anchor="middle" font-size="4" fill="white" font-family="monospace">2.4K</text>
+          <text x="128" y="47" text-anchor="middle" font-size="4" fill="white" font-family="monospace">2.5K</text>
+          <text x="154" y="38" text-anchor="middle" font-size="4" fill="#1F4690" font-family="monospace">3.1K</text>
+          <text x="180" y="24" text-anchor="middle" font-size="4" fill="#1F4690" font-family="monospace">4.0K</text>
+          <text x="206" y="6"  text-anchor="middle" font-size="4" fill="#1F4690" font-family="monospace">5.1K</text>
+          <text x="50"  y="97" text-anchor="middle" font-size="5" fill="#6b7c93" font-family="monospace">FY22</text>
+          <text x="76"  y="97" text-anchor="middle" font-size="5" fill="#6b7c93" font-family="monospace">FY23</text>
+          <text x="102" y="97" text-anchor="middle" font-size="5" fill="#6b7c93" font-family="monospace">FY24</text>
+          <text x="128" y="97" text-anchor="middle" font-size="5" fill="#6b7c93" font-family="monospace">FY25</text>
+          <text x="154" y="97" text-anchor="middle" font-size="5" fill="#FFA500" font-family="monospace">FY26E</text>
+          <text x="180" y="97" text-anchor="middle" font-size="5" fill="#FFA500" font-family="monospace">FY27E</text>
+          <text x="206" y="97" text-anchor="middle" font-size="5" fill="#FFA500" font-family="monospace">FY28E</text>
+          <line x1="144" y1="40" x2="216" y2="8" stroke="#1a7a4a" stroke-width="0.8"/>
+          <text x="180" y="18" text-anchor="middle" font-size="4" fill="#1a7a4a" font-family="monospace">+27% CAGR</text>
+        </svg>
+        <div class="figure-source">PAT CAGR FY25–28E: 27.0% | Brokerage headwinds absorbed | Tikona Capital Est.</div>
+      </div>
+
+      <!-- CHART 3: EBITDA Margin -->
+      <div style="border:1px solid #d5dce8;border-radius:4px;padding:8px;">
+        <div class="figure-title" style="margin-bottom:6px;">EBITDA Margin (%) — FY22 to FY28E</div>
+        <svg viewBox="0 0 220 110" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+          <line x1="36" y1="8" x2="36" y2="88" stroke="#d5dce8" stroke-width="0.5"/>
+          <line x1="36" y1="88" x2="215" y2="88" stroke="#d5dce8" stroke-width="0.5"/>
+          <line x1="36" y1="58" x2="215" y2="58" stroke="#d5dce8" stroke-width="0.3" stroke-dasharray="2,2"/>
+          <line x1="36" y1="28" x2="215" y2="28" stroke="#d5dce8" stroke-width="0.3" stroke-dasharray="2,2"/>
+          <text x="33" y="91" text-anchor="end" font-size="4.5" fill="#6b7c93" font-family="monospace">0%</text>
+          <text x="33" y="61" text-anchor="end" font-size="4.5" fill="#6b7c93" font-family="monospace">30%</text>
+          <text x="33" y="31" text-anchor="end" font-size="4.5" fill="#6b7c93" font-family="monospace">60%</text>
+          <!-- scale 0-60%=80px. 49.3%→66px, 44.9%→60px, 57.4%→77px, 54.5%→73px, 52.3%→70px -->
+          <rect x="40"  y="22" width="20" height="66" fill="#3A5BA0" rx="1"/>
+          <rect x="66"  y="28" width="20" height="60" fill="#1F4690" rx="1"/>
+          <rect x="92"  y="11" width="20" height="77" fill="#1F4690" rx="1"/>
+          <rect x="118" y="15" width="20" height="73" fill="#1F4690" rx="1"/>
+          <rect x="144" y="18" width="20" height="70" fill="#FFA500" rx="1"/>
+          <rect x="170" y="18" width="20" height="70" fill="#FFA500" rx="1"/>
+          <rect x="196" y="18" width="20" height="70" fill="#FFA500" rx="1"/>
+          <text x="50"  y="20" text-anchor="middle" font-size="4.5" fill="#1F4690" font-family="monospace">49.3</text>
+          <text x="76"  y="26" text-anchor="middle" font-size="4.5" fill="#1F4690" font-family="monospace">44.9</text>
+          <text x="102" y="9"  text-anchor="middle" font-size="4.5" fill="#1F4690" font-family="monospace">57.4</text>
+          <text x="128" y="13" text-anchor="middle" font-size="4.5" fill="#1F4690" font-family="monospace">54.5</text>
+          <text x="154" y="16" text-anchor="middle" font-size="4.5" fill="#1F4690" font-family="monospace">52.3</text>
+          <text x="180" y="16" text-anchor="middle" font-size="4.5" fill="#1F4690" font-family="monospace">52.3</text>
+          <text x="206" y="16" text-anchor="middle" font-size="4.5" fill="#1F4690" font-family="monospace">52.3</text>
+          <text x="50"  y="97" text-anchor="middle" font-size="5" fill="#6b7c93" font-family="monospace">FY22</text>
+          <text x="76"  y="97" text-anchor="middle" font-size="5" fill="#6b7c93" font-family="monospace">FY23</text>
+          <text x="102" y="97" text-anchor="middle" font-size="5" fill="#6b7c93" font-family="monospace">FY24</text>
+          <text x="128" y="97" text-anchor="middle" font-size="5" fill="#6b7c93" font-family="monospace">FY25</text>
+          <text x="154" y="97" text-anchor="middle" font-size="5" fill="#FFA500" font-family="monospace">FY26E</text>
+          <text x="180" y="97" text-anchor="middle" font-size="5" fill="#FFA500" font-family="monospace">FY27E</text>
+          <text x="206" y="97" text-anchor="middle" font-size="5" fill="#FFA500" font-family="monospace">FY28E</text>
+        </svg>
+        <div class="figure-source">EBITDA margins sustain 52%+ as ARR grows — fee engine highly scalable | Tikona Capital</div>
+      </div>
+    </div>
+
+    <!-- ROW 2: 3 charts -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+
+      <!-- CHART 4: AUM growth -->
+      <div style="border:1px solid #d5dce8;border-radius:4px;padding:8px;">
+        <div class="figure-title" style="margin-bottom:6px;">Total AUM Growth (₹ Lakh Crore) — Trajectory</div>
+        <svg viewBox="0 0 220 110" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+          <rect x="36" y="8" width="179" height="80" fill="#f4f6f9" rx="2"/>
+          <line x1="36" y1="8" x2="36" y2="88" stroke="#d5dce8" stroke-width="0.5"/>
+          <line x1="36" y1="88" x2="215" y2="88" stroke="#d5dce8" stroke-width="0.5"/>
+          <line x1="36" y1="58" x2="215" y2="58" stroke="#d5dce8" stroke-width="0.3" stroke-dasharray="2,2"/>
+          <line x1="36" y1="28" x2="215" y2="28" stroke="#d5dce8" stroke-width="0.3" stroke-dasharray="2,2"/>
+          <text x="33" y="91" text-anchor="end" font-size="4.5" fill="#1F4690" font-family="monospace">0</text>
+          <text x="33" y="61" text-anchor="end" font-size="4.5" fill="#1F4690" font-family="monospace">1.0L</text>
+          <text x="33" y="31" text-anchor="end" font-size="4.5" fill="#1F4690" font-family="monospace">2.0L</text>
+          <!-- AUM bars: AMC AUM (blue) + Pvt Wealth AUM (orange) stacked | scale 0-4L Cr = 80px -->
+          <!-- AMC 1.89: (1.89/4)*80 = 37.8px | PW 1.96: (1.96/4)*80 = 39.2px -->
+          <!-- Historical (approx): FY22: total ~0.7L, FY23: ~0.8L, FY24: ~1.2L, FY25: ~1.4L; FY26E: 1.77L, etc. -->
+          <rect x="46"  y="75" width="15" height="13" fill="#3A5BA0" rx="1" opacity="0.85"/>
+          <rect x="76"  y="72" width="15" height="16" fill="#1F4690" rx="1" opacity="0.85"/>
+          <rect x="106" y="60" width="15" height="28" fill="#1F4690" rx="1" opacity="0.85"/>
+          <rect x="136" y="54" width="15" height="34" fill="#1F4690" rx="1" opacity="0.85"/>
+          <rect x="166" y="43" width="15" height="45" fill="#FFA500" rx="1" opacity="0.9"/>
+          <rect x="196" y="24" width="15" height="64" fill="#FFA500" rx="1" opacity="0.9"/>
+          <text x="53"  y="73" text-anchor="middle" font-size="4" fill="white" font-family="monospace">0.6L</text>
+          <text x="83"  y="70" text-anchor="middle" font-size="4" fill="white" font-family="monospace">0.8L</text>
+          <text x="113" y="58" text-anchor="middle" font-size="4" fill="white" font-family="monospace">1.2L</text>
+          <text x="143" y="52" text-anchor="middle" font-size="4" fill="white" font-family="monospace">1.4L</text>
+          <text x="173" y="41" text-anchor="middle" font-size="4" fill="#1F4690" font-family="monospace">1.8L</text>
+          <text x="203" y="22" text-anchor="middle" font-size="4" fill="#1F4690" font-family="monospace">2.5L</text>
+          <text x="53"  y="97" text-anchor="middle" font-size="4.5" fill="#6b7c93" font-family="monospace">FY22</text>
+          <text x="83"  y="97" text-anchor="middle" font-size="4.5" fill="#6b7c93" font-family="monospace">FY23</text>
+          <text x="113" y="97" text-anchor="middle" font-size="4.5" fill="#6b7c93" font-family="monospace">FY24</text>
+          <text x="143" y="97" text-anchor="middle" font-size="4.5" fill="#6b7c93" font-family="monospace">FY25</text>
+          <text x="173" y="97" text-anchor="middle" font-size="4.5" fill="#FFA500" font-family="monospace">H1FY26</text>
+          <text x="203" y="97" text-anchor="middle" font-size="4.5" fill="#FFA500" font-family="monospace">FY27E</text>
+          <line x1="46" y1="82" x2="196" y2="43" stroke="#1a7a4a" stroke-width="0.8"/>
+          <text x="120" y="54" text-anchor="middle" font-size="4" fill="#1a7a4a" font-family="monospace" transform="rotate(-15,120,54)">+46% YoY</text>
+        </svg>
+        <div class="figure-source">Total AUM ₹1.77L Cr (+46% YoY) | 91% of AUM outperforming benchmarks over 3 years</div>
+      </div>
+
+      <!-- CHART 5: Revenue Mix ARR vs Broking -->
+      <div style="border:1px solid #d5dce8;border-radius:4px;padding:8px;">
+        <div class="figure-title" style="margin-bottom:6px;">Revenue Mix — ARR vs Broking vs Other (Shift)</div>
+        <svg viewBox="0 0 220 110" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+          <text x="64" y="14" text-anchor="middle" font-size="5.5" fill="#1F4690" font-family="monospace" font-weight="bold">BEFORE (FY22)</text>
+          <text x="165" y="14" text-anchor="middle" font-size="5.5" fill="#1F4690" font-family="monospace" font-weight="bold">NOW (H1FY26)</text>
+          <!-- FY22: Broking ~55%, Fee/ARR ~35%, Other 10% -->
+          <rect x="14" y="20" width="55" height="28" fill="#1F4690" rx="1"/>
+          <text x="41" y="38" text-anchor="middle" font-size="5" fill="white" font-family="monospace" font-weight="bold">Broking</text>
+          <text x="41" y="44" text-anchor="middle" font-size="4" fill="rgba(255,255,255,0.8)" font-family="monospace">55%</text>
+          <rect x="14" y="50" width="35" height="28" fill="#FFA500" rx="1"/>
+          <text x="31" y="67" text-anchor="middle" font-size="4.5" fill="#1F4690" font-family="monospace" font-weight="bold">ARR/Fee</text>
+          <text x="31" y="73" text-anchor="middle" font-size="4" fill="#1F4690" font-family="monospace">35%</text>
+          <rect x="51" y="50" width="18" height="28" fill="#0e7490" rx="1"/>
+          <text x="60" y="67" text-anchor="middle" font-size="4" fill="white" font-family="monospace">Oth</text>
+          <text x="60" y="73" text-anchor="middle" font-size="4" fill="rgba(255,255,255,0.8)" font-family="monospace">10%</text>
+          <!-- Arrow -->
+          <line x1="113" y1="50" x2="122" y2="50" stroke="#1a7a4a" stroke-width="1.5"/>
+          <polygon points="122,47 127,50 122,53" fill="#1a7a4a"/>
+          <text x="117" y="46" text-anchor="middle" font-size="4" fill="#1a7a4a" font-family="monospace">Shift</text>
+          <!-- H1FY26: Broking 30%, ARR/Fee 65%, Other 5% -->
+          <rect x="122" y="20" width="30" height="28" fill="#1F4690" rx="1"/>
+          <text x="137" y="38" text-anchor="middle" font-size="5" fill="white" font-family="monospace" font-weight="bold">Broking</text>
+          <text x="137" y="44" text-anchor="middle" font-size="4" fill="rgba(255,255,255,0.8)" font-family="monospace">30% ↓</text>
+          <rect x="122" y="50" width="58" height="28" fill="#FFA500" rx="1"/>
+          <text x="151" y="67" text-anchor="middle" font-size="4.5" fill="#1F4690" font-family="monospace" font-weight="bold">ARR / Fee</text>
+          <text x="151" y="73" text-anchor="middle" font-size="4" fill="#1F4690" font-family="monospace">65% ↑</text>
+          <rect x="182" y="50" width="10" height="28" fill="#0e7490" rx="1"/>
+          <!-- Key insight box -->
+          <rect x="14" y="82" width="169" height="16" fill="#FFE5B4" rx="2"/>
+          <text x="98" y="91" text-anchor="middle" font-size="5" fill="#1F4690" font-family="monospace" font-weight="bold">ARR: 35% → 65% of revenues → Re-rating to AMC multiples</text>
+          <rect x="14" y="100" width="6" height="4" fill="#1F4690" rx="0.5"/>
+          <text x="22" y="104" font-size="4" fill="#6b7c93" font-family="monospace">Broking</text>
+          <rect x="60" y="100" width="6" height="4" fill="#FFA500" rx="0.5"/>
+          <text x="68" y="104" font-size="4" fill="#6b7c93" font-family="monospace">ARR/Fee</text>
+          <rect x="110" y="100" width="6" height="4" fill="#0e7490" rx="0.5"/>
+          <text x="118" y="104" font-size="4" fill="#6b7c93" font-family="monospace">Other</text>
+        </svg>
+        <div class="figure-source">ARR shift: 35% (FY22) → 65% (H1FY26) — structural quality improvement ongoing</div>
+      </div>
+
+      <!-- CHART 6: ROE trend + EPS -->
+      <div style="border:1px solid #d5dce8;border-radius:4px;padding:8px;">
+        <div class="figure-title" style="margin-bottom:6px;">ROE (%) &amp; EPS (₹) — Multi-Year Trajectory</div>
+        <svg viewBox="0 0 220 110" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+          <line x1="36" y1="8" x2="36" y2="88" stroke="#d5dce8" stroke-width="0.5"/>
+          <line x1="36" y1="88" x2="215" y2="88" stroke="#d5dce8" stroke-width="0.5"/>
+          <line x1="36" y1="58" x2="215" y2="58" stroke="#d5dce8" stroke-width="0.3" stroke-dasharray="2,2"/>
+          <line x1="36" y1="28" x2="215" y2="28" stroke="#d5dce8" stroke-width="0.3" stroke-dasharray="2,2"/>
+          <text x="33" y="91" text-anchor="end" font-size="4.5" fill="#6b7c93" font-family="monospace">0%</text>
+          <text x="33" y="61" text-anchor="end" font-size="4.5" fill="#6b7c93" font-family="monospace">15%</text>
+          <text x="33" y="31" text-anchor="end" font-size="4.5" fill="#6b7c93" font-family="monospace">30%</text>
+          <!-- ROE: FY22=23%→61px, FY23=15%→40px, FY24=28%→75px, FY25=23%→61px, FY26E=22%→59px, FY27E=23%→61px, FY28E=24%→64px -->
+          <!-- bars each %, scale 0-30%=80px -->
+          <rect x="40"  y="27" width="18" height="61" fill="#1F4690" rx="1" opacity="0.85"/>
+          <rect x="66"  y="48" width="18" height="40" fill="#1F4690" rx="1" opacity="0.85"/>
+          <rect x="92"  y="13" width="18" height="75" fill="#1F4690" rx="1" opacity="0.85"/>
+          <rect x="118" y="27" width="18" height="61" fill="#1F4690" rx="1" opacity="0.85"/>
+          <rect x="144" y="29" width="18" height="59" fill="#FFA500" rx="1" opacity="0.9"/>
+          <rect x="170" y="27" width="18" height="61" fill="#FFA500" rx="1" opacity="0.9"/>
+          <rect x="196" y="23" width="18" height="65" fill="#FFA500" rx="1" opacity="0.9"/>
+          <text x="49"  y="25" text-anchor="middle" font-size="4" fill="#1F4690" font-family="monospace">23%</text>
+          <text x="75"  y="46" text-anchor="middle" font-size="4" fill="#1F4690" font-family="monospace">15%</text>
+          <text x="101" y="11" text-anchor="middle" font-size="4" fill="#1F4690" font-family="monospace">28%</text>
+          <text x="127" y="25" text-anchor="middle" font-size="4" fill="#1F4690" font-family="monospace">23%</text>
+          <text x="153" y="27" text-anchor="middle" font-size="4" fill="#8a5c00" font-family="monospace">22%E</text>
+          <text x="179" y="25" text-anchor="middle" font-size="4" fill="#1a7a4a" font-family="monospace">23%E</text>
+          <text x="205" y="21" text-anchor="middle" font-size="4" fill="#1a7a4a" font-family="monospace">24%E</text>
+          <text x="49"  y="97" text-anchor="middle" font-size="4.5" fill="#6b7c93" font-family="monospace">FY22</text>
+          <text x="75"  y="97" text-anchor="middle" font-size="4.5" fill="#6b7c93" font-family="monospace">FY23</text>
+          <text x="101" y="97" text-anchor="middle" font-size="4.5" fill="#6b7c93" font-family="monospace">FY24</text>
+          <text x="127" y="97" text-anchor="middle" font-size="4.5" fill="#6b7c93" font-family="monospace">FY25</text>
+          <text x="153" y="97" text-anchor="middle" font-size="4.5" fill="#FFA500" font-family="monospace">FY26E</text>
+          <text x="179" y="97" text-anchor="middle" font-size="4.5" fill="#FFA500" font-family="monospace">FY27E</text>
+          <text x="205" y="97" text-anchor="middle" font-size="4.5" fill="#1a7a4a" font-family="monospace">FY28E</text>
+        </svg>
+        <!-- Horizontal progress bars for segment margins -->
+        <div style="margin-top:7px;">
+          <div class="figure-title" style="margin-bottom:4px;">Business Segment EBITDA Margins</div>
+          <div style="display:flex;flex-direction:column;gap:3px;">
+            <div style="display:flex;align-items:center;gap:4px;">
+              <div style="font-size:5.5pt;width:60px;color:#1a2537;font-family:'JetBrains Mono',monospace;flex-shrink:0;">AMC/Wealth</div>
+              <div style="flex:1;background:#e0e6f0;border-radius:1px;height:9px;overflow:hidden;">
+                <div style="width:57%;height:100%;background:#1F4690;border-radius:1px;"></div>
+              </div>
+              <div style="font-size:5.5pt;font-family:'JetBrains Mono',monospace;color:#1F4690;font-weight:700;width:28px;">57%+</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:4px;">
+              <div style="font-size:5.5pt;width:60px;color:#1a2537;font-family:'JetBrains Mono',monospace;flex-shrink:0;">Housing Fin.</div>
+              <div style="flex:1;background:#e0e6f0;border-radius:1px;height:9px;overflow:hidden;">
+                <div style="width:30%;height:100%;background:#1a7a4a;border-radius:1px;"></div>
+              </div>
+              <div style="font-size:5.5pt;font-family:'JetBrains Mono',monospace;color:#1a7a4a;font-weight:700;width:28px;">30%+</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:4px;">
+              <div style="font-size:5.5pt;width:60px;color:#1a2537;font-family:'JetBrains Mono',monospace;flex-shrink:0;">Broking</div>
+              <div style="flex:1;background:#e0e6f0;border-radius:1px;height:9px;overflow:hidden;">
+                <div style="width:20%;height:100%;background:#FFA500;border-radius:1px;"></div>
+              </div>
+              <div style="font-size:5.5pt;font-family:'JetBrains Mono',monospace;color:#FFA500;font-weight:700;width:28px;">~20%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div class="footer-left">SEBI Reg. No.: INH000009807</div>
+    <div class="footer-center">Motilal Oswal Financial Services Ltd — Equity Research</div>
+    <div class="footer-right">Page 2 of 15</div>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- PAGE 3: INVESTMENT THESIS & CATALYSTS -->
+<!-- ============================================================ -->
+<div class="page">
+  <div class="mini-header">
+    <div class="mini-firm">Tikona Capital</div>
+    <div class="mini-company">Motilal Oswal Financial Services — Investment Thesis &amp; Catalysts</div>
+    <div class="mini-stats">
+      <div class="mini-stat"><span class="mini-stat-label">CMP</span><span class="mini-stat-value">₹822.90</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">TP</span><span class="mini-stat-value accent">₹1,127</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Upside</span><span class="mini-stat-value green-v">+37%</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Mkt Cap</span><span class="mini-stat-value">₹49,079 Cr</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Rating</span><span class="mini-stat-value buy">BUY</span></div>
+    </div>
+  </div>
+
+  <div class="page-content pb48">
+    <div class="section-header">
+      <span class="section-number">03</span>
+      <span class="section-title">Investment Thesis &amp; Key Catalysts</span>
+    </div>
+
+    <div class="two-col-wide">
+      <div>
+        <div class="analysis-block">
+          <p><span class="analysis-bold">Core Thesis — From Cyclical Broking to Annuity Powerhouse:</span> Motilal Oswal Financial Services has systematically evolved from a research-driven broking house into one of India's most comprehensive financial services platforms. The company is executing one of the most significant revenue quality transformations in Indian financial services — deliberately reducing dependence on volatile transaction-based broking (now only 30% of revenues) while growing Annual Recurring Revenue (ARR) to 65% of total net revenues, with management guiding for further expansion. This structural shift de-risks the earnings base and should trigger a re-rating from broking multiples (12-15x P/E) toward asset management multiples (25-35x P/E) as the ARR proportion crosses 70%.</p>
+          <p>The market opportunity is exceptional: India is projected to have 16.57 lakh HNWIs by 2027, becoming the world's fourth-largest private wealth market by 2028. Mutual fund penetration remains at just 5-6% of GDP, with private credit investments hitting a record US$9 billion in H1 2025 (+53% YoY). MOFSL is uniquely positioned at the intersection of all these growth vectors through its integrated platform spanning capital markets, AMC, private wealth, housing finance, and alternative investments.</p>
+          <p><span class="analysis-bold">The inflection is happening NOW:</span> Q2FY25 profits at ₹1,242 crore (+123% YoY) demonstrated the earnings power of the diversified model in a favorable market. While Q2FY26 reflected SEBI regulatory headwinds on F&amp;O trading (brokerage revenue –24%), the AMC, Private Wealth, and Housing Finance businesses continued growing at 30%+ YoY — validating the thesis that the annuity engine is now large enough to cushion cyclical shocks. The credit rating upgrade to AA+ (Stable) by ICRA is external, institutional validation of this transformation.</p>
+        </div>
+
+        <div class="mb10">
+          <div class="fin-table-title">SAARTHI Multi-Dimensional Assessment — Score: 72/100 (BUY)</div>
+          <div class="score-item">
+            <div class="score-header"><span class="score-name">R — Reinvestment Quality (Highest)</span><span class="score-val">13 / 15</span></div>
+            <div class="score-bar-bg"><div class="score-bar-fill" style="width:86.7%;background:var(--accent);"></div></div>
+            <div class="score-desc">Market cap ₹49,079 crore (+24.8% YoY) with P/E 24.20x and P/B 3.82x. Private Wealth AUM grew 31% YoY to ₹1.96 lakh crore with family count up 41% and PAT up 14% -- capital reinvested into advisory infrastructure generating superior returns.</div>
+          </div>
+          <div class="score-item">
+            <div class="score-header"><span class="score-name">S — Scalability of Core Engine</span><span class="score-val">12 / 15</span></div>
+            <div class="score-bar-bg"><div class="score-bar-fill" style="width:80%;background:var(--primary-dark);"></div></div>
+            <div class="score-desc">ARR contributing 65% of total net revenues and fee-based revenue at 45% demonstrates platform-based scalability. AMC AUM rose 33% YoY to ₹1.89 lakh crore with net flows ₹11,610 crore. Asset-light fee model serves growing client base without proportional infrastructure growth.</div>
+          </div>
+          <div class="score-item">
+            <div class="score-header"><span class="score-name">A1 — Addressable Market &amp; Adjacency</span><span class="score-val">9 / 10</span></div>
+            <div class="score-bar-bg"><div class="score-bar-fill" style="width:90%;background:var(--primary-mid);"></div></div>
+            <div class="score-desc">India HNWI projected 16.57 lakh by 2027; UHNWI to grow 58.4% by 2028. Mutual fund penetration at 5-6%. Private credit in India ₹US$9B in H1 2025 (+53% YoY). Massive TAM with successful adjacency expansion across capital markets, wealth, housing finance, and alternatives.</div>
+          </div>
+          <div class="score-item">
+            <div class="score-header"><span class="score-name">H — Human Capital &amp; Institutional DNA</span><span class="score-val">9 / 10</span></div>
+            <div class="score-bar-bg"><div class="score-bar-fill" style="width:90%;background:var(--teal);"></div></div>
+            <div class="score-desc">Raamdeo Agrawal (Chairman) — creator of QGLP philosophy and 'Buy Right, Sit Tight'. Motilal Oswal — co-founder, four decades of leadership. Navin Agarwal, Ajay Menon — institutional depth. Received Rashtriya Samman Patra for being highest income taxpayers (FY95-99) — rare ethical commercial achievement.</div>
+          </div>
+          <div class="score-item">
+            <div class="score-header"><span class="score-name">T — Track Record Through Adversity</span><span class="score-val">8 / 10</span></div>
+            <div class="score-bar-bg"><div class="score-bar-fill" style="width:80%;background:var(--slate);"></div></div>
+            <div class="score-desc">Q2FY25 profits +123% YoY; Q2FY26 profits –67.64% YoY on SEBI F&amp;O changes — demonstrating residual cyclicality. However, AUM and ARR base continued growing through the shock — validating institutional resilience.</div>
+          </div>
+          <div class="score-item">
+            <div class="score-header"><span class="score-name">I — Inflection Point Identification</span><span class="score-val">11 / 15</span></div>
+            <div class="score-bar-bg"><div class="score-bar-fill" style="width:73.3%;background:var(--green);"></div></div>
+            <div class="score-desc">Analyst consensus ₹1,126.67 vs. CMP ₹822.90 — 37% upside — market has not priced the ARR re-rating. AA+ credit upgrade. ARR crossing 70% triggers valuation re-rating from broking to asset management multiples in 6-18 months.</div>
+          </div>
+          <div class="score-item" style="border-bottom:none;">
+            <div class="score-header"><span class="score-name">A2 — Asymmetric Pricing Power (Weakest)</span><span class="score-val">10 / 15</span></div>
+            <div class="score-bar-bg"><div class="score-bar-fill" style="width:66.7%;background:var(--mid-grey);"></div></div>
+            <div class="score-desc">91% of AUM outperforming benchmarks provides meaningful pricing power in premium wealth/PMS. However, brokerage revenue declined 24% on regulatory changes. Discount brokers and fintech platforms limit pricing in commoditized broking — the weakest SAARTHI dimension.</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="fin-table-title mb6">Key Catalysts — Value Realization Triggers</div>
+        <div class="catalyst-item">
+          <div class="catalyst-icon">📈</div>
+          <div>
+            <div class="catalyst-title">ARR Crossing 70% of Revenues <span class="catalyst-badge">PRIMARY CATALYST</span></div>
+            <div class="catalyst-desc">When ARR crosses 70% of total revenues, the market should re-rate MOFSL from broking multiples (12-15x P/E) to asset management multiples (25-35x P/E). Management is guiding for further ARR increases. This single catalyst could drive 40-60% stock re-rating over 12-18 months — the most powerful, measurable inflection trigger in our coverage universe.</div>
+          </div>
+        </div>
+        <div class="catalyst-item">
+          <div class="catalyst-icon">💰</div>
+          <div>
+            <div class="catalyst-title">AUM Scale &amp; Outperformance Compounding <span class="catalyst-badge">ONGOING</span></div>
+            <div class="catalyst-desc">Total AUM at ₹1.77 lakh crore growing 46% YoY. 91% of AUM outperforming benchmarks — this track record drives fee retention and new client acquisition in a virtuous cycle. As AUM compounds at 25-30% CAGR, management fee revenues grow proportionally with minimal incremental costs — operating leverage embedded in the model.</div>
+          </div>
+        </div>
+        <div class="catalyst-item">
+          <div class="catalyst-icon">🏛</div>
+          <div>
+            <div class="catalyst-title">Private Wealth HNI/UHNI Expansion <span class="catalyst-badge">NEAR-TERM</span></div>
+            <div class="catalyst-desc">India projected to have 16.57 lakh HNWIs by 2027 (+94% from current 8.56 lakh). UHNWI population to surge 58.4% by 2028. MOFSL's Private Wealth AUM already ₹1.96 lakh crore with family count growing 41% YoY. India's fourth-largest private wealth market by 2028 — MOFSL is the best-positioned pure-play wealth manager to capture this structural wave.</div>
+          </div>
+        </div>
+        <div class="catalyst-item">
+          <div class="catalyst-icon">🎯</div>
+          <div>
+            <div class="catalyst-title">Regulatory Tailwinds in F&amp;O Normalization <span class="catalyst-badge">NEXT 2-4 QTRS</span></div>
+            <div class="catalyst-desc">SEBI's F&amp;O regulatory changes created a transient headwind that compressed Q2FY26 broking revenues by ~24%. As market participants adapt and F&amp;O volumes normalize, the cyclical broking segment recovery will provide earnings uplift on top of the structurally growing ARR base — a double-barrelled earnings recovery catalyst.</div>
+          </div>
+        </div>
+        <div class="catalyst-item">
+          <div class="catalyst-icon">💳</div>
+          <div>
+            <div class="catalyst-title">Alternative Investments &amp; Private Credit Growth <span class="catalyst-badge">FY26-27</span></div>
+            <div class="catalyst-desc">India private credit investments hit record US$9 billion in H1 2025 (+53% YoY). MOFSL launched a new private credit fund with ₹58 crore recurring carry income already. Alternatives segment, once sub-scale, is now generating meaningful recurring revenues — expanding the ARR base with highest-quality sticky fee income.</div>
+          </div>
+        </div>
+        <div class="highlight-box accent-border mt8">
+          <div class="highlight-box-title">Thesis Risk Monitor</div>
+          <p><span style="color:var(--red);font-weight:700;">Primary Risk:</span> SEBI regulatory headwinds on F&amp;O trading norms compressing cyclical broking revenues near-term. Secondary risk: ARR contribution dropping below 55% for two consecutive quarters (thesis-breaking). Forensic monitor: recurring SEBI enforcement actions suggesting deeper governance issues. Stop-loss at ₹750 if technical support breaks with high volume.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div class="footer-left">SEBI Reg. No.: INH000009807</div>
+    <div class="footer-center">Motilal Oswal Financial Services Ltd — Equity Research</div>
+    <div class="footer-right">Page 3 of 15</div>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- PAGE 4: INDUSTRY OVERVIEW -->
+<!-- ============================================================ -->
+<div class="page">
+  <div class="mini-header">
+    <div class="mini-firm">Tikona Capital</div>
+    <div class="mini-company">Motilal Oswal Financial Services — Industry Overview</div>
+    <div class="mini-stats">
+      <div class="mini-stat"><span class="mini-stat-label">CMP</span><span class="mini-stat-value">₹822.90</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">TP</span><span class="mini-stat-value accent">₹1,127</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Upside</span><span class="mini-stat-value green-v">+37%</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Mkt Cap</span><span class="mini-stat-value">₹49,079 Cr | Mid Cap</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Rating</span><span class="mini-stat-value buy">BUY</span></div>
+    </div>
+  </div>
+
+  <div class="page-content pb48">
+    <div class="section-header">
+      <span class="section-number">04</span>
+      <span class="section-title">Industry Overview — Indian Financial Services Landscape</span>
+    </div>
+
+    <div class="three-col">
+      <div>
+        <div class="fin-table-title mb6">India Wealth Management Sector</div>
+        <div class="analysis-block">
+          <p><span class="analysis-bold">India: The Next Wealth Supercycle.</span> India's financial services sector is described in the Economic Survey 2025-26 as the "strategic shock absorber" for India's growth story — positioned at the centre of the growth-resilience trade-off. The sector is projected to nearly double its profits by FY30, led by NBFCs growing at 16% annually. India now stands as the world's most dynamic wealth creation engine: 8.56 lakh HNWIs in June 2025, projected to grow to 9.37 lakh by 2028 and 16.57 lakh by 2027 (on an accelerated trajectory), making India the fourth-largest private wealth market globally by 2028.</p>
+          <p>India's mutual fund industry penetration stands at just 5-6% of GDP versus 20%+ in developed markets — an extraordinary structural gap that implies decades of compounding growth ahead. The India AUM story is still early innings: BSE listed companies grew from 135 in 1995 to 5,328 by February 2025, and the investing community is expanding geometrically as digital onboarding removes friction. The UHNWI (ultra-high net worth individuals) segment in India is projected to surge 58.4% by 2028 — driving demand for sophisticated multi-asset, alternative, and global investment products that only integrated platforms like MOFSL can provide.</p>
+        </div>
+        <div class="fin-table-title mb6 mt6">Key Industry Tailwinds</div>
+        <div class="risk-item" style="border:none;padding-bottom:3px;">
+          <div class="risk-badge" style="background:#d1fae5;color:var(--green);">BULL</div>
+          <div class="risk-text"><span class="risk-title">Mutual Fund Penetration Under-development</span>India's MF penetration at 5-6% vs. global average 20%+ — massive latent growth. India's financial savings shifting from gold/real estate to financial instruments. Every 1% increase in MF penetration adds ~₹3-4 lakh crore to industry AUM — MOFSL directly benefits as a leading AMC.</div>
+        </div>
+        <div class="risk-item" style="border:none;padding-bottom:3px;">
+          <div class="risk-badge" style="background:#d1fae5;color:var(--green);">BULL</div>
+          <div class="risk-text"><span class="risk-title">India's Demographic Dividend</span>Large working-age population entering peak earning years. Digital payment infrastructure matured — new distribution channels opening for financial products. BSE companies grew 39x from 135 to 5,328 in 30 years — equity culture deepening structurally. SIP culture expanding into Tier 2-3 cities.</div>
+        </div>
+        <div class="risk-item" style="border:none;padding-bottom:3px;">
+          <div class="risk-badge" style="background:#d1fae5;color:var(--green);">BULL</div>
+          <div class="risk-text"><span class="risk-title">Policy Support &amp; Open Banking</span>FDI in insurance revised to 100% (automatic route, Budget 2025-26). Account Aggregator framework enabling open banking and new distribution. Government financial inclusion campaign — 6.65 lakh new accounts under PM Jan Dhan Yojana. Regulatory support for FinTech innovation expanding the market.</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="fin-table-title mb6">India Capital Markets Sector</div>
+        <div class="analysis-block">
+          <p><span class="analysis-bold">F&amp;O Regulatory Headwinds — Transient, Not Structural.</span> SEBI's tightening of F&amp;O trading norms in late 2025 created a meaningful but transient headwind for broking revenues across the industry. The regulatory intent — reducing retail participation in speculative derivatives — is sound long-term policy, but the near-term impact was a ~24% decline in brokerage revenues for MOFSL in Q2FY26. This has created a significant market mispricing opportunity: the stock sold off as if the entire business was impaired, when in fact only the cyclical 30% broking portion was affected. The 65% ARR portion continued growing at 15%+ YoY.</p>
+          <p>India's capital markets are at the cusp of a structural deepening phase. The equity culture, once confined to urban India, is expanding rapidly into Tier 2 and Tier 3 markets. SIP contributions have grown from ₹4,000 crore/month in 2018 to ₹25,000+ crore/month in 2025 — a 6x increase reflecting mass market financial awareness. This creates a durable structural tailwind for MOFSL's research-driven, high-quality investment management approach.</p>
+        </div>
+        <div class="fin-table-title mb6 mt6">AI &amp; Digital Transformation</div>
+        <div class="kpi-grid-2 mb8">
+          <div class="kpi-box">
+            <div class="kpi-box-label">Operational Efficiency</div>
+            <div class="kpi-box-value">60%</div>
+            <div class="kpi-box-sub">Reduction in operational timelines via AI</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-box-label">GenAI Banking Potential</div>
+            <div class="kpi-box-value">46%</div>
+            <div class="kpi-box-sub">RBI estimated enhancement potential</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-box-label">FinTech Startups (2022)</div>
+            <div class="kpi-box-value">14,000</div>
+            <div class="kpi-box-sub">Up from 733 in 2016-17</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-box-label">Private Credit (H1 2025)</div>
+            <div class="kpi-box-value">$9B</div>
+            <div class="kpi-box-sub">↑53% YoY — record high</div>
+          </div>
+        </div>
+        <div class="highlight-box navy-border">
+          <div class="highlight-box-title">Technology Moat: Research Platform</div>
+          <p>MOFSL's research franchise covering 300+ companies is the enduring competitive moat attracting institutional clients. AI is being deployed to enhance research productivity and client portfolio analytics. The 'Buy Right, Sit Tight' philosophy is digitally codified in their investment process platform — creating a proprietary advisory engine that cannot be easily replicated by discount fintech competitors.</p>
+        </div>
+      </div>
+
+      <div>
+        <div class="fin-table-title mb6">India Wealth Market Size &amp; Growth</div>
+        <div class="kpi-grid-2 mb8">
+          <div class="kpi-box">
+            <div class="kpi-box-label">HNWI Count (Jun 2025)</div>
+            <div class="kpi-box-value">8.56L</div>
+            <div class="kpi-box-sub">India's HNWIs — 4th globally by 2028</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-box-label">HNWI By 2027</div>
+            <div class="kpi-box-value">16.57L</div>
+            <div class="kpi-box-sub">Projected — 94% growth from today</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-box-label">UHNWI Growth by 2028</div>
+            <div class="kpi-box-value">58.4%</div>
+            <div class="kpi-box-sub">Fastest growing ultra-HNI pool globally</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-box-label">NBFC Profit Growth</div>
+            <div class="kpi-box-value">16%</div>
+            <div class="kpi-box-sub">Annual — sector profit doubling by FY30</div>
+          </div>
+        </div>
+        <div class="fin-table-title mb6">Key Industry Risks</div>
+        <div class="risk-item">
+          <div class="risk-badge risk-high">HIGH</div>
+          <div class="risk-text"><span class="risk-title">Regulatory Uncertainty</span>SEBI's evolving capital adequacy, risk management, and consumer protection frameworks create ongoing compliance costs and business model uncertainty for financial services intermediaries. F&amp;O tightening was first of potentially more interventions — monitor SEBI statements on fee structures, market access, and distribution models.</div>
+        </div>
+        <div class="risk-item">
+          <div class="risk-badge risk-high">HIGH</div>
+          <div class="risk-text"><span class="risk-title">Market Volatility &amp; Revenue Cyclicality</span>Capital markets volatility compresses transaction-based revenues, creating Q-on-Q earnings variability that can mask structural ARR growth. Global risk aversion causing FII outflows and Indian market corrections directly impact AUM valuations and therefore management fee revenues.</div>
+        </div>
+        <div class="risk-item">
+          <div class="risk-badge risk-med">MED</div>
+          <div class="risk-text"><span class="risk-title">Fintech Disruption</span>14,000+ fintech startups competing for the same customer base with lower-cost digital alternatives. Discount brokers like Zerodha and Groww dominate retail broking volumes. MOFSL's differentiation through research and HNI focus protects against commoditization but requires constant product innovation.</div>
+        </div>
+        <div class="risk-item" style="border-bottom:none;">
+          <div class="risk-badge risk-med">MED</div>
+          <div class="risk-text"><span class="risk-title">India External Sector Vulnerability</span>India's reliance on foreign capital creates exposure to global risk-off episodes. FII outflows during global crises (2020, 2022) caused sharp AUM corrections. Insurance of structural domestic savings migration to equities provides inflow buffers that are growing over time.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div class="footer-left">SEBI Reg. No.: INH000009807</div>
+    <div class="footer-center">Motilal Oswal Financial Services Ltd — Equity Research</div>
+    <div class="footer-right">Page 4 of 15</div>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- PAGE 5: COMPANY OVERVIEW -->
+<!-- ============================================================ -->
+<div class="page">
+  <div class="mini-header">
+    <div class="mini-firm">Tikona Capital</div>
+    <div class="mini-company">Motilal Oswal Financial Services — Company Overview</div>
+    <div class="mini-stats">
+      <div class="mini-stat"><span class="mini-stat-label">CMP</span><span class="mini-stat-value">₹822.90</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">TP</span><span class="mini-stat-value accent">₹1,127</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Upside</span><span class="mini-stat-value green-v">+37%</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Mkt Cap</span><span class="mini-stat-value">₹49,079 Cr | Mid Cap</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Rating</span><span class="mini-stat-value buy">BUY</span></div>
+    </div>
+  </div>
+
+  <div class="page-content pb48">
+    <div class="section-header">
+      <span class="section-number">05</span>
+      <span class="section-title">Company Overview — MOFSL Business Architecture</span>
+    </div>
+
+    <div class="two-col-wide">
+      <div>
+        <div class="thesis-box mb8">
+          <p>Motilal Oswal Financial Services Limited, co-founded by Motilal Oswal and Raamdeo Agrawal in 1987, has systematically evolved from a traditional broking house into one of India's most comprehensive financial services platforms. Headquartered in Mumbai, the company operates across 550+ cities and towns with 2,500+ business locations operated by business partners, serving over 1,600,000 customers. It commands a market capitalization of ₹49,079 crores (up 24.8% in one year). The company's research capabilities, covering over 300 companies, remain its enduring competitive moat — attracting institutional clients, high-net-worth families, and retail investors alike. Under Chairman Raamdeo Agrawal — architect of the QGLP investment philosophy and 'Buy Right, Sit Tight' framework — MOFSL has built one of India's most respected investment research franchises. Long-term credit rating upgraded to AA+ (Stable) by ICRA.</p>
+        </div>
+
+        <div class="fin-table-title mb4">Corporate Evolution Timeline</div>
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-year">1987–1995</div>
+            <div class="timeline-text">Founded as a research-driven equity broking firm by Motilal Oswal and Raamdeo Agrawal. Built proprietary research framework focused on quality businesses at reasonable valuations. Received Rashtriya Samman Patra from Government of India for being among India's highest income taxpayers for five consecutive years (FY95–99) — evidencing early ethical commercial success.</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-year">2000–2010</div>
+            <div class="timeline-text">Navin Agarwal joins in 2000, Ajay Menon in 1998 — building institutional depth. IPO in 2007, listing on NSE/BSE. Raamdeo Agrawal codifies the QGLP (Quality, Growth, Longevity &amp; favorable Price) investment process. Annual Wealth Creation Studies begin — becomes one of India's most respected institutional research publications, establishing MOFSL as a thought leader.</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-year">2010–2018</div>
+            <div class="timeline-text">Systematic diversification into Asset Management (AMC), Private Wealth, and Housing Finance. AMC AUM begins compounding. 'Buy Right, Sit Tight' philosophy attracts long-duration HNI and institutional clients. Research coverage expanded to 300+ companies, becoming India's premier publicly available institutional equity research publication.</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-year">2018–2024</div>
+            <div class="timeline-text">Alternative investments business launched with private credit and real estate funds. Private Wealth AUM surpasses ₹1 lakh crore — a defining scale milestone. ARR contribution crosses 60% of total revenues for the first time. AA+ credit rating from ICRA confirms balance sheet transformation. AMC AUM crosses ₹1 lakh crore amid India's SIP boom.</div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-year">2024–2026</div>
+            <div class="timeline-text">ARR reaches 65% of total net revenues — management guiding for 70%+ target. Total AUM ₹1.77 lakh crore (+46% YoY). 91% of AUM outperforming benchmarks. F&amp;O regulatory headwinds (Q2FY26) create valuation opportunity — stock mispriced. SEBI regulations pushing structural shift away from transaction-based model — accelerating the ARR transformation thesis.</div>
+          </div>
+        </div>
+
+        <div class="fin-table-title mb4 mt8">Strategic Architecture — 5 Business Pillars</div>
+        <table>
+          <thead><tr><th>Pillar</th><th>Revenue Share</th><th>Stage</th><th>Strategic Role</th></tr></thead>
+          <tbody>
+            <tr><td>Capital Markets &amp; Broking</td><td>30%</td><td>Mature / Declining Share</td><td>Cash generation, distribution network</td></tr>
+            <tr><td>Asset Management (AMC)</td><td>~25%</td><td>High Growth</td><td>Premium ARR engine, AUM compounding</td></tr>
+            <tr><td>Private Wealth Management</td><td>~20%</td><td>High Growth</td><td>HNI franchise, recurring advisory fees</td></tr>
+            <tr><td>Housing Finance</td><td>~15%</td><td>Growth</td><td>Secured NII income, balance sheet diversification</td></tr>
+            <tr class="tbl-highlight"><td>Alternative Investments</td><td>&lt;10%</td><td>Nascent / Growing</td><td>Carry income, institutional differentiation</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div>
+        <div class="fin-table-title mb6">Competitive Advantages — Enduring Moats</div>
+        <table>
+          <thead><tr><th>Advantage</th><th>Assessment</th></tr></thead>
+          <tbody>
+            <tr><td>Research Franchise (300+ companies)</td><td class="bold green">Enduring Moat</td></tr>
+            <tr><td>QGLP / Buy Right Sit Tight Philosophy</td><td class="bold green">Brand Differentiator</td></tr>
+            <tr><td>91% AUM outperforming benchmarks (3Y)</td><td class="bold green">Proof of Excellence</td></tr>
+            <tr><td>65% ARR — Revenue Quality</td><td class="bold green">Structural Advantage</td></tr>
+            <tr><td>550+ cities, 2,500+ business locations</td><td class="bold">Deep Distribution</td></tr>
+            <tr><td>Integrated platform: Broking→PMS→Wealth→IB</td><td class="bold">Cross-sell Engine</td></tr>
+            <tr><td>AA+ (Stable) credit rating — ICRA</td><td class="bold green">Balance Sheet Strength</td></tr>
+            <tr class="tbl-highlight"><td>Founder-led vision — 38 years of research culture</td><td class="bold accent">Cultural Moat</td></tr>
+          </tbody>
+        </table>
+
+        <div class="fin-table-title mb6 mt8">AUM Portfolio &amp; Performance Breakdown</div>
+        <table>
+          <thead><tr><th>Segment</th><th>AUM (Lakh Cr)</th><th>YoY Growth</th><th>Key Metric</th></tr></thead>
+          <tbody>
+            <tr><td>Total AUM</td><td class="bold">₹1.77L Cr</td><td class="green bold">+46% YoY</td><td>91% outperforming benchmarks</td></tr>
+            <tr class="tbl-highlight"><td>AMC (Mutual Funds + PMS)</td><td class="bold">₹1.89L Cr</td><td class="green bold">+33% YoY</td><td>Net flows ₹11,610 Cr</td></tr>
+            <tr><td>Private Wealth Management</td><td class="bold">₹1.96L Cr</td><td class="green bold">+31% YoY</td><td>Family count +41% YoY</td></tr>
+            <tr><td>Housing Finance Loan Book</td><td class="bold">₹6,630 Cr</td><td class="green">+25% YoY</td><td>Distribution book ₹42,775 Cr</td></tr>
+            <tr><td>Alternative Investments</td><td>Nascent</td><td class="green">Growing</td><td>Carry income ₹58 Cr p.a.</td></tr>
+          </tbody>
+        </table>
+
+        <div class="highlight-box navy-border mt8">
+          <div class="highlight-box-title">38-Year Research-First DNA — The Enduring Moat</div>
+          <p>MOFSL's research franchise, built over 38 years, is the enduring competitive moat that cannot be quickly replicated. The annual "Wealth Creation Study" is India's most respected long-form investment research publication — read by every institutional investor and HNI family. This research depth creates a self-reinforcing flywheel: better research → better client outcomes → more AUM → more fee revenues → more research investment. At 91% AUM outperformance over 3 years, this flywheel is operating at peak efficiency — attracting premium HNI clients who pay higher advisory fees and drive the ARR transformation thesis.</p>
+        </div>
+
+        <div class="highlight-box accent-border mt6">
+          <div class="highlight-box-title">Revenue Model Evolution — Structural Re-rating</div>
+          <p>Revenue model is deliberately shifting: Management fees (AMC) + Advisory fees (wealth management) + NII (housing finance) + Carry income (alternatives) — supplemented by transaction-based broking. As this mix shifts, the business's valuation multiple should re-rate from the 12-15x P/E applicable to broking firms toward the 25-35x P/E applied to pure AMC and wealth management companies — a 2-3x multiple re-rating opportunity if ARR crosses 70-75% of revenues.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div class="footer-left">SEBI Reg. No.: INH000009807</div>
+    <div class="footer-center">Motilal Oswal Financial Services Ltd — Equity Research</div>
+    <div class="footer-right">Page 5 of 15</div>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- PAGE 6: BUSINESS SEGMENTS -->
+<!-- ============================================================ -->
+<div class="page">
+  <div class="mini-header">
+    <div class="mini-firm">Tikona Capital</div>
+    <div class="mini-company">Motilal Oswal Financial Services — Business Segments Deep-Dive</div>
+    <div class="mini-stats">
+      <div class="mini-stat"><span class="mini-stat-label">CMP</span><span class="mini-stat-value">₹822.90</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">TP</span><span class="mini-stat-value accent">₹1,127</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Upside</span><span class="mini-stat-value green-v">+37%</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Mkt Cap</span><span class="mini-stat-value">₹49,079 Cr | Mid Cap</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Rating</span><span class="mini-stat-value buy">BUY</span></div>
+    </div>
+  </div>
+
+  <div class="page-content pb48">
+    <div class="section-header">
+      <span class="section-number">06</span>
+      <span class="section-title">Business Segments — Growth Drivers &amp; Investment Thesis</span>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="segment-card">
+          <div class="segment-card-header">
+            <span class="segment-name">Asset Management (AMC)</span>
+            <span class="segment-share">AUM ₹1.89L Cr | +33% YoY | Fee-Based ARR Engine</span>
+          </div>
+          <div class="segment-kpi">
+            <span class="kpi-chip">₹1.89L Cr AUM</span>
+            <span class="kpi-chip">+33% YoY Growth</span>
+            <span class="kpi-chip">₹11,610 Cr Net Flows</span>
+            <span class="kpi-chip">91% Outperforming Benchmarks</span>
+            <span class="kpi-chip">EBITDA Margin 57%+</span>
+          </div>
+          <div class="segment-desc">The AMC business is the crown jewel of MOFSL's transformation — a capital-light, fee-generating machine that requires minimal incremental investment as AUM grows, creating significant operating leverage. Revenue is generated through management fees (AUM × fee rate), creating a recurring income stream that grows automatically as the AUM compounds. The 91% benchmark outperformance over 3 years is the critical differentiator: it enables MOFSL to charge premium fees (1-2% AUM) versus discount managers (0.1-0.5%) and attract sticky, quality clients who rarely leave when performance persists. Net flows of ₹11,610 crore demonstrate the market's trust in MOFSL's investment process despite overall industry volatility. SIP culture expanding into Tier 2-3 cities is the secular tailwind driving systematic inflows.</div>
+          <div class="fin-table-title mb4 mt6">AMC — Growth Engine Breakdown</div>
+          <table>
+            <thead><tr><th>Metric</th><th>Current</th><th>FY27E Target</th><th>Growth Lever</th></tr></thead>
+            <tbody>
+              <tr><td>AUM (Lakh Crore)</td><td>₹1.89L Cr</td><td class="green bold">₹3.0L+ Cr</td><td>Market appreciation + net flows</td></tr>
+              <tr><td>Management Fee Income</td><td>Growing</td><td class="green bold">+25% CAGR</td><td>AUM compounding effect</td></tr>
+              <tr><td>Benchmark Outperformance</td><td>91%</td><td class="bold">Maintain 85%+</td><td>QGLP process discipline</td></tr>
+              <tr class="tbl-highlight"><td>Net Inflows/Quarter</td><td>₹11,610 Cr (H1)</td><td class="bold accent">₹15,000 Cr+</td><td>Tier 2/3 SIP expansion</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="segment-card">
+          <div class="segment-card-header">
+            <span class="segment-name">Private Wealth Management</span>
+            <span class="segment-share">AUM ₹1.96L Cr | +31% YoY | HNI/UHNI Premium Franchise</span>
+          </div>
+          <div class="segment-kpi">
+            <span class="kpi-chip">₹1.96L Cr AUM</span>
+            <span class="kpi-chip">+41% Family Count YoY</span>
+            <span class="kpi-chip">PAT +14% (9M)</span>
+            <span class="kpi-chip">Distribution Book ₹42,775 Cr</span>
+            <span class="kpi-chip">+34% Distribution YoY</span>
+          </div>
+          <div class="segment-desc">Private Wealth Management targets HNI and UHNI families with tailored financial advisory and wealth solutions. This is the segment that will benefit most from India's wealth creation super-cycle: 8.56 lakh HNWIs in June 2025, growing to 16.57 lakh by 2027. MOFSL's competitive advantage here is its 38-year research reputation — HNI families trust MOFSL's QGLP process and 'Buy Right, Sit Tight' philosophy. Family count growing 41% YoY demonstrates that MOFSL's HNI advisor network is acquiring new clients at an accelerating pace. Advisory fees charged as a percentage of AUM create a pure ARR income stream with zero capital at risk and zero cycle sensitivity.</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="segment-card">
+          <div class="segment-card-header">
+            <span class="segment-name">Capital Markets &amp; Broking</span>
+            <span class="segment-share">30% Revenue | Deliberate Decline | Distribution Network</span>
+          </div>
+          <div class="segment-kpi">
+            <span class="kpi-chip">30% of Revenues</span>
+            <span class="kpi-chip">Research: 300+ Companies</span>
+            <span class="kpi-chip">SEBI F&amp;O Headwind</span>
+            <span class="kpi-chip">Brokerage –24% Q2FY26</span>
+          </div>
+          <div class="segment-desc">The legacy broking business (equity, derivatives, commodity, currency, institutional services, and M&amp;A advisory) now contributes only 30% of total revenue — down from historical highs — reflecting MOFSL's deliberate diversification into annuity businesses. This is by design, not distress. While SEBI's F&amp;O regulatory changes caused a 24% decline in brokerage revenue in Q2FY26, this segment's declining revenue share is actually evidence of the thesis working: the annuity businesses (AMC, wealth) are growing faster. The institutional equity distribution through research-led approach remains the brand anchor that drives HNI and institutional credibility across all other business lines.</div>
+          <div class="fin-table-title mb4 mt6">Broking — Regulatory Impact &amp; Outlook</div>
+          <table>
+            <thead><tr><th>Parameter</th><th>Before SEBI</th><th>Post-SEBI (Q2FY26)</th><th>Recovery Path</th></tr></thead>
+            <tbody>
+              <tr><td>F&amp;O Volume Impact</td><td>Peak levels</td><td class="red">–24% brokerage</td><td>Stabilization by Q3FY26</td></tr>
+              <tr><td>Market Share</td><td>Gaining</td><td>Holding</td><td class="green">Maintain 3-5%</td></tr>
+              <tr class="tbl-highlight"><td>Broking % of Revenue</td><td>~40%</td><td>30%</td><td class="bold accent">Target &lt;25% by FY28</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="segment-card">
+          <div class="segment-card-header">
+            <span class="segment-name">Housing Finance</span>
+            <span class="segment-share">Loan Book ₹6,630 Cr | +25% YoY | NII Income Stream</span>
+          </div>
+          <div class="segment-kpi">
+            <span class="kpi-chip">₹6,630 Cr Loan Book</span>
+            <span class="kpi-chip">+25% YoY Growth</span>
+            <span class="kpi-chip">₹42,775 Cr Distribution Book</span>
+            <span class="kpi-chip">Distribution +34% YoY</span>
+          </div>
+          <div class="segment-desc">The Housing Finance segment provides retail mortgage lending focused on affordable and mid-segment housing loans, generating NII (Net Interest Income) — another recurring, cycle-resistant income stream. The loan book growing 25% YoY to ₹6,630 crore and the distribution book growing 34% to ₹42,775 crore demonstrate healthy momentum. Urbanization, rising disposable incomes, and government affordable housing schemes are secular tailwinds. The housing finance unit adds balance sheet depth and geographic diversification to MOFSL's increasingly asset-light wealth management core — providing a secured income stream to complement the fee revenues from AMC and wealth management.</div>
+        </div>
+
+        <div class="segment-card">
+          <div class="segment-card-header">
+            <span class="segment-name">Alternative Investments</span>
+            <span class="segment-share">Carry: ₹58 Cr p.a. | Private Credit | Growing Rapidly</span>
+          </div>
+          <div class="segment-kpi">
+            <span class="kpi-chip">₹58 Cr Recurring Carry</span>
+            <span class="kpi-chip">New Private Credit Fund</span>
+            <span class="kpi-chip">India Pvt Credit $9B (H1 2025)</span>
+            <span class="kpi-chip">+53% YoY Market Growth</span>
+          </div>
+          <div class="segment-desc">The Alternatives segment (private credit, real estate, other alternative strategies) is MOFSL's fastest-growing and highest-margin business on a per-unit basis. India private credit investments hit a record US$9 billion in H1 2025 (+53% YoY jump), validating the market opportunity. The ₹58 crore recurring carry income represents a baseline that should grow significantly as the fund matures and new fund launches generate additional carry. This segment positions MOFSL as a full-spectrum investment platform — able to serve family offices and institutionals across liquid and illiquid asset classes.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div class="footer-left">SEBI Reg. No.: INH000009807</div>
+    <div class="footer-center">Motilal Oswal Financial Services Ltd — Equity Research</div>
+    <div class="footer-right">Page 6 of 15</div>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- PAGE 7: MANAGEMENT ANALYSIS -->
+<!-- ============================================================ -->
+<div class="page">
+  <div class="mini-header">
+    <div class="mini-firm">Tikona Capital</div>
+    <div class="mini-company">Motilal Oswal Financial Services — Management &amp; Governance</div>
+    <div class="mini-stats">
+      <div class="mini-stat"><span class="mini-stat-label">CMP</span><span class="mini-stat-value">₹822.90</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">TP</span><span class="mini-stat-value accent">₹1,127</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Upside</span><span class="mini-stat-value green-v">+37%</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Mkt Cap</span><span class="mini-stat-value">₹49,079 Cr</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Rating</span><span class="mini-stat-value buy">BUY</span></div>
+    </div>
+  </div>
+
+  <div class="page-content pb48">
+    <div class="section-header">
+      <span class="section-number">07</span>
+      <span class="section-title">Management Analysis &amp; Governance Quality</span>
+    </div>
+
+    <div class="two-col-wide">
+      <div>
+        <div class="fin-table-title mb4">Board &amp; Key Management</div>
+        <div style="border:1px solid var(--border);border-radius:4px;overflow:hidden;">
+          <div class="mgmt-row" style="background:var(--primary-dark);">
+            <div style="color:var(--accent);font-size:6pt;font-weight:700;font-family:'JetBrains Mono',monospace;">NAME</div>
+            <div style="color:var(--accent);font-size:6pt;font-weight:700;font-family:'JetBrains Mono',monospace;">ROLE</div>
+            <div style="color:var(--accent);font-size:6pt;font-weight:700;font-family:'JetBrains Mono',monospace;">ASSESSMENT</div>
+          </div>
+          <div class="mgmt-row">
+            <div><div class="mgmt-name">Raamdeo Agrawal</div><div class="mgmt-role">Chairman, MOFSL &amp; Chairman, Motilal Oswal AMC</div></div>
+            <div><div class="mgmt-role">Co-founder (1987). Creator of QGLP process and 'Buy Right, Sit Tight' philosophy.</div></div>
+            <div class="mgmt-bio">Architect of India's most respected investment research franchise. Annual 'Wealth Creation Study' authored by Agrawal is the most-read institutional investment publication in India. QGLP framework — codified, repeatable process — is the foundation of 91% AUM outperformance. Globally recognized as a long-duration, quality-focused investor with consistent 40-year track record. The genuine article of investing wisdom in Indian capital markets.</div>
+          </div>
+          <div class="mgmt-row">
+            <div><div class="mgmt-name">Motilal Oswal</div><div class="mgmt-role">Founder, Chairman &amp; Managing Director</div></div>
+            <div><div class="mgmt-role">Co-founder (1987). Led transformation from broking to financial services platform over four decades.</div></div>
+            <div class="mgmt-bio">Co-founder who has built the company from a two-person broking operation to a ₹49,079 crore market cap financial services group. Recipient of the Rashtriya Samman Patra from Government of India — among highest income taxpayers for five consecutive years (FY95–FY99) — demonstrating both business success and ethical conduct. Drives institutional brand and business development relationships across India's corporate and capital markets ecosystem.</div>
+          </div>
+          <div class="mgmt-row">
+            <div><div class="mgmt-name">Navin Agarwal</div><div class="mgmt-role">Executive Board Member — Business Strategy &amp; Capital Allocation</div></div>
+            <div><div class="mgmt-role">Joined MOFSL Group in 2000. Strategic business reviews and capital allocation across all verticals.</div></div>
+            <div class="mgmt-bio">Joined 2000 as part of the Executive Board driving business strategy and reviews for all businesses and capital allocation across the MOFSL Group. Responsible for building market-leading positions across multiple business verticals through disciplined capital deployment and strategic prioritization. Brings professional management depth and strategic acumen to complement the founder vision — critical institutional process quality contributor.</div>
+          </div>
+          <div class="mgmt-row">
+            <div><div class="mgmt-name">Ajay Menon</div><div class="mgmt-role">Executive — Operations, Compliance, Risk &amp; Technology</div></div>
+            <div><div class="mgmt-role">Joined 1998. 27+ years capital markets experience. Responsible for operational, compliance, risk, and technology functions.</div></div>
+            <div class="mgmt-bio">Over 27 years of vast experience in Indian Capital Markets. Joined as Accounts Manager in 1998 and became responsible for operations, compliance, legal, risk management, business process excellence, and information technology. The cornerstone of MOFSL's operational excellence. A driving force behind cutting-edge technology initiatives across the group. Critical to navigating SEBI regulatory inspections and compliance management — the risk of recurring regulatory violations requires strong oversight from this function.</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="fin-table-title mb6">Governance Assessment</div>
+        <div class="progress-item">
+          <div class="progress-label"><span class="progress-name">Research Quality &amp; Independence</span><span class="progress-val">9/10</span></div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:90%;background:var(--green);"></div></div>
+        </div>
+        <div class="progress-item">
+          <div class="progress-label"><span class="progress-name">Capital Allocation Track Record</span><span class="progress-val">9/10</span></div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:90%;background:var(--primary-dark);"></div></div>
+        </div>
+        <div class="progress-item">
+          <div class="progress-label"><span class="progress-name">Founder Alignment &amp; Long-Term Vision</span><span class="progress-val">9/10</span></div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:90%;background:var(--primary-mid);"></div></div>
+        </div>
+        <div class="progress-item">
+          <div class="progress-label"><span class="progress-name">Regulatory Compliance Track Record</span><span class="progress-val">5/10</span></div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:50%;background:var(--accent);"></div></div>
+        </div>
+        <div class="progress-item">
+          <div class="progress-label"><span class="progress-name">Board Independence</span><span class="progress-val">6/10</span></div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:60%;background:var(--slate);"></div></div>
+        </div>
+        <div class="progress-item mb10">
+          <div class="progress-label"><span class="progress-name">SAARTHI Human Capital Dimension</span><span class="progress-val">9/10</span></div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:90%;background:var(--mid-grey);"></div></div>
+        </div>
+
+        <div class="highlight-box accent-border">
+          <div class="highlight-box-title">Management Commentary — Q2FY26 Results</div>
+          <p>"Q2FY26 results demonstrate the strength of the diversified business model and ability to capitalize on market opportunities. Record operating PAT is a testament to focus on building sustainable, annuity-based revenue streams. Operating PAT grew 16% year-on-year to ₹611 crore. Asset and Private Wealth businesses leading growth at 32% YoY. Consolidated annual recurring revenue now makes up 65% of total net revenues." — Motilal Oswal, Managing Director and CEO.</p>
+        </div>
+
+        <div class="highlight-box red-border mt6">
+          <div class="highlight-box-title">Key Governance Risk: Regulatory Violations Pattern</div>
+          <p>SEBI has imposed multiple penalties on MOFSL: ₹7 lakh (margin reporting violations, 2021), ₹25 lakh (client fund misutilization, May 2022), declared 'not fit and proper' as commodity derivative broker (2019, basis SFIO/EOW findings on NSEL case). SEBI concluded MOFSL failed to exercise sufficient control over 13 NSE + 9 BSE terminals operating from undeclared locations. While these are operational rather than fraudulent violations, the recurring pattern warrants monitoring. Non-thesis-breaking but requires close compliance oversight — Monitor Closely category.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div class="footer-left">SEBI Reg. No.: INH000009807</div>
+    <div class="footer-center">Motilal Oswal Financial Services Ltd — Equity Research</div>
+    <div class="footer-right">Page 7 of 15</div>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- PAGE 8: EARNINGS FORECAST -->
+<!-- ============================================================ -->
+<div class="page">
+  <div class="mini-header">
+    <div class="mini-firm">Tikona Capital</div>
+    <div class="mini-company">Motilal Oswal Financial Services — Earnings Forecast</div>
+    <div class="mini-stats">
+      <div class="mini-stat"><span class="mini-stat-label">CMP</span><span class="mini-stat-value">₹822.90</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">TP</span><span class="mini-stat-value accent">₹1,127</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Upside</span><span class="mini-stat-value green-v">+37%</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Mkt Cap</span><span class="mini-stat-value">₹49,079 Cr</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Rating</span><span class="mini-stat-value buy">BUY</span></div>
+    </div>
+  </div>
+
+  <div class="page-content pb48">
+    <div class="section-header">
+      <span class="section-number">08</span>
+      <span class="section-title">Earnings Forecast — Multi-Year Financial Model</span>
+    </div>
+
+    <div class="two-col-wide">
+      <div>
+        <div class="fin-table-title mb4">P&amp;L Forecast Model (₹ Crore)</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th>FY22A</th>
+              <th>FY23A</th>
+              <th>FY24A</th>
+              <th>FY25A</th>
+              <th>FY26E</th>
+              <th>FY27E</th>
+              <th>FY28E</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="tbl-section"><td colspan="8">Revenue &amp; Profitability</td></tr>
+            <tr><td>Net Revenue (Cr)</td><td>4,298</td><td>4,178</td><td>7,106</td><td>8,340</td><td class="bold">10,402</td><td class="bold">12,973</td><td class="bold">16,181</td></tr>
+            <tr><td>Revenue Growth</td><td>—</td><td class="red">–2.8%</td><td class="green">70.1%</td><td class="green">17.4%</td><td class="green">24.7%</td><td class="green">24.7%</td><td class="green">24.7%</td></tr>
+            <tr><td>EBITDA (Cr)</td><td>2,120</td><td>1,877</td><td>4,082</td><td>4,546</td><td class="bold">5,439</td><td class="bold">6,784</td><td class="bold">8,462</td></tr>
+            <tr><td>EBITDA Margin</td><td>49.3%</td><td>44.9%</td><td>57.4%</td><td>54.5%</td><td>52.3%</td><td>52.3%</td><td>52.3%</td></tr>
+            <tr class="tbl-highlight"><td>PAT (Cr)</td><td>1,310</td><td>932</td><td>2,441</td><td>2,502</td><td class="green bold">3,066</td><td class="green bold">3,983</td><td class="green bold">5,128</td></tr>
+            <tr><td>PAT Margin</td><td>30.5%</td><td>22.3%</td><td>34.4%</td><td>30.0%</td><td class="green">29.5%</td><td class="green">30.7%</td><td>31.7%</td></tr>
+            <tr class="tbl-section"><td colspan="8">Per Share Data</td></tr>
+            <tr><td>EPS (₹)</td><td>22.0</td><td>15.7</td><td>41.0</td><td>41.7</td><td class="bold green">51.2</td><td class="bold green">66.5</td><td class="bold green">85.6</td></tr>
+            <tr><td>EPS Growth</td><td>—</td><td class="red">–28.6%</td><td class="green">+161.1%</td><td class="green">+1.7%</td><td class="green bold">+22.8%</td><td class="green">+29.9%</td><td class="green">+28.7%</td></tr>
+            <tr><td>BVPS (₹)</td><td>95.2</td><td>105.6</td><td>146.5</td><td>184.9</td><td>229.8</td><td>288.2</td><td>363.4</td></tr>
+            <tr class="tbl-section"><td colspan="8">Valuation Multiples (at CMP ₹822.90)</td></tr>
+            <tr><td>P/E (x)</td><td>37.5x</td><td>52.3x</td><td>20.1x</td><td>19.7x</td><td class="accent bold">16.1x</td><td class="accent">12.4x</td><td class="accent">9.6x</td></tr>
+            <tr><td>EV/EBITDA (x)</td><td>9.0x</td><td>10.3x</td><td>9.5x</td><td>11.4x</td><td class="accent bold">12.7x</td><td class="accent">10.5x</td><td class="accent">8.8x</td></tr>
+            <tr><td>P/B (x)</td><td>8.7x</td><td>7.8x</td><td>5.6x</td><td>4.5x</td><td class="accent">3.6x</td><td class="accent">2.9x</td><td class="accent">2.3x</td></tr>
+          </tbody>
+        </table>
+        <div class="figure-source">Source: Company filings, Tikona Capital Research estimates. E = Tikona Capital estimates.</div>
+
+        <div class="fin-table-title mb4 mt8">CAGR Summary</div>
+        <table>
+          <thead><tr><th>Metric</th><th>3Y Historical CAGR (FY22–25)</th><th>Projected 3Y CAGR (FY25–28)</th></tr></thead>
+          <tbody>
+            <tr><td>Revenue</td><td class="green">24.7%</td><td class="green bold">24.7%</td></tr>
+            <tr><td>EBITDA</td><td class="green">28.9%</td><td class="green bold">23.0%</td></tr>
+            <tr class="tbl-highlight"><td>Net Income (PAT)</td><td class="green">24.1%</td><td class="green bold">27.0%</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div>
+        <div class="fin-table-title mb6">Forecast Assumptions</div>
+        <div class="highlight-box accent-border mb6">
+          <div class="highlight-box-title">Revenue Growth Drivers (FY26–28)</div>
+          <p><span style="font-weight:700;color:var(--primary-dark);">AMC &amp; Wealth (30%+ CAGR):</span> AUM compounding at 25-30% CAGR as India's HNI base expands. Management fee income grows proportionally. 91% outperformance track record sustains premium fee capture vs. discount managers.</p>
+          <p style="margin-top:3px;"><span style="font-weight:700;color:var(--primary-dark);">Housing Finance (25% CAGR):</span> Loan book growing 25% YoY. NII improvement as RM productivity matures. Urbanization and government affordable housing schemes provide secular demand tailwind across geographies.</p>
+          <p style="margin-top:3px;"><span style="font-weight:700;color:var(--primary-dark);">Alternatives (40%+ CAGR):</span> Private credit fund with ₹58 Cr recurring carry expected to continue and grow. India private credit market record $9B in H1 2025 (+53% YoY) validates the institutional appetite for this product.</p>
+          <p style="margin-top:3px;"><span style="font-weight:700;color:var(--primary-dark);">Broking Recovery (10-15%):</span> F&amp;O volume normalization post-regulatory adaptation. Transaction revenues recovering as market participants adjust. This segment's declining revenue share is per plan — minimal reliance assumed.</p>
+        </div>
+
+        <div class="highlight-box navy-border mb6">
+          <div class="highlight-box-title">PAT Growth Acceleration — Key Assumption</div>
+          <p>PAT re-accelerates at 27% CAGR (FY25–28) driven by: (1) AMC operating leverage — AUM growing 30%+ with marginal incremental costs, (2) Private Wealth advisory fee income compounding, (3) Housing Finance NII growing at 25% on loan book expansion, (4) Alternatives carry income scaling. EBITDA margin sustaining at 52%+ validates the fee-model quality. PAT growth of 27% CAGR significantly ahead of revenue growth (25%) — operating leverage is the story.</p>
+        </div>
+
+        <div class="highlight-box red-border mb6">
+          <div class="highlight-box-title">Downside Scenario Assumptions</div>
+          <p>If SEBI regulatory headwinds intensify (additional F&amp;O restrictions, fee caps on AMC), revenue CAGR compresses to 15-18%. If AUM growth slows to 15% YoY due to market correction, PAT CAGR reverts to ~18%. Combined downside yields PAT of ~₹2,800 Cr in FY26E vs. base ₹3,066 Cr — approximately 9% downside to earnings. Stop-loss at ₹750 provides reasonable risk management.</p>
+        </div>
+
+        <div class="fin-table-title mb4">Quarterly Earnings Trend (Recent)</div>
+        <table>
+          <thead><tr><th>Quarter</th><th>Revenue (Cr)</th><th>PAT (Cr)</th><th>YoY Change</th></tr></thead>
+          <tbody>
+            <tr><td>Q2 FY25</td><td>High</td><td class="bold green">₹1,242</td><td class="green">+123% YoY</td></tr>
+            <tr><td>H1 FY26 (Op.)</td><td>₹2,888</td><td class="bold">₹1,088</td><td class="green">+11% YoY</td></tr>
+            <tr><td>Q2 FY26</td><td>–34.91%</td><td class="red">–67.64%</td><td class="red">SEBI F&amp;O impact</td></tr>
+            <tr class="tbl-highlight"><td>Op. PAT (Q2 FY26)</td><td>—</td><td class="bold green">₹611 Cr</td><td class="bold green">+16% YoY</td></tr>
+          </tbody>
+        </table>
+        <div class="figure-source">Source: MOFSL Quarterly Reports; Tikona Capital Research estimates.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div class="footer-left">SEBI Reg. No.: INH000009807</div>
+    <div class="footer-center">Motilal Oswal Financial Services Ltd — Equity Research</div>
+    <div class="footer-right">Page 8 of 15</div>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- PAGE 9: FINANCIAL HIGHLIGHTS -->
+<!-- ============================================================ -->
+<div class="page">
+  <div class="mini-header">
+    <div class="mini-firm">Tikona Capital</div>
+    <div class="mini-company">Motilal Oswal Financial Services — Financial Highlights</div>
+    <div class="mini-stats">
+      <div class="mini-stat"><span class="mini-stat-label">CMP</span><span class="mini-stat-value">₹822.90</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">TP</span><span class="mini-stat-value accent">₹1,127</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Upside</span><span class="mini-stat-value green-v">+37%</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Mkt Cap</span><span class="mini-stat-value">₹49,079 Cr</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Rating</span><span class="mini-stat-value buy">BUY</span></div>
+    </div>
+  </div>
+
+  <div class="page-content pb48">
+    <div class="section-header">
+      <span class="section-number">09</span>
+      <span class="section-title">Financial Highlights — Detailed P&amp;L, Balance Sheet &amp; Return Ratios</span>
+    </div>
+
+    <div class="three-col">
+      <div>
+        <div class="fin-table-title mb4">Detailed P&amp;L Summary (₹ Crore)</div>
+        <table>
+          <thead><tr><th>Line Item</th><th>FY23A</th><th>FY24A</th><th>FY25A</th><th>FY26E</th></tr></thead>
+          <tbody>
+            <tr class="tbl-section"><td colspan="5">Revenue</td></tr>
+            <tr><td>Net Revenue</td><td>4,178</td><td>7,106</td><td>8,340</td><td class="bold">10,402</td></tr>
+            <tr><td>Revenue Growth</td><td class="red">–2.8%</td><td class="green">70.1%</td><td class="green">17.4%</td><td class="green bold">24.7%</td></tr>
+            <tr class="tbl-section"><td colspan="5">Profitability</td></tr>
+            <tr><td>EBITDA</td><td>1,877</td><td>4,082</td><td>4,546</td><td class="bold green">5,439</td></tr>
+            <tr><td>EBITDA Margin</td><td>44.9%</td><td>57.4%</td><td>54.5%</td><td class="green">52.3%</td></tr>
+            <tr class="tbl-highlight"><td>PAT (Consolidated)</td><td class="bold">932</td><td class="bold">2,441</td><td class="bold">2,502</td><td class="bold green">3,066</td></tr>
+            <tr><td>PAT Margin</td><td>22.3%</td><td>34.4%</td><td>30.0%</td><td class="green">29.5%</td></tr>
+            <tr class="tbl-section"><td colspan="5">Per Share Metrics</td></tr>
+            <tr><td>EPS (₹ Basic)</td><td>15.7</td><td>41.0</td><td>41.7</td><td class="bold green">51.2</td></tr>
+            <tr><td>EPS Growth</td><td class="red">–62.1%</td><td class="green">+161%</td><td class="green">+1.7%</td><td class="green bold">+22.8%</td></tr>
+            <tr><td>BVPS (₹)</td><td>105.6</td><td>146.5</td><td>184.9</td><td>229.8</td></tr>
+            <tr class="tbl-section"><td colspan="5">Return Ratios</td></tr>
+            <tr><td>ROE</td><td>15%</td><td>28%</td><td>23%</td><td>22%</td></tr>
+            <tr><td>ROCE</td><td>13%</td><td>21%</td><td>19%</td><td>18%</td></tr>
+            <tr><td>ROIC</td><td>78%</td><td>119%</td><td>87%</td><td>35%</td></tr>
+          </tbody>
+        </table>
+        <div class="figure-source">Source: MOFSL Annual Reports; E = Tikona Capital Estimates</div>
+      </div>
+
+      <div>
+        <div class="fin-table-title mb4">Balance Sheet Snapshot (₹ Crore)</div>
+        <table>
+          <thead><tr><th>Item</th><th>FY23A</th><th>FY24A</th><th>FY25A</th></tr></thead>
+          <tbody>
+            <tr class="tbl-section"><td colspan="4">Key Balance Sheet Metrics</td></tr>
+            <tr><td>Market Capitalisation</td><td>~32,000</td><td>~40,000</td><td class="bold">49,079</td></tr>
+            <tr><td>Mkt Cap YoY</td><td>—</td><td>—</td><td class="green">+24.8%</td></tr>
+            <tr><td>Net Worth (₹ Cr)</td><td>~8,800</td><td>~10,500</td><td class="bold green">12,871</td></tr>
+            <tr><td>Net Worth Growth</td><td>—</td><td>—</td><td class="green">+16% YoY</td></tr>
+            <tr class="tbl-section"><td colspan="4">AUM &amp; Business KPIs</td></tr>
+            <tr><td>Total AUM (₹)</td><td>~0.86L Cr</td><td>~1.21L Cr</td><td class="bold">1.77L Cr</td></tr>
+            <tr><td>AUM Growth</td><td>—</td><td>—</td><td class="green bold">+46% YoY</td></tr>
+            <tr class="tbl-highlight"><td>AMC AUM (₹)</td><td>~0.7L Cr</td><td>~1.0L Cr</td><td class="bold">1.89L Cr</td></tr>
+            <tr><td>Private Wealth AUM</td><td>~0.8L Cr</td><td>~1.2L Cr</td><td class="bold">1.96L Cr</td></tr>
+            <tr class="tbl-section"><td colspan="4">Credit &amp; Financial Health</td></tr>
+            <tr><td>ICRA Rating</td><td>AA</td><td>AA</td><td class="accent bold">AA+ (Stable)</td></tr>
+            <tr><td>P/E (TTM)</td><td>—</td><td>—</td><td class="bold">24.20x</td></tr>
+            <tr><td>P/B</td><td>—</td><td>—</td><td class="bold">3.82x</td></tr>
+          </tbody>
+        </table>
+        <div class="figure-source">Source: MOFSL Quarterly Reports, Annual Reports.</div>
+
+        <div class="fin-table-title mb4 mt6">Revenue Mix (H1 FY26)</div>
+        <table>
+          <thead><tr><th>Revenue Type</th><th>% of Total</th><th>Trend</th></tr></thead>
+          <tbody>
+            <tr class="tbl-highlight"><td>Annual Recurring Revenue (ARR)</td><td class="bold green">65%</td><td class="green">↑ from 61%</td></tr>
+            <tr><td>Fee-Based Revenue</td><td class="bold">45%</td><td class="green">↑ Growing</td></tr>
+            <tr><td>Brokerage / Transaction</td><td>30%</td><td class="red">↓ Declining (<br>by Design)</td></tr>
+            <tr><td>Other</td><td>~5%</td><td>Stable</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div>
+        <div class="fin-table-title mb4">Segment Performance Profile</div>
+        <div class="progress-item">
+          <div class="progress-label"><span class="progress-name">AMC — Management Fee Margin</span><span class="progress-val">57%+</span></div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:57%;background:var(--primary-dark);"></div></div>
+        </div>
+        <div class="progress-item">
+          <div class="progress-label"><span class="progress-name">Private Wealth — Advisory Margin</span><span class="progress-val">50%+</span></div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:50%;background:var(--green);"></div></div>
+        </div>
+        <div class="progress-item">
+          <div class="progress-label"><span class="progress-name">Broking (Capital Markets)</span><span class="progress-val">~20%</span></div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:20%;background:var(--accent);"></div></div>
+        </div>
+        <div class="progress-item">
+          <div class="progress-label"><span class="progress-name">Housing Finance (NIM)</span><span class="progress-val">~30%</span></div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:30%;background:var(--teal);"></div></div>
+        </div>
+
+        <div class="highlight-box navy-border mt6">
+          <div class="highlight-box-title">Financial Health Assessment: STRONG</div>
+          <p>MOFSL's balance sheet is in excellent shape: Net worth ₹12,871 crore (+16% YoY) provides strong capital base for business expansion. AA+ credit rating (ICRA) validates institutional quality. Asset-light business model means most revenue growth flows directly to margins with minimal balance sheet risk. AUM businesses (AMC + Wealth) carry no credit risk — pure fee income on client assets. Housing Finance loan book healthy at 25% growth with no disclosed asset quality stress. The business combination of fee-heavy AUM businesses + secured NII (Housing Finance) creates a highly defensive revenue base that we estimate can sustain through one or even two regulatory shocks without thesis impairment.</p>
+        </div>
+
+        <div class="highlight-box green-border mt6">
+          <div class="highlight-box-title">Working Capital &amp; Capital Efficiency</div>
+          <p>Fee-based businesses require minimal working capital — the key metric is AUM growth, not balance sheet deployment. Working Capital to Sales ratio of 193% (FY25A) reflects the nature of the financial services business where client assets are off-balance-sheet but drive revenue. OCF/EBITDA of 27% (FY25A) normalizing from the –9% in FY24A — improving trend. ROIC of 87% (FY25A) demonstrates exceptional capital efficiency in the core fee-based business model.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div class="footer-left">SEBI Reg. No.: INH000009807</div>
+    <div class="footer-center">Motilal Oswal Financial Services Ltd — Equity Research</div>
+    <div class="footer-right">Page 9 of 15</div>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- PAGE 10: VALUATION -->
+<!-- ============================================================ -->
+<div class="page">
+  <div class="mini-header">
+    <div class="mini-firm">Tikona Capital</div>
+    <div class="mini-company">Motilal Oswal Financial Services — Valuation</div>
+    <div class="mini-stats">
+      <div class="mini-stat"><span class="mini-stat-label">CMP</span><span class="mini-stat-value">₹822.90</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">TP</span><span class="mini-stat-value accent">₹1,127</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Upside</span><span class="mini-stat-value green-v">+37%</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Mkt Cap</span><span class="mini-stat-value">₹49,079 Cr</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Rating</span><span class="mini-stat-value buy">BUY</span></div>
+    </div>
+  </div>
+
+  <div class="page-content pb48">
+    <div class="section-header">
+      <span class="section-number">10</span>
+      <span class="section-title">Valuations — Multi-Method Analysis &amp; Target Price Derivation</span>
+    </div>
+
+    <div class="two-col-wide">
+      <div>
+        <div class="fin-table-title mb4">P/E-Based Valuation — Primary Method</div>
+        <div class="val-table-wrapper">
+          <div class="val-table-hdr">Target Price Derivation — Tikona Capital Base Case</div>
+          <table>
+            <thead>
+              <tr>
+                <th>Method</th>
+                <th>Multiple Applied</th>
+                <th>Earnings Base</th>
+                <th>Value Per Share (₹)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Base Case P/E</td><td>24x P/E</td><td>FY27E EPS of ₹66.5</td><td class="bold green">₹1,596 (unadjusted)</td></tr>
+              <tr><td>Discounted Target (1Y)</td><td>12% discount rate</td><td>12-month forward</td><td class="bold">₹1,127 (Base TP)</td></tr>
+              <tr><td>Analyst Consensus</td><td>Market implied</td><td>Current consensus view</td><td class="bold">₹1,126.67</td></tr>
+              <tr class="tbl-highlight"><td>Probability-Weighted TP</td><td>30%×₹1,400 + 50%×₹1,127 + 20%×₹630</td><td>Scenario blend</td><td class="bold accent">₹1,109</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="fin-table-title mb4 mt6">Relative Valuation vs. Peers</div>
+        <table>
+          <thead><tr><th>Company</th><th>P/E (TTM)</th><th>P/B</th><th>AUM Growth</th><th>Comment</th></tr></thead>
+          <tbody>
+            <tr class="tbl-highlight"><td>Motilal Oswal (MOFSL)</td><td class="bold">24.20x</td><td class="bold">3.82x</td><td class="green bold">+46% YoY</td><td class="bold accent">ARR re-rating pending</td></tr>
+            <tr><td>HDFC AMC</td><td>35.0x</td><td>12.0x</td><td>+40% YoY</td><td>Pure AMC — premium multiple</td></tr>
+            <tr><td>Nippon AMC</td><td>28.0x</td><td>8.5x</td><td>+35% YoY</td><td>High-quality AMC peer</td></tr>
+            <tr><td>ICICI Securities</td><td>16.5x</td><td>7.0x</td><td>N/A</td><td>Broking-heavy — lower multiple</td></tr>
+          </tbody>
+        </table>
+        <div class="figure-source mt6">MOFSL trades at discount to AMC peers due to broking overhang — re-rating thesis: ARR hitting 70% narrows this gap</div>
+
+        <div class="fin-table-title mb4 mt6">Valuation Scenario Summary</div>
+        <table>
+          <thead><tr><th>Scenario</th><th>Probability</th><th>Target Price</th><th>Return vs. CMP</th><th>Key Assumption</th></tr></thead>
+          <tbody>
+            <tr><td>Bull Case</td><td>30%</td><td class="green bold">₹1,400</td><td class="green bold">+70%</td><td>ARR 70%+, 28x P/E, FY27E EPS ₹50</td></tr>
+            <tr class="tbl-highlight"><td>Base Case</td><td>50%</td><td class="bold accent">₹1,127</td><td class="bold accent">+37%</td><td>ARR 65%, 24x P/E, FY27E EPS ₹47</td></tr>
+            <tr><td>Bear Case</td><td>20%</td><td class="red">₹630</td><td class="red">–23%</td><td>18x P/E, depressed FY27E EPS ₹35</td></tr>
+            <tr><td>Prob. Weighted Avg.</td><td>100%</td><td class="bold">₹1,109</td><td class="bold green">+34.8%</td><td>Blended scenario</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div>
+        <div class="fin-table-title mb6">Scenario Targets</div>
+        <div class="scenario-grid">
+          <div class="scenario-card bear">
+            <div class="scenario-label">Bear Case</div>
+            <div class="scenario-tp">₹630</div>
+            <div class="scenario-updown" style="color:var(--red);">–23.4% vs CMP</div>
+            <div class="scenario-desc">Regulatory headwinds intensify. Additional SEBI restrictions. AUM growth slows to single digits. F&amp;O volumes remain permanently impaired. Competition from fintech erodes market share. 18x P/E on depressed EPS ₹35.</div>
+          </div>
+          <div class="scenario-card base">
+            <div class="scenario-label">Base Case</div>
+            <div class="scenario-tp">₹1,127</div>
+            <div class="scenario-updown" style="color:#8a5c00;">+37% vs CMP</div>
+            <div class="scenario-desc">ARR sustains at 65%. AUM growth 25%+ YoY. Housing Finance and Alternatives steady growth. 24x P/E on FY27E EPS ₹47. Consistent thesis execution. Our primary recommendation.</div>
+          </div>
+          <div class="scenario-card bull">
+            <div class="scenario-label">Bull Case</div>
+            <div class="scenario-tp">₹1,400</div>
+            <div class="scenario-updown" style="color:var(--green);">+70% vs CMP</div>
+            <div class="scenario-desc">ARR crosses 70% — triggers AMC multiple re-rating. AUM growth 40%+ YoY. Regulatory clarity on F&amp;O. International expansion. 28x P/E on FY27E EPS ₹50. UHNWI wealth creation super-cycle accelerates.</div>
+          </div>
+        </div>
+
+        <div class="highlight-box accent-border mt8">
+          <div class="highlight-box-title">Valuation Conviction: Why 37% Upside Is Conservative</div>
+          <p>At a P/E of 24.2x on FY25A EPS of ₹41.83, MOFSL trades at a 30-40% discount to pure AMC peers like HDFC AMC (35x) and Nippon AMC (28x). This discount is entirely attributable to the broking revenue overhang — but broking is only 30% of revenues and declining. When ARR crosses 70% (our base case: 12-18 months), the market should re-rate MOFSL to the AMC/wealth management multiple range of 28-32x, implying ₹1,200-1,600 stock price on FY27E EPS. Our ₹1,127 base case is, if anything, conservative relative to the re-rating potential if the ARR transformation completes as guided.</p>
+        </div>
+
+        <div class="highlight-box navy-border mt6">
+          <div class="highlight-box-title">Entry Strategy: ₹800-850 Is Optimal Range</div>
+          <p>The ₹800-850 entry range (current CMP ₹822.90) represents a 15-20% discount to analyst consensus target ₹1,126.67. At this level, you are acquiring a world-class investment research franchise growing at 27% PAT CAGR for FY25–28E at 16x FY26E P/E. This is an exceptionally attractive entry point for a business with 65% recurring revenues, 91% AUM outperformance, and a structural wealth creation tailwind from India's HNWI explosion. We recommend full position initiation at current levels with incremental buying on any dip toward ₹750-800.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div class="footer-left">SEBI Reg. No.: INH000009807</div>
+    <div class="footer-center">Motilal Oswal Financial Services Ltd — Equity Research</div>
+    <div class="footer-right">Page 10 of 15</div>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- PAGE 11: SAARTHI SCORECARD -->
+<!-- ============================================================ -->
+<div class="page">
+  <div class="mini-header">
+    <div class="mini-firm">Tikona Capital</div>
+    <div class="mini-company">Motilal Oswal Financial Services — SAARTHI Scorecard</div>
+    <div class="mini-stats">
+      <div class="mini-stat"><span class="mini-stat-label">CMP</span><span class="mini-stat-value">₹822.90</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">TP</span><span class="mini-stat-value accent">₹1,127</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Upside</span><span class="mini-stat-value green-v">+37%</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Mkt Cap</span><span class="mini-stat-value">₹49,079 Cr</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Rating</span><span class="mini-stat-value buy">BUY</span></div>
+    </div>
+  </div>
+
+  <div class="page-content pb48">
+    <div class="section-header">
+      <span class="section-number">11</span>
+      <span class="section-title">SAARTHI Framework Scorecard — Multi-Dimensional Investment Assessment</span>
+    </div>
+
+    <div style="background:var(--accent-light);border:1px solid var(--accent);border-radius:4px;padding:7px 12px;margin-bottom:10px;">
+      <span style="font-family:'Playfair Display',serif;font-size:9pt;font-weight:600;color:var(--primary-dark);">SAARTHI Total Score: </span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:12pt;font-weight:700;color:var(--primary-dark);">72 / 100 &nbsp;</span>
+      <span class="rating-badge" style="font-size:7pt;">BUY (70–84 Range)</span>
+      <span style="font-size:7pt;color:var(--text-light);margin-left:10px;">Strongest: Reinvestment Quality (13/15) &amp; Human Capital (9/10) &nbsp;|&nbsp; Weakest: Asymmetric Pricing Power (10/15)</span>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="score-item">
+          <div class="score-header">
+            <span class="score-name">R — Reinvestment Quality (Strongest)</span>
+            <span class="score-val">13 / 15</span>
+          </div>
+          <div class="score-bar-bg"><div class="score-bar-fill" style="width:86.7%;background:var(--accent);"></div></div>
+          <div class="score-desc">Market cap ₹49,079 crore (+24.8% YoY) with P/E 24.20x and P/B 3.82x reflects investor confidence in reinvestment quality. EPS ₹9.42 for Q2 FY26, ₹41.83 for FY2024-25. Strong ROCE and disciplined capital allocation with clear focus on high-return fee-based businesses. Private Wealth AUM grew 31% YoY to ₹1.96 lakh crore with family count up 41% and PAT up 14% for 9 months, reflecting returns from ongoing reinvestment in advisory infrastructure. The highest-scoring dimension reflects MOFSL's exemplary track record of allocating capital from lower-quality broking revenues into higher-quality, compounding fee businesses.</div>
+        </div>
+
+        <div class="score-item">
+          <div class="score-header">
+            <span class="score-name">S — Scalability of Core Engine</span>
+            <span class="score-val">12 / 15</span>
+          </div>
+          <div class="score-bar-bg"><div class="score-bar-fill" style="width:80%;background:var(--primary-dark);"></div></div>
+          <div class="score-desc">ARR now contributing 61% of total net revenues and fee-based revenue at 45% of total revenues demonstrates strong platform-based scalability. H1FY26 operating PAT ₹1,088 crore (+11% YoY) on consolidated net revenue ₹2,888 crore (+15%). Asset-light fee-based model enables serving growing client base without proportional infrastructure growth. AMC AUM rose 33% YoY to ₹1.89 lakh crore with net flows ₹11,610 crore. Regulatory constraints on F&amp;O trading limit full scalability of the broking engine near-term — hence 12 rather than 15.</div>
+        </div>
+
+        <div class="score-item">
+          <div class="score-header">
+            <span class="score-name">A1 — Addressable Market &amp; Adjacency</span>
+            <span class="score-val">9 / 10</span>
+          </div>
+          <div class="score-bar-bg"><div class="score-bar-fill" style="width:90%;background:var(--green);"></div></div>
+          <div class="score-desc">India projected to have 16.57 lakh HNWIs by 2027 — India the fourth-largest private wealth market globally by 2028. 58.4% surge in UHNWI population projected. India's financial services sector to double profits by FY30. Mutual fund penetration at 5-6% — massive latent opportunity. India private credit ₹US$9 billion in H1 2025 (+53% YoY). Massive TAM with successful adjacency expansion across capital markets, wealth management, housing finance, and alternative investments validates the integrated platform strategy.</div>
+        </div>
+
+        <div class="score-item">
+          <div class="score-header">
+            <span class="score-name">H — Human Capital &amp; Institutional DNA</span>
+            <span class="score-val">9 / 10</span>
+          </div>
+          <div class="score-bar-bg"><div class="score-bar-fill" style="width:90%;background:var(--teal);"></div></div>
+          <div class="score-desc">Raamdeo Agrawal — QGLP process creator, 'Buy Right, Sit Tight' philosophy architect, annual Wealth Creation Study author. Motilal Oswal — co-founder with 38-year institutional DNA. Navin Agarwal (joined 2000), Ajay Menon (joined 1998) provide institutional management depth. Rashtriya Samman Patra recipient for being highest income taxpayers for 5 years (FY95–99) — evidencing early ethical commercial success. This founding duo has navigated nearly four decades across multiple market cycles including 2001 dot-com crash, 2008 GFC, COVID-19, and multiple SEBI regulatory cycles — a rare institutional DNA advantage in Indian financial services.</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="score-item">
+          <div class="score-header">
+            <span class="score-name">T — Track Record Through Adversity</span>
+            <span class="score-val">8 / 10</span>
+          </div>
+          <div class="score-bar-bg"><div class="score-bar-fill" style="width:80%;background:var(--primary-mid);"></div></div>
+          <div class="score-desc">Q2FY25 profits ₹1,242 crore (+123% YoY) with 46% revenue growth and 48% ROE demonstrated exceptional performance in favorable markets. However, Q2FY26 profit decreased 67.64% YoY and revenue declined 34.91% YoY — showing meaningful vulnerability to regulatory changes in the F&amp;O segment. While AUM and ARR continued growing, the reported profit swing highlights residual cyclicality embedded in the business. Institutional resilience is demonstrated by continued growth of the non-broking businesses through the shock.</div>
+        </div>
+
+        <div class="score-item">
+          <div class="score-header">
+            <span class="score-name">I — Inflection Point Identification</span>
+            <span class="score-val">11 / 15</span>
+          </div>
+          <div class="score-bar-bg"><div class="score-bar-fill" style="width:73.3%;background:var(--green);"></div></div>
+          <div class="score-desc">ARR now constituting 65% of total net revenues (up from 61%), management guiding for further increases — a measurable inflection in revenue quality that the market appears to be underpricing. Analyst consensus target ₹1,126.67 vs. CMP ₹822.90 — 37% upside — confirms market has not priced the ARR re-rating story. AA+ credit upgrade by ICRA. Continued ARR growth toward 70%+ of revenues could trigger a significant valuation re-rating from broking to asset management multiples over 6-18 months — a clear, measurable, time-bound catalyst.</div>
+        </div>
+
+        <div class="score-item" style="border-bottom:none;">
+          <div class="score-header">
+            <span class="score-name">A2 — Asymmetric Pricing Power (Weakest)</span>
+            <span class="score-val">10 / 15</span>
+          </div>
+          <div class="score-bar-bg"><div class="score-bar-fill" style="width:66.7%;background:var(--accent);"></div></div>
+          <div class="score-desc">91% of AUM outperforming benchmarks provides meaningful pricing power in premium wealth and PMS segments — justifying management fees of 1-2% versus 0.1-0.5% for index trackers. A 24% decline in brokerage revenue due to regulatory changes exposes the cyclical segment to fee compression. Competitive pressure from discount brokers (Zerodha, Groww) and fintech platforms limits pricing in the commoditized broking segment. Asset management and wealth advisory command premium pricing due to research differentiation and track record — but this covers only 45-65% of current revenues, limiting the full pricing power score.</div>
+        </div>
+
+        <div class="highlight-box accent-border mt6">
+          <div class="highlight-box-title">SAARTHI Conviction Statement</div>
+          <p>At 72/100, Motilal Oswal Financial Services sits firmly in the BUY zone. The highest-scoring dimensions — Reinvestment Quality (13/15) and Human Capital (9/10) — reflect decades of disciplined, high-quality capital allocation and an institutional research culture that creates genuine, durable competitive moats. The weakest dimension — Asymmetric Pricing Power (10/15) — represents a known, partially managed risk through the ongoing ARR transformation. The scoring trajectory is positive: as ARR crosses 70%, both Scalability and Pricing Power scores should improve meaningfully, potentially pushing the total to 75-78/100 — a strong BUY confirmation with higher conviction.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div class="footer-left">SEBI Reg. No.: INH000009807</div>
+    <div class="footer-center">Motilal Oswal Financial Services Ltd — Equity Research</div>
+    <div class="footer-right">Page 11 of 15</div>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- PAGE 12: SCENARIO ANALYSIS -->
+<!-- ============================================================ -->
+<div class="page">
+  <div class="mini-header">
+    <div class="mini-firm">Tikona Capital</div>
+    <div class="mini-company">Motilal Oswal Financial Services — Scenario Analysis</div>
+    <div class="mini-stats">
+      <div class="mini-stat"><span class="mini-stat-label">CMP</span><span class="mini-stat-value">₹822.90</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">TP</span><span class="mini-stat-value accent">₹1,127</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Upside</span><span class="mini-stat-value green-v">+37%</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Mkt Cap</span><span class="mini-stat-value">₹49,079 Cr</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Rating</span><span class="mini-stat-value buy">BUY</span></div>
+    </div>
+  </div>
+
+  <div class="page-content pb48">
+    <div class="section-header">
+      <span class="section-number">12</span>
+      <span class="section-title">Scenario Analysis — Bull / Base / Bear Case with Assumptions</span>
+    </div>
+
+    <div class="three-col">
+      <div>
+        <div style="background:var(--primary-dark);border-radius:4px;padding:7px 10px;margin-bottom:8px;">
+          <div style="color:var(--red);font-family:'JetBrains Mono',monospace;font-size:7pt;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;">Bear Case — ₹630 (–23.4% vs CMP)</div>
+        </div>
+        <div class="highlight-box red-border">
+          <div class="highlight-box-title">Macro Assumptions</div>
+          <p>Indian equity markets enter prolonged correction phase (Nifty –20-30%). FII outflows intensify due to global risk-off. GDP growth decelerates to 5.5-6.0%. Interest rates remain elevated, suppressing AUM valuations across the board.</p>
+        </div>
+        <div class="highlight-box red-border">
+          <div class="highlight-box-title">Business Assumptions</div>
+          <p>SEBI imposes additional regulatory restrictions on F&amp;O trading beyond current measures. Brokerage revenues decline further (cumulative –40%). AUM growth slows to single digits amid market correction. Fee caps imposed on AMC industry limiting management fee income. Competition from discount fintech brokers further erodes broking market share. Recurring regulatory violations lead to material enforcement action. ARR proportion drops to 55% as regulatory compression of fee income occurs alongside absolute revenue decline.</p>
+        </div>
+        <div class="highlight-box red-border">
+          <div class="highlight-box-title">Valuation Assumptions</div>
+          <p>18x P/E applied on depressed FY27E EPS of ₹35. Multiple compression reflects: (1) regulatory uncertainty discount, (2) ARR thesis challenged, (3) market-wide de-rating. PAT FY27E: ₹2,100 crore (significantly below current ₹2,502 crore FY25A baseline).</p>
+        </div>
+        <table>
+          <thead><tr><th>Metric</th><th>Bear Value</th></tr></thead>
+          <tbody>
+            <tr><td>FY27E PAT</td><td class="red">₹2,100 Cr</td></tr>
+            <tr><td>EPS FY27E</td><td class="red">₹35</td></tr>
+            <tr><td>P/E Applied</td><td>18x (compressed)</td></tr>
+            <tr><td>Implied Price</td><td class="red bold">₹630</td></tr>
+            <tr><td>vs CMP</td><td class="red">–23.4%</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div>
+        <div style="background:var(--primary-dark);border-radius:4px;padding:7px 10px;margin-bottom:8px;">
+          <div style="color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:7pt;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;">Base Case — ₹1,127 (+37% vs CMP) — PRIMARY RECOMMENDATION</div>
+        </div>
+        <div class="highlight-box accent-border">
+          <div class="highlight-box-title">Macro Assumptions</div>
+          <p>India GDP growth at 6.5-7.0% sustained. Equity markets deliver moderate returns. F&amp;O regulatory environment stabilizes at current tightening levels. SIP culture continues expanding into Tier 2-3 cities at 15-20% annual pace.</p>
+        </div>
+        <div class="highlight-box accent-border">
+          <div class="highlight-box-title">Business Assumptions</div>
+          <p>ARR stabilizes at 65% of total revenues with gradual improvement toward 68-70%. AUM growth sustaining above 25% YoY with net flows exceeding ₹10,000 crore annually. Private Wealth AUM growing 25%+ YoY with family count expansion. Housing Finance loan book growing 20-25% YoY. Operating PAT growth sustains at 10-15% annually with net revenue growth 15-20%. Operating leverage maintains EBITDA margins above 52%. No major SEBI enforcement actions. Stable regulatory environment for capital markets.</p>
+        </div>
+        <div class="highlight-box accent-border">
+          <div class="highlight-box-title">Valuation Assumptions</div>
+          <p>24x P/E applied on FY27E EPS ₹47 — consistent with current market multiple for hybrid broking/wealth platforms. This is conservative versus pure AMC peers at 28-35x. Discounted at 12% to 12-month target yields ₹1,127.</p>
+        </div>
+        <table>
+          <thead><tr><th>Metric</th><th>Base Value</th></tr></thead>
+          <tbody>
+            <tr><td>FY27E PAT</td><td class="bold">₹3,983 Cr</td></tr>
+            <tr><td>EPS FY27E</td><td class="bold">₹66.5</td></tr>
+            <tr><td>P/E Applied</td><td>24x (FY27E)</td></tr>
+            <tr><td>Target (12-mon disc.)</td><td class="bold accent">₹1,127 TP</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div>
+        <div style="background:var(--green);border-radius:4px;padding:7px 10px;margin-bottom:8px;">
+          <div style="color:var(--white);font-family:'JetBrains Mono',monospace;font-size:7pt;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;">Bull Case — ₹1,400 (+70% vs CMP)</div>
+        </div>
+        <div class="highlight-box green-border">
+          <div class="highlight-box-title">Macro Assumptions</div>
+          <p>India GDP growth at 7.5%+. Equity markets rally 20-25% driven by India growth narrative. Global risk appetite high. FII flows sustain into India's structural story. UHNWI population growth accelerates faster than projected.</p>
+        </div>
+        <div class="highlight-box green-border">
+          <div class="highlight-box-title">Business Assumptions</div>
+          <p>ARR crosses 70% — triggering institutional recognition of the AMC re-rating thesis. AUM growth accelerates to 40%+ YoY as bull market + new HNI creation provides double tailwind. Successful international expansion (UAE, Singapore wealth management). Private credit alternatives business scales to ₹500+ crore AUM carry. Regulatory clarity on F&amp;O with volumes recovering. New product categories (global investing, digital advisory) contribute 5-10% of revenues. MOFSL achieves market share gains in both AMC and wealth management segments.</p>
+        </div>
+        <div class="highlight-box green-border">
+          <div class="highlight-box-title">Valuation Assumptions</div>
+          <p>28x P/E applied on FY27E EPS ₹50 (bull case assumes higher operating leverage). Multiple expansion justified by ARR hitting 70%+ — market begins valuing MOFSL as an asset manager rather than a broking house. Probability: 30%.</p>
+        </div>
+        <table>
+          <thead><tr><th>Metric</th><th>Bull Value</th></tr></thead>
+          <tbody>
+            <tr><td>FY27E PAT</td><td class="green bold">₹3,000+ Cr (accelerated)</td></tr>
+            <tr><td>EPS FY27E</td><td class="green bold">₹50 (bull EPS)</td></tr>
+            <tr><td>P/E Applied</td><td>28x (re-rating)</td></tr>
+            <tr><td>Implied Price</td><td class="green bold">₹1,400</td></tr>
+            <tr><td>vs CMP</td><td class="green bold">+70.1%</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div class="footer-left">SEBI Reg. No.: INH000009807</div>
+    <div class="footer-center">Motilal Oswal Financial Services Ltd — Equity Research</div>
+    <div class="footer-right">Page 12 of 15</div>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- PAGE 13: RISKS & FORENSIC -->
+<!-- ============================================================ -->
+<div class="page">
+  <div class="mini-header">
+    <div class="mini-firm">Tikona Capital</div>
+    <div class="mini-company">Motilal Oswal Financial Services — Risk Register &amp; Forensic Assessment</div>
+    <div class="mini-stats">
+      <div class="mini-stat"><span class="mini-stat-label">CMP</span><span class="mini-stat-value">₹822.90</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">TP</span><span class="mini-stat-value accent">₹1,127</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Upside</span><span class="mini-stat-value green-v">+37%</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Mkt Cap</span><span class="mini-stat-value">₹49,079 Cr</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Rating</span><span class="mini-stat-value buy">BUY</span></div>
+    </div>
+  </div>
+
+  <div class="page-content pb48">
+    <div class="section-header">
+      <span class="section-number">13</span>
+      <span class="section-title">Risk Register &amp; Forensic Assessment — Governance Monitoring</span>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="fin-table-title mb6">Investment Risks</div>
+        <div class="risk-item">
+          <div class="risk-badge risk-high">HIGH</div>
+          <div class="risk-text"><span class="risk-title">SEBI Regulatory Headwinds on F&amp;O</span>SEBI's repeated interventions on F&amp;O trading norms compressing cyclical broking revenues — Q2FY26 brokerage revenue declined 24%. Primary risk to near-term earnings: if SEBI imposes further restrictions, broking revenues could decline an additional 15-25%. Monitoring trigger: track quarterly SEBI circulars on derivatives framework and F&amp;O volume data.</div>
+        </div>
+        <div class="risk-item">
+          <div class="risk-badge risk-high">HIGH</div>
+          <div class="risk-text"><span class="risk-title">Market Volatility — AUM Valuation Risk</span>A sharp equity market correction (Nifty –20%+ scenario) would compress AUM valuations and therefore management fee income. 46% YoY AUM growth is partly market appreciation — in a bear market, this reverses to AUM compression. H1FY26 operating PAT growth of 11% is partly protected by new flows, but an extended bear market reduces both valuations and new investment appetite simultaneously.</div>
+        </div>
+        <div class="risk-item">
+          <div class="risk-badge risk-high">HIGH</div>
+          <div class="risk-text"><span class="risk-title">Fintech Disruption — Discount Broker Competition</span>Zerodha, Groww, and other discount fintech brokers continue to capture retail broking market share. MOFSL's differentiation in research and HNI advisory limits the impact in premium segments, but the mass-market broking business faces structural margin compression. Fintech startups grew from 733 (FY16-17) to 14,000+ (FY21-22) — competitive intensity is at an all-time high.</div>
+        </div>
+        <div class="risk-item">
+          <div class="risk-badge risk-med">MED</div>
+          <div class="risk-text"><span class="risk-title">ARR Trajectory Risk — Thesis-Breaking Condition</span>If ARR contribution drops below 55% for two consecutive quarters (currently 65%), the re-rating thesis is challenged. This could occur if regulatory headwinds become severe enough to compress fee income disproportionately, or if management makes an ill-timed acquisition that increases revenue volatility. Monitor ARR % every quarter against the 55% floor threshold.</div>
+        </div>
+        <div class="risk-item">
+          <div class="risk-badge risk-med">MED</div>
+          <div class="risk-text"><span class="risk-title">AUM Performance Reversion Risk</span>91% of AUM outperforming benchmarks over 3 years is exceptional — but it creates a high baseline. Any meaningful performance reversion (especially in MOFSL's flagship multicap and emerging bluechip funds) would trigger client redemptions and hurt both AUM levels and the brand premium that justifies higher management fees.</div>
+        </div>
+        <div class="risk-item" style="border-bottom:none;">
+          <div class="risk-badge risk-low">LOW</div>
+          <div class="risk-text"><span class="risk-title">Key Person Risk — Raamdeo Agrawal</span>Raamdeo Agrawal's QGLP philosophy and research reputation are deeply embedded in the MOFSL brand and AUM outperformance. Any leadership transition risk (health, retirement) could create client confidence uncertainty, particularly for the QGLP-branded funds. Institutional process documentation and second-tier research leadership development would mitigate this long-term structural risk.</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="fin-table-title mb6" style="color:var(--red);">⚠ Forensic Assessment — MONITOR CLOSELY</div>
+        <div class="highlight-box red-border mb6">
+          <div class="highlight-box-title">Overall Forensic Verdict: Monitor Closely</div>
+          <p>MOFSL faces recurring regulatory violations that are operational rather than fraudulent in nature. Despite SEBI's repeated interventions, these structural lapses suggest deeper governance issues within the risk management systems. The pattern warrants close monitoring but does not fundamentally impair the business model or thesis. We classify MOFSL in the "Monitor Closely" forensic category — not disqualifying, but requiring active quarterly tracking of compliance developments.</p>
+        </div>
+        <div class="risk-item">
+          <div class="risk-badge risk-med">MED</div>
+          <div class="risk-text"><span class="risk-title">SEBI Penalty — Margin Reporting Violations (2021)</span>SEBI imposed ₹7 lakh penalty for multiple violations of securities laws stemming from margin reporting issues, collection violations, and other regulatory lapses discovered during an inspection. While small in monetary terms, the pattern suggests systemic compliance weaknesses in the back-office and reporting infrastructure. Severity: Low monetary, Medium reputational.</div>
+        </div>
+        <div class="risk-item">
+          <div class="risk-badge risk-med">MED</div>
+          <div class="risk-text"><span class="risk-title">SEBI Penalty — Client Fund Misutilization (May 2022)</span>In May 2022, SEBI penalized Motilal Oswal with ₹25 lakh fine for misutilization of client funds and inaccurate margin reporting. The combination of client fund misuse and reporting inaccuracies indicates gaps in internal controls and oversight — a more substantive governance concern than the 2021 margin reporting violation alone. Severity: Medium — second offense of financial reporting nature.</div>
+        </div>
+        <div class="risk-item">
+          <div class="risk-badge risk-high">HIGH</div>
+          <div class="risk-text"><span class="risk-title">NSEL Case — Misselling &amp; 'Not Fit &amp; Proper' (Historical)</span>SFIO and EOW-Mumbai found MOFSL guilty of misselling NSEL contracts, KYC manipulation, client code modification, and illegal transactions. SEBI declared MOFSL "not fit and proper" as commodity derivative broker in February 2019. While historical, the severity of these findings — including regulatory disqualification in a product category — demands ongoing monitoring. Severity: High (historical) — still affects regulatory relationship quality.</div>
+        </div>
+        <div class="risk-item">
+          <div class="risk-badge risk-med">MED</div>
+          <div class="risk-text"><span class="risk-title">Unauthorized Terminal Operations</span>SEBI concluded MOFSL failed to exercise sufficient control over APs with 13 NSE + 9 BSE terminals operating from locations not declared to the regulator, including an unreported branch in Delhi. This is an operational governance and reporting failure — suggesting the compliance infrastructure has not scaled commensurately with business growth. Severity: Medium — structural control weakness.</div>
+        </div>
+        <div class="highlight-box accent-border mt6">
+          <div class="highlight-box-title">Forensic Monitoring Triggers</div>
+          <p>1. Any fresh SEBI enforcement actions or penalties (monitor every quarter) | 2. Client complaint escalation trends on SCORES portal | 3. Auditor commentary on internal controls in quarterly results | 4. Management's progress on compliance infrastructure investments | 5. Any investigation by SFIO, EOW, or other enforcement agencies expanding scope from historical NSEL case.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div class="footer-left">SEBI Reg. No.: INH000009807</div>
+    <div class="footer-center">Motilal Oswal Financial Services Ltd — Equity Research</div>
+    <div class="footer-right">Page 13 of 15</div>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- PAGE 14: ENTRY STRATEGY & RECOMMENDATION -->
+<!-- ============================================================ -->
+<div class="page">
+  <div class="mini-header">
+    <div class="mini-firm">Tikona Capital</div>
+    <div class="mini-company">Motilal Oswal Financial Services — Entry Strategy &amp; Recommendation</div>
+    <div class="mini-stats">
+      <div class="mini-stat"><span class="mini-stat-label">CMP</span><span class="mini-stat-value">₹822.90</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">TP</span><span class="mini-stat-value accent">₹1,127</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Upside</span><span class="mini-stat-value green-v">+37%</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Mkt Cap</span><span class="mini-stat-value">₹49,079 Cr</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Rating</span><span class="mini-stat-value buy">BUY</span></div>
+    </div>
+  </div>
+
+  <div class="page-content pb48">
+    <div class="section-header">
+      <span class="section-number">14</span>
+      <span class="section-title">Entry, Review &amp; Exit Strategy</span>
+    </div>
+
+    <div class="two-col-wide">
+      <div>
+        <div class="thesis-box mb8">
+          <p><span class="analysis-bold">Conviction Statement:</span> We initiate coverage on Motilal Oswal Financial Services with a BUY rating and target price of ₹1,127, representing 37% upside from current levels. At ₹822.90, you are acquiring India's premier research-driven financial services platform at 16.1x FY26E P/E — a compelling discount to both its fundamental value and to pure-play AMC peers. The ARR transformation thesis is measurable, time-bound, and confirmed by management guidance — when ARR crosses 70% of revenues, we expect a valuation re-rating from 16-20x P/E to 24-28x P/E, generating substantial alpha on this position.</p>
+        </div>
+
+        <div class="fin-table-title mb6">Entry Strategy — When to Buy</div>
+        <div class="highlight-box accent-border">
+          <div class="highlight-box-title">Immediate Entry Zone: ₹800-850 (Current — OPTIMAL)</div>
+          <p>The current CMP of ₹822.90 is within the optimal entry range of ₹800-850. This represents a 27-37% discount to our target price and a 15-20% discount to analyst consensus. The stock is trading at 16.1x FY26E P/E — one of the cheapest quality financial services franchises in India. The SEBI F&amp;O headwind has created a compelling valuation dislocation: the market is pricing MOFSL as a broking company, not as the 65% ARR, AUM-compounding, fee-generating machine it actually is. We recommend initiating a full position at current levels — this is a rare entry point where valuation mispricing aligns with a structural growth catalyst.</p>
+        </div>
+        <div class="highlight-box navy-border">
+          <div class="highlight-box-title">Add-On Zone: ₹750-800 (If Weakness Occurs)</div>
+          <p>Any correction toward ₹750-800 on macro volatility or market-wide sell-off should be used aggressively to add to positions. At ₹750, MOFSL trades at approximately 14.7x FY26E P/E — below the long-run fair value of 20-24x for an asset manager growing at 25%+ CAGR. Technically, ₹750 is the hard stop-loss level — above ₹750, any weakness is a buy opportunity within the BUY thesis.</p>
+        </div>
+        <div class="highlight-box green-border">
+          <div class="highlight-box-title">Review Points — Thesis Confirmation Milestones</div>
+          <p><strong>Every Quarter:</strong> Confirm ARR % of total net revenues maintaining above 60%. Monitor AUM growth sustaining above 25% YoY with net flows exceeding ₹10,000 crore annually. Track SEBI compliance track record — no major enforcement actions.<br><br><strong>Every 2 Quarters:</strong> Verify Private Wealth AUM growth above 25% YoY with family count expansion. Assess management commentary on ARR trajectory and business mix transformation timeline. Monitor operating leverage improvement with cost-to-income ratio declining.</p>
+        </div>
+
+        <div class="fin-table-title mb4 mt6">Thesis Invalidation Triggers — When to Exit</div>
+        <div class="risk-item">
+          <div class="risk-badge risk-high">EXIT</div>
+          <div class="risk-text"><span class="risk-title">ARR Below 55% for Two Consecutive Quarters</span>If Annual Recurring Revenue contribution drops below 55% of total net revenues for two consecutive quarters, the core re-rating thesis is fundamentally challenged. This would signal that regulatory compression is broader than expected or that the business model transformation is reversing. Immediate: reduce to 50% position and place 30-day watch; if no recovery, exit fully.</div>
+        </div>
+        <div class="risk-item">
+          <div class="risk-badge risk-high">EXIT</div>
+          <div class="risk-text"><span class="risk-title">Major SEBI Enforcement Action with Direct Business Impact</span>If SEBI issues a business restriction order (suspension of operations, license revocation, or major fine above ₹100 crore) that directly impairs MOFSL's ability to operate in any core business segment (AMC, broking, wealth management), immediately exit the position. Forensic "Monitor Closely" classification would upgrade to "Exit" on such an event.</div>
+        </div>
+        <div class="risk-item" style="border-bottom:none;">
+          <div class="risk-badge risk-high">EXIT</div>
+          <div class="risk-text"><span class="risk-title">Asset Management AUM Declining for Two Consecutive Quarters</span>AUM growth is the lifeblood of the re-rating thesis. If AMC AUM declines for two consecutive quarters (indicating redemptions exceeding new flows + market appreciation), the fee-based revenue growth engine is impaired. Stop-loss at ₹750 (–8.8% from CMP) if technical support breaks with high volume on thesis-confirming negative news.</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="fin-table-title mb6">Investment Summary Scorecard</div>
+        <table>
+          <thead><tr><th>Parameter</th><th>Assessment</th><th>Score</th></tr></thead>
+          <tbody>
+            <tr><td>SAARTHI Framework</td><td class="bold green">BUY Zone</td><td class="bold">72/100</td></tr>
+            <tr><td>Valuation Attractiveness</td><td class="bold green">37% Undervalued</td><td class="bold">Upside 37%</td></tr>
+            <tr><td>Revenue Quality</td><td class="bold green">65% ARR Recurring</td><td class="bold">High Quality</td></tr>
+            <tr><td>AUM Growth Visibility</td><td class="green">High</td><td>+46% YoY</td></tr>
+            <tr><td>Management Track Record</td><td class="bold green">38-Year QGLP</td><td>9/10</td></tr>
+            <tr><td>Governance Risk</td><td>Monitor Closely</td><td>6/10</td></tr>
+            <tr><td>Earnings Growth</td><td class="green">Strong</td><td>27% CAGR</td></tr>
+            <tr><td>Credit Rating</td><td class="bold green">AA+ Stable</td><td>Best-in-class</td></tr>
+            <tr class="tbl-highlight"><td>Overall Recommendation</td><td class="bold green">BUY — HIGH CONVICTION</td><td class="bold accent">TP: ₹1,127</td></tr>
+          </tbody>
+        </table>
+
+        <div class="highlight-box accent-border mt8">
+          <div class="highlight-box-title">Tikona Capital Position Summary</div>
+          <p><strong>Rating:</strong> BUY (Initiating Coverage)<br><strong>Base Target Price:</strong> ₹1,127 (12-month)<br><strong>Probability-Weighted Target:</strong> ₹1,109<br><strong>Stop-Loss:</strong> ₹750 (–8.8% from CMP — hard exit if technical support breaks)<br><strong>Time Horizon:</strong> 12–18 months to base target realization; 18–36 months for bull case if ARR hits 70%+<br><strong>Position Sizing:</strong> Core mid-cap holding (3-5% portfolio weight). The AA+ balance sheet and strong liquidity (₹49,079 crore market cap) permit meaningful sizing. 2-3 month build timeline recommended to average volatility from SEBI regulatory headwinds.</p>
+        </div>
+
+        <div class="highlight-box navy-border mt6">
+          <div class="highlight-box-title">Exit Strategy — Scaling Out on Gains</div>
+          <p><strong>Sell 50%</strong> at ₹1,100-1,150 (30-40% gains) — book partial profits as stock approaches consensus target.<br><strong>Sell remaining 50%</strong> at ₹1,200+ (45%+ gains) if valuation multiples expand beyond 25x P/E — signaling ARR re-rating is being priced in by the broader market.<br><strong>Review holding</strong> after 24 months if stock fails to achieve ₹1,000+ despite thesis intact — reassess market timing rather than fundamental thesis.</p>
+        </div>
+
+        <div class="disclaimer">
+          <strong>DISCLAIMER:</strong> This research report has been prepared by Tikona Capital Finserv Pvt. Ltd. ("Tikona Capital"), a SEBI Registered Research Analyst. This document is for informational purposes only and does not constitute an offer or solicitation for the purchase or sale of any financial instrument. The information contained herein is obtained from public sources believed to be reliable but is not guaranteed as to accuracy or completeness. Tikona Capital and its affiliates may trade for their own account, and may have positions in the securities mentioned herein. Past performance is no guarantee of future results. Investors should independently evaluate investments and are advised to consult their own investment advisors. Tikona Capital Finserv Pvt. Ltd. | SEBI Registration No.: INH000009807 | Registered Office: Mumbai, Maharashtra.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div class="footer-left">SEBI Reg. No.: INH000009807</div>
+    <div class="footer-center">Motilal Oswal Financial Services Ltd — Equity Research</div>
+    <div class="footer-right">Page 14 of 15</div>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- PAGE 15: REGULATORY DISCLAIMER -->
+<!-- ============================================================ -->
+<div class="page">
+  <div class="mini-header">
+    <div class="mini-firm">Tikona Capital</div>
+    <div class="mini-company">Motilal Oswal Financial Services — Regulatory Disclaimer &amp; Disclosures</div>
+    <div class="mini-stats">
+      <div class="mini-stat"><span class="mini-stat-label">CMP</span><span class="mini-stat-value">₹822.90</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">TP</span><span class="mini-stat-value accent">₹1,127</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Upside</span><span class="mini-stat-value green-v">+37%</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Mkt Cap</span><span class="mini-stat-value">₹49,079 Cr</span></div>
+      <div class="mini-stat"><span class="mini-stat-label">Rating</span><span class="mini-stat-value buy">BUY</span></div>
+    </div>
+  </div>
+
+  <div class="page-content pb48">
+    <div class="section-header">
+      <span class="section-number">15</span>
+      <span class="section-title">Regulatory Disclaimer, Disclosures &amp; Compliance</span>
+    </div>
+
+    <div class="two-col-wide">
+      <div>
+        <div class="highlight-box accent-border mb8">
+          <div class="highlight-box-title">About Us</div>
+          <p>Research Analyst is registered with SEBI as Research Analyst with Registration No. INH000009807. The firm got its registration on June 13, 2022, and is engaged in research services.</p>
+        </div>
+
+        <div class="highlight-box navy-border mb8">
+          <div class="highlight-box-title">Disciplinary History</div>
+          <p>No penalties / directions have been issued by SEBI under the SEBI Act or Regulations made thereunder against Tikona Capital. There are no pending material litigations or legal proceedings, findings of inspections or investigations for which action has been taken or initiated by any regulatory authority against the Research Analyst.</p>
+        </div>
+
+        <div class="highlight-box mb8" style="border-left:3px solid var(--mid-grey);">
+          <div class="highlight-box-title">Details of Associates</div>
+          <p>No associates.</p>
+        </div>
+
+        <div class="highlight-box navy-border mb8">
+          <div class="highlight-box-title">Disclosures with Respect to Research and Recommendation Services</div>
+          <p>Research Analyst may have financial interest or actual / beneficial ownership in the securities recommended in its personal portfolio. Details of the same may be referred through the disclosures made at the time of recommendation.</p>
+          <p style="margin-top:5px;">There are no actual or potential conflicts of interest arising from any connection to or association with any issuer of products / securities, including any material information or facts that might compromise its objectivity or independence in the carrying on of Research Analyst services.</p>
+        </div>
+
+        <div style="border:1px solid var(--border);border-radius:4px;overflow:hidden;">
+          <div style="background:var(--primary-dark);padding:5px 9px;">
+            <span style="color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:6.5pt;font-weight:700;text-transform:uppercase;">Conflict of Interest &amp; Independence Declarations</span>
+          </div>
+          <div style="padding:7px 9px;">
+            <div class="risk-item" style="border-bottom:1px solid var(--border);padding-bottom:5px;margin-bottom:5px;">
+              <div class="risk-badge" style="background:#d1fae5;color:var(--green);font-size:5pt;width:40px;">NIL</div>
+              <div style="font-size:6.5pt;color:var(--text);line-height:1.5;text-align:justify;">Research Analyst or its employee or its associates have <strong>not received any compensation</strong> from the company (MOFSL) in past 12 months.</div>
+            </div>
+            <div class="risk-item" style="border-bottom:1px solid var(--border);padding-bottom:5px;margin-bottom:5px;">
+              <div class="risk-badge" style="background:#d1fae5;color:var(--green);font-size:5pt;width:40px;">NIL</div>
+              <div style="font-size:6.5pt;color:var(--text);line-height:1.5;text-align:justify;">Research Analyst or its employee or its associates have <strong>not managed or co-managed</strong> the public offering of the Subject Company (MOFSL) in the past 12 months.</div>
+            </div>
+            <div class="risk-item" style="border-bottom:1px solid var(--border);padding-bottom:5px;margin-bottom:5px;">
+              <div class="risk-badge" style="background:#d1fae5;color:var(--green);font-size:5pt;width:40px;">NIL</div>
+              <div style="font-size:6.5pt;color:var(--text);line-height:1.5;text-align:justify;">Research Analyst or its employee or its associates have <strong>not received any compensation for investment banking, merchant banking, or brokerage services</strong> from the subject company (MOFSL) in the past 12 months.</div>
+            </div>
+            <div class="risk-item" style="border-bottom:1px solid var(--border);padding-bottom:5px;margin-bottom:5px;">
+              <div class="risk-badge" style="background:#d1fae5;color:var(--green);font-size:5pt;width:40px;">NIL</div>
+              <div style="font-size:6.5pt;color:var(--text);line-height:1.5;text-align:justify;">Research Analyst or its employee or its associates have <strong>not received any compensation or other benefits from MOFSL or any third party</strong> in connection with the research report / recommendation.</div>
+            </div>
+            <div class="risk-item" style="border-bottom:none;padding-bottom:0;margin-bottom:0;">
+              <div class="risk-badge" style="background:#d1fae5;color:var(--green);font-size:5pt;width:40px;">NIL</div>
+              <div style="font-size:6.5pt;color:var(--text);line-height:1.5;text-align:justify;">Research Analysts or its employee or its associates have <strong>not served as an officer, director, or employee</strong> of the subject company (MOFSL).</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="highlight-box red-border mb8">
+          <div class="highlight-box-title">⚠ Important Regulatory Notices</div>
+          <p style="margin-bottom:5px;"><strong>Registration &amp; Certification:</strong> Registration granted by SEBI, membership of BASL and certification from NISM in no way guarantee performance of the Intermediary or provide any assurance of returns to investors.</p>
+          <p><strong>Market Risk Warning:</strong> Investment in securities market are subject to market risks. Read all the related documents carefully before investing.</p>
+        </div>
+
+        <div class="highlight-box mb8" style="border-left:3px solid var(--primary-dark);background:var(--light-grey);">
+          <div class="highlight-box-title">General Disclaimer</div>
+          <p>This research report has been prepared by Tikona Capital Finserv Pvt. Ltd. ("Tikona Capital"), a SEBI Registered Research Analyst (Registration No. INH000009807). This document is for informational purposes only and does not constitute an offer or solicitation for the purchase or sale of any financial instrument.</p>
+          <p style="margin-top:4px;">The information contained herein is obtained from public sources believed to be reliable but is not guaranteed as to accuracy or completeness. Tikona Capital and its affiliates may trade for their own account and may have positions in the securities mentioned herein. Past performance is no guarantee of future results.</p>
+          <p style="margin-top:4px;">Investors should independently evaluate investments and are advised to consult their own investment advisors before making any investment decisions. All views and opinions expressed herein are those of Tikona Capital Research and are subject to change without notice. This report is intended for institutional and sophisticated investors and should not be relied upon as a sole basis for any investment decision.</p>
+        </div>
+
+        <div class="highlight-box accent-border mb8">
+          <div class="highlight-box-title">Report Identification</div>
+          <p><strong>Subject Company:</strong> Motilal Oswal Financial Services Ltd (NSE: MOFSL | BSE: 532892)<br>
+          <strong>Report Type:</strong> Initiating Coverage — Equity Research<br>
+          <strong>Reference Quarter:</strong> Q2 FY2025-26 (September 30, 2025)<br>
+          <strong>Analyst:</strong> Tikona Capital Research Team<br>
+          <strong>SEBI Registration No.:</strong> INH000009807<br>
+          <strong>Registration Date:</strong> June 13, 2022<br>
+          <strong>Registered with:</strong> Securities and Exchange Board of India (SEBI)</p>
+        </div>
+
+        <div style="background:var(--primary-dark);border-radius:4px;padding:10px 12px;margin-bottom:8px;">
+          <div style="color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:6.5pt;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Rating Legend &amp; Framework</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;">
+            <div style="background:rgba(255,165,0,0.2);border-radius:3px;padding:5px 7px;">
+              <div style="color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:7pt;font-weight:700;">BUY</div>
+              <div style="color:rgba(255,255,255,0.7);font-size:5.5pt;margin-top:2px;">Expected return &gt;15% over 12 months. SAARTHI Score 70–100.</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.1);border-radius:3px;padding:5px 7px;">
+              <div style="color:var(--white);font-family:'JetBrains Mono',monospace;font-size:7pt;font-weight:700;">HOLD</div>
+              <div style="color:rgba(255,255,255,0.7);font-size:5.5pt;margin-top:2px;">Expected return 5–15% or thesis partially intact. SAARTHI 55–70.</div>
+            </div>
+            <div style="background:rgba(185,28,28,0.2);border-radius:3px;padding:5px 7px;">
+              <div style="color:#fca5a5;font-family:'JetBrains Mono',monospace;font-size:7pt;font-weight:700;">SELL</div>
+              <div style="color:rgba(255,255,255,0.7);font-size:5.5pt;margin-top:2px;">Expected return &lt;5% or downside risk. SAARTHI below 55.</div>
+            </div>
+            <div style="background:rgba(14,116,144,0.2);border-radius:3px;padding:5px 7px;">
+              <div style="color:#7dd3fc;font-family:'JetBrains Mono',monospace;font-size:7pt;font-weight:700;">WATCH</div>
+              <div style="color:rgba(255,255,255,0.7);font-size:5.5pt;margin-top:2px;">Under monitoring — insufficient data or thesis in flux.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="disclaimer">
+          <strong>Copyright &amp; Distribution:</strong> © 2026 Tikona Capital Finserv Pvt. Ltd. All rights reserved. This publication is strictly for the use of the intended recipient only. Any reproduction, redistribution, or retransmission of this document without the prior written consent of Tikona Capital is strictly prohibited. Tikona Capital Finserv Pvt. Ltd. | SEBI Research Analyst Registration No.: INH000009807 | Registration Date: June 13, 2022 | Registered Office: Mumbai, Maharashtra, India.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div class="footer-left">SEBI Reg. No.: INH000009807</div>
+    <div class="footer-center">Motilal Oswal Financial Services Ltd — Equity Research</div>
+    <div class="footer-right">Page 15 of 15</div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,13 +1,14 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
-import { getFrameworkFromPlaybook, updateSectorPlaybook } from '@/lib/pipeline-api';
+import { getFrameworkFromPlaybook, updateSectorPlaybook, getSectorPlaybookVersions } from '@/lib/pipeline-api';
 import { runStage0 } from '@/lib/anthropic-pipeline';
-import type { SectorPlaybook } from '@/types/pipeline';
+import type { SectorPlaybook, SectorPlaybookVersion } from '@/types/pipeline';
 import type { PipelineProgress } from '@/types/pipeline';
 import {
   Search, ChevronRight, Save, X, RefreshCw,
   Layers, CalendarDays, Hash, ArrowLeft, Pencil, Eye,
   Sparkles, ChevronDown, ChevronUp, Zap, RotateCcw,
+  History, Clock,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { SECTORS } from '@/lib/sectors';
@@ -39,6 +40,13 @@ export default function SectorThesis() {
   // --- Regenerate (right panel) state ---
   const [regenerating, setRegenerating] = useState(false);
   const [regenProgress, setRegenProgress] = useState<PipelineProgress | null>(null);
+
+  // --- Version history state ---
+  const [versions, setVersions] = useState<SectorPlaybookVersion[]>([]);
+  const [versionsLoading, setVersionsLoading] = useState(false);
+  const [showVersionPanel, setShowVersionPanel] = useState(false);
+  const [viewingVersion, setViewingVersion] = useState<SectorPlaybookVersion | null>(null);
+  const versionPanelRef = useRef<HTMLDivElement>(null);
 
   const sectorInputRef = useRef<HTMLInputElement>(null);
 
@@ -86,7 +94,36 @@ export default function SectorThesis() {
     setSelectedPlaybook(pb);
     setDraft(getFrameworkFromPlaybook(pb));
     setEditMode(false);
+    setViewingVersion(null);
+    setShowVersionPanel(false);
+    // Load version history for this playbook
+    loadVersions(pb.id);
   };
+
+  // ---------- Load version history ----------
+  const loadVersions = useCallback(async (playbookId: string) => {
+    setVersionsLoading(true);
+    try {
+      const versionData = await getSectorPlaybookVersions(playbookId);
+      setVersions(versionData);
+    } catch (err) {
+      console.error('Failed to load versions:', err);
+      setVersions([]);
+    } finally {
+      setVersionsLoading(false);
+    }
+  }, []);
+
+  // Close version panel on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (versionPanelRef.current && !versionPanelRef.current.contains(e.target as Node)) {
+        setShowVersionPanel(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
   // ---------- Save edited framework ----------
   const handleSave = async () => {
@@ -485,6 +522,101 @@ export default function SectorThesis() {
                   </>
                 ) : (
                   <>
+                    {/* Version History button */}
+                    <div className="relative" ref={versionPanelRef}>
+                      <button
+                        onClick={() => setShowVersionPanel(v => !v)}
+                        disabled={versionsLoading}
+                        className={`h-8 px-3 rounded-lg border text-xs font-medium transition-colors flex items-center gap-2 ${
+                          showVersionPanel || viewingVersion
+                            ? 'bg-amber-50 border-amber-300 text-amber-700'
+                            : 'border-neutral-200 text-neutral-600 hover:bg-neutral-50 hover:border-neutral-300'
+                        }`}
+                        title="View previous versions"
+                      >
+                        <History className="h-3.5 w-3.5" />
+                        {viewingVersion ? `v${viewingVersion.version}` : 'History'}
+                        {versions.length > 0 && (
+                          <span className="inline-flex items-center justify-center h-4 min-w-[16px] px-1 rounded-full bg-neutral-200 text-neutral-600 text-[10px] font-bold">
+                            {versions.length}
+                          </span>
+                        )}
+                      </button>
+
+                      {/* Version dropdown panel */}
+                      {showVersionPanel && (
+                        <div className="absolute right-0 top-full mt-2 w-72 bg-white border border-neutral-200 rounded-xl shadow-lg z-50 overflow-hidden">
+                          <div className="px-4 py-3 border-b border-neutral-100 bg-neutral-50">
+                            <p className="text-xs font-semibold text-neutral-700 flex items-center gap-2">
+                              <History className="h-3 w-3" /> Version History
+                            </p>
+                            <p className="text-xs text-neutral-400 mt-0.5">
+                              {versions.length} previous version{versions.length !== 1 ? 's' : ''} archived
+                            </p>
+                          </div>
+                          <div className="max-h-64 overflow-y-auto">
+                            {/* Current version */}
+                            <button
+                              onClick={() => {
+                                setViewingVersion(null);
+                                setShowVersionPanel(false);
+                              }}
+                              className={`w-full text-left px-4 py-3 border-b border-neutral-50 hover:bg-accent-50 transition-colors ${
+                                !viewingVersion ? 'bg-accent-50' : ''
+                              }`}
+                            >
+                              <div className="flex items-center justify-between">
+                                <span className="text-xs font-semibold text-accent-700 flex items-center gap-1.5">
+                                  <Hash className="h-2.5 w-2.5" /> v{selectedPlaybook.version}
+                                  <span className="px-1.5 py-0.5 rounded bg-accent-100 text-accent-600 text-[10px] font-bold">CURRENT</span>
+                                </span>
+                                <span className="text-[10px] text-neutral-400">{selectedPlaybook.last_updated}</span>
+                              </div>
+                            </button>
+
+                            {/* Archived versions */}
+                            {versionsLoading ? (
+                              <div className="py-6 text-center">
+                                <RefreshCw className="h-4 w-4 text-neutral-300 animate-spin mx-auto" />
+                              </div>
+                            ) : versions.length === 0 ? (
+                              <div className="py-6 text-center">
+                                <p className="text-xs text-neutral-400">No previous versions</p>
+                                <p className="text-xs text-neutral-300 mt-1">Versions are saved on regenerate or edit</p>
+                              </div>
+                            ) : (
+                              versions.map(v => (
+                                <button
+                                  key={v.id}
+                                  onClick={() => {
+                                    setViewingVersion(v);
+                                    setShowVersionPanel(false);
+                                    setEditMode(false);
+                                  }}
+                                  className={`w-full text-left px-4 py-3 border-b border-neutral-50 hover:bg-neutral-50 transition-colors ${
+                                    viewingVersion?.id === v.id ? 'bg-amber-50' : ''
+                                  }`}
+                                >
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-xs font-medium text-neutral-700 flex items-center gap-1.5">
+                                      <Hash className="h-2.5 w-2.5 text-neutral-400" /> v{v.version}
+                                    </span>
+                                    <span className="text-[10px] text-neutral-400 flex items-center gap-1">
+                                      <Clock className="h-2.5 w-2.5" />
+                                      {new Date(v.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                    </span>
+                                  </div>
+                                  <p className="text-[10px] text-neutral-400 mt-1 truncate">
+                                    {v.framework_content.slice(0, 80)}...
+                                  </p>
+                                </button>
+                              ))
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
                     {/* Regenerate button */}
                     <button
                       onClick={handleRegenerate}
@@ -500,7 +632,7 @@ export default function SectorThesis() {
                       {regenerating ? 'Regenerating...' : 'Regenerate'}
                     </button>
                     <button
-                      onClick={() => setEditMode(true)}
+                      onClick={() => { setViewingVersion(null); setEditMode(true); }}
                       className="h-8 px-4 rounded-lg bg-accent-600 hover:bg-accent-700 text-white text-xs font-medium transition-colors flex items-center gap-2"
                     >
                       <Pencil className="h-3.5 w-3.5" /> Edit Framework
@@ -546,14 +678,41 @@ export default function SectorThesis() {
                 </div>
               ) : (
                 <div className="max-w-4xl mx-auto">
+                  {/* Viewing old version banner */}
+                  {viewingVersion && (
+                    <div className="mb-4 px-4 py-3 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <History className="h-4 w-4 text-amber-600" />
+                        <div>
+                          <p className="text-xs font-semibold text-amber-800">
+                            Viewing version {viewingVersion.version}
+                          </p>
+                          <p className="text-[10px] text-amber-600">
+                            Archived on {new Date(viewingVersion.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setViewingVersion(null)}
+                        className="h-7 px-3 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-700 text-xs font-medium transition-colors flex items-center gap-1.5"
+                      >
+                        <X className="h-3 w-3" /> Back to current
+                      </button>
+                    </div>
+                  )}
+
                   <div className="flex items-center gap-2 mb-4">
                     <Eye className="h-3.5 w-3.5 text-neutral-400" />
-                    <span className="text-xs font-semibold text-neutral-400 uppercase tracking-wider">Preview Mode</span>
+                    <span className="text-xs font-semibold text-neutral-400 uppercase tracking-wider">
+                      {viewingVersion ? `Version ${viewingVersion.version}` : 'Preview Mode'}
+                    </span>
                   </div>
                   <div
                     className="bg-white rounded-xl border border-neutral-200 shadow-sm p-6 md:p-8"
                     dangerouslySetInnerHTML={{
-                      __html: `<div class="prose prose-sm max-w-none"><p class="text-sm text-neutral-700 leading-relaxed">${renderMarkdown(getFrameworkFromPlaybook(selectedPlaybook))}</p></div>`,
+                      __html: `<div class="prose prose-sm max-w-none"><p class="text-sm text-neutral-700 leading-relaxed">${renderMarkdown(
+                        viewingVersion ? viewingVersion.framework_content : getFrameworkFromPlaybook(selectedPlaybook)
+                      )}</p></div>`,
                     }}
                   />
                 </div>

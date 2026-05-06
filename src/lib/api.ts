@@ -13,6 +13,7 @@ import type {
 } from '@/types/database';
 
 const N8N_BASE_URL = 'https://n8n.tikonacapital.com';
+const FINANCIAL_MODEL_SERVICE_URL = '/proxy/fm';
 
 /**
  * Triggers the financial model generation script via n8n webhook.
@@ -30,7 +31,13 @@ export async function generateFinancialModel(
   companyName: string,
   sector: string,
   folderId: string
-): Promise<{ fileId: string | null; fileUrl: string | null; fileName: string }> {
+): Promise<{
+  fileId: string | null;
+  fileUrl: string | null;
+  fileName: string;
+  storageUrl: string | null;
+  driveFileUrl: string | null;
+}> {
   const requestBody = {
     nse_symbol: ticker.toUpperCase(),
     company_name: companyName,
@@ -58,7 +65,7 @@ export async function generateFinancialModel(
   if (!responseText) {
     // Webhook may be fire-and-forget — return gracefully
     console.warn('[API] Financial model webhook returned empty response (may be async)');
-    return { fileId: null, fileUrl: null, fileName };
+    return { fileId: null, fileUrl: null, fileName, storageUrl: null, driveFileUrl: null };
   }
 
   let data: Record<string, unknown>;
@@ -66,15 +73,47 @@ export async function generateFinancialModel(
     data = JSON.parse(responseText);
   } catch {
     console.warn('[API] Financial model response not JSON:', responseText.slice(0, 200));
-    return { fileId: null, fileUrl: null, fileName };
+    return { fileId: null, fileUrl: null, fileName, storageUrl: null, driveFileUrl: null };
   }
 
   const fileId = (data.file_id as string) || (data.id as string) || null;
-  const fileUrl = fileId
-    ? `https://docs.google.com/spreadsheets/d/${fileId}/edit`
-    : (data.file_url as string) || null;
+  const storageUrl = (data.storage_url as string) || (data.supabase_url as string) || null;
+  const driveFileUrl =
+    (data.file_url as string) ||
+    (data.webViewLink as string) ||
+    (fileId ? `https://drive.google.com/file/d/${fileId}/view` : null);
+  const fileUrl = storageUrl || driveFileUrl || null;
 
-  return { fileId, fileUrl, fileName };
+  return { fileId, fileUrl, fileName, storageUrl, driveFileUrl };
+}
+
+export async function mirrorFinancialModelToStorage(
+  ticker: string
+): Promise<{ fileUrl: string; filePath: string | null }> {
+  const response = await fetch(`${FINANCIAL_MODEL_SERVICE_URL}/storage/${ticker.toUpperCase()}`, {
+    method: 'POST',
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Financial model storage mirror failed: ${response.status} ${errorText.slice(0, 300)}`);
+  }
+
+  const data = (await response.json()) as {
+    status: string;
+    message?: string | null;
+    storage_url?: string | null;
+    storage_path?: string | null;
+  };
+
+  if (data.status !== 'success' || !data.storage_url) {
+    throw new Error(data.message || 'Financial model storage mirror did not return a URL');
+  }
+
+  return {
+    fileUrl: data.storage_url,
+    filePath: data.storage_path ?? null,
+  };
 }
 
 /**
@@ -750,12 +789,48 @@ export async function finalizeReport(
 export async function getReportBySession(
   sessionId: string
 ): Promise<ResearchReport | null> {
+  const { data: generatedReport, error: generatedError } = await supabase
+    .from('research_reports')
+    .select('*')
+    .eq('session_id', sessionId)
+    .or('pptx_file_url.not.is.null,pptx_file_path.not.is.null')
+    .order('updated_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (generatedError) {
+    throw new Error(`Failed to fetch report: ${generatedError.message}`);
+  }
+
+  if (generatedReport) {
+    return generatedReport;
+  }
+
   const { data, error } = await supabase
     .from('research_reports')
     .select('*')
     .eq('session_id', sessionId)
-    .order('created_at', { ascending: false })
+    .order('updated_at', { ascending: false })
     .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Failed to fetch report: ${error.message}`);
+  }
+
+  return data;
+}
+
+/**
+ * Gets a single report by report ID.
+ */
+export async function getReportById(
+  reportId: string
+): Promise<ResearchReport | null> {
+  const { data, error } = await supabase
+    .from('research_reports')
+    .select('*')
+    .eq('report_id', reportId)
     .maybeSingle();
 
   if (error) {
@@ -933,5 +1008,61 @@ export async function unpublishReport(reportId: string): Promise<void> {
   if (error) {
     throw new Error(`Failed to unpublish report: ${error.message}`);
   }
+}
+
+// ============================================================
+// PPTX Report (reportgen pipeline)
+// ============================================================
+
+const configuredPptServiceUrl =
+  (import.meta as unknown as { env?: { VITE_PPT_SERVICE_URL?: string } }).env?.VITE_PPT_SERVICE_URL?.trim();
+
+export const PPT_SERVICE_URL =
+  !configuredPptServiceUrl || configuredPptServiceUrl.includes('localhost:8501')
+    ? '/proxy/ppt'
+    : configuredPptServiceUrl;
+
+export interface GeneratePptxInput {
+  reportId: string;
+  sessionId: string;
+  useMock?: boolean;
+}
+
+export interface GeneratePptxResult {
+  status: 'success' | 'error';
+  message?: string | null;
+  pptx_file_url?: string | null;
+  pptx_file_path?: string | null;
+  pptx_pdf_file_url?: string | null;
+  pptx_pdf_file_path?: string | null;
+  duration_seconds?: number | null;
+  warnings?: string[] | null;
+}
+
+export async function generatePptx(
+  input: GeneratePptxInput,
+): Promise<GeneratePptxResult> {
+  const response = await fetch(`${PPT_SERVICE_URL}/generate-pptx`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      reportId: input.reportId,
+      sessionId: input.sessionId,
+      useMock: input.useMock ?? false,
+    }),
+  });
+
+  if (!response.ok) {
+    let detail = '';
+    try {
+      const body = (await response.json()) as { message?: string };
+      detail = body?.message ?? '';
+    } catch {
+      detail = (await response.text()).slice(0, 300);
+    }
+    throw new Error(`PPTX generation failed: ${response.status} ${detail}`);
+  }
+
+  return (await response.json()) as GeneratePptxResult;
 }
 

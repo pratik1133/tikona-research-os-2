@@ -1,0 +1,999 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Motilal Oswal Financial Services Ltd. — BUY | Tikona Capital</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Serif+4:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@page { size: A4 landscape; margin: 0; }
+
+:root {
+  --primary-dark: #1F4690;
+  --primary-mid: #3A5BA0;
+  --accent: #FFA500;
+  --accent-light: #FFE5B4;
+  --slate: #3a4d6b;
+  --mid-grey: #6b7c93;
+  --light-grey: #f4f6f9;
+  --border: #d5dce8;
+  --text: #1a2537;
+  --text-light: #4a5568;
+  --green: #1a7a4a;
+  --red: #b91c1c;
+  --teal: #0e7490;
+  --white: #ffffff;
+  --page-width: 297mm;
+  --page-height: 210mm;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 8pt;
+  color: var(--text);
+  background: #e0e6f0;
+  line-height: 1.45;
+}
+
+/* ═══ PAGE ═══ */
+.page {
+  width: var(--page-width);
+  height: var(--page-height);
+  min-height: var(--page-height);
+  max-height: var(--page-height);
+  background: var(--white);
+  margin: 0 auto 16px;
+  position: relative;
+  padding: 0;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  overflow: hidden;
+}
+
+/* ═══ FULL HEADER (cover page only) ═══ */
+.report-header {
+  background: var(--primary-dark);
+  padding: 10px 18px 8px;
+  position: relative;
+  overflow: hidden;
+}
+.report-header::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 180px; height: 100%;
+  background: linear-gradient(135deg, var(--accent) 0%, #FFB833 100%);
+  clip-path: polygon(30% 0, 100% 0, 100% 100%, 0% 100%);
+}
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.firm-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  position: relative;
+  z-index: 2;
+}
+.firm-logo {
+  width: 30px; height: 30px;
+  background: var(--accent);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 12px; font-weight: 700;
+  color: var(--primary-dark);
+}
+.firm-name {
+  color: var(--white);
+  font-family: 'Playfair Display', serif;
+  font-size: 11pt;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+}
+.firm-tagline {
+  color: rgba(255,255,255,0.6);
+  font-size: 5.5pt;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+}
+.report-type-badge {
+  position: relative; z-index: 2;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 4px;
+  padding: 3px 10px;
+  color: var(--white);
+  font-size: 5.5pt;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+}
+.header-company-line {
+  margin-top: 6px;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.company-name-hdr {
+  font-family: 'Playfair Display', serif;
+  font-size: 18pt;
+  font-weight: 700;
+  color: var(--white);
+}
+.rating-badge {
+  background: var(--accent);
+  color: var(--primary-dark);
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 8pt;
+  padding: 2px 12px;
+  border-radius: 3px;
+  letter-spacing: 1px;
+}
+.sector-tag {
+  color: rgba(255,255,255,0.65);
+  font-size: 6.5pt;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.4px;
+}
+.report-date {
+  color: rgba(255,255,255,0.55);
+  font-size: 6pt;
+  font-family: 'JetBrains Mono', monospace;
+  position: absolute;
+  bottom: 7px; right: 18px;
+}
+
+.header-stats-bar {
+  display: flex;
+  gap: 0;
+  margin-top: 8px;
+  padding-top: 7px;
+  border-top: 1px solid rgba(255,255,255,0.15);
+  position: relative;
+  z-index: 2;
+}
+.hstat {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding-right: 16px;
+  margin-right: 16px;
+  border-right: 1px solid rgba(255,255,255,0.18);
+}
+.hstat:last-child {
+  padding-right: 0;
+  margin-right: 0;
+  border-right: none;
+}
+.hstat-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 5.4pt;
+  color: rgba(255,255,255,0.52);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+.hstat-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5pt;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1.1;
+}
+.hstat-value.white { color: var(--white); }
+.hstat-value.green-v { color: #6ee7b7; }
+.hstat-sub {
+  font-size: 5.8pt;
+  color: rgba(255,255,255,0.45);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ═══ MINI HEADER (sub-pages) ═══ */
+.mini-header {
+  background: var(--primary-dark);
+  padding: 5px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 3px solid var(--accent);
+}
+.mini-firm { color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 6pt; font-weight: 700; letter-spacing: 1px; }
+.mini-company { color: var(--white); font-family: 'Playfair Display', serif; font-size: 8pt; font-weight: 600; }
+.mini-meta { color: rgba(255,255,255,0.55); font-size: 5.5pt; font-family: 'JetBrains Mono', monospace; }
+.mini-header-left { display: flex; flex-direction: column; gap: 1px; }
+.mini-stats { display: flex; gap: 0; align-items: center; }
+.mini-stat {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 9px;
+  border-right: 1px solid rgba(255,255,255,0.2);
+}
+.mini-stat:first-child { padding-left: 0; }
+.mini-stat:last-child { border-right: none; padding-right: 0; }
+.mini-stat-label {
+  font-size: 5.3pt;
+  color: rgba(255,255,255,0.5);
+  font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.mini-stat-value {
+  font-size: 7.2pt;
+  font-weight: 700;
+  color: var(--white);
+  font-family: 'JetBrains Mono', monospace;
+}
+.mini-stat-value.accent { color: var(--accent); }
+.mini-stat-value.green-v { color: #6ee7b7; }
+.mini-stat-value.buy {
+  background: var(--accent);
+  color: var(--primary-dark);
+  padding: 1px 6px;
+  border-radius: 2px;
+  font-size: 6.3pt;
+}
+
+/* ═══ TAGLINE BAND ═══ */
+.tagline-band {
+  background: var(--accent);
+  padding: 5px 18px;
+}
+.tagline-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 10pt;
+  font-weight: 600;
+  color: var(--primary-dark);
+  letter-spacing: 0.2px;
+}
+
+/* ═══ ANALYST STRIP ═══ */
+.analyst-strip {
+  background: var(--primary-dark);
+  padding: 6px 18px;
+  display: flex;
+  gap: 18px;
+  align-items: center;
+}
+.analyst-name { color: var(--white); font-weight: 700; font-size: 7pt; }
+.analyst-title { color: var(--accent); font-size: 5.5pt; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.5px; }
+.analyst-contact { color: rgba(255,255,255,0.55); font-size: 5.5pt; font-family: 'JetBrains Mono', monospace; }
+
+/* ═══ LAYOUT GRIDS ═══ */
+.three-col-wide {
+  display: grid;
+  grid-template-columns: 2fr 1fr 220px;
+  gap: 10px;
+  padding: 10px 18px 0;
+}
+.three-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+}
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.two-col-side {
+  display: grid;
+  grid-template-columns: 1fr 220px;
+  gap: 10px;
+  padding: 10px 18px 0;
+}
+.two-col-wide {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 10px;
+}
+.page-content {
+  padding: 6px 18px 10px;
+}
+.main-col {}
+.side-col {}
+.main-stack > * + * { margin-top: 8px; }
+
+/* ═══ SECTION HEADER ═══ */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 2px solid var(--primary-dark);
+}
+.section-number {
+  background: var(--primary-dark);
+  color: var(--accent);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7pt;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 2px;
+}
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 12pt;
+  font-weight: 600;
+  color: var(--primary-dark);
+}
+
+/* ═══ THESIS BOX ═══ */
+.thesis-box {
+  border-left: 3px solid var(--accent);
+  padding: 8px 10px;
+  background: var(--accent-light);
+  margin-bottom: 8px;
+  border-radius: 0 4px 4px 0;
+}
+.thesis-box p {
+  font-size: 7pt;
+  font-weight: 600;
+  color: var(--primary-dark);
+  line-height: 1.5;
+}
+
+/* ═══ SIDE PANEL ═══ */
+.side-panel-card {
+  background: var(--primary-dark);
+  border-radius: 4px;
+  padding: 8px;
+  margin-bottom: 6px;
+}
+.side-panel-card.compact { padding: 7px 8px; }
+.side-panel-card.light {
+  background: var(--light-grey);
+  border: 1px solid var(--border);
+}
+.side-metric-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 5pt;
+  color: rgba(255,255,255,0.55);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 2px;
+}
+.side-metric-title.dark { color: var(--mid-grey); }
+.side-metric-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11pt;
+  font-weight: 700;
+  color: var(--accent);
+}
+.side-metric-value.dark { color: var(--primary-dark); }
+.side-metric-sub {
+  font-size: 5.5pt;
+  color: rgba(255,255,255,0.45);
+  font-family: 'JetBrains Mono', monospace;
+}
+.side-metric-sub.dark { color: var(--mid-grey); }
+.side-divider { border-top: 1px solid rgba(255,255,255,0.1); margin: 4px 0; }
+.side-divider.dark { border-color: var(--border); }
+.side-row { display: flex; justify-content: space-between; align-items: center; padding: 1.5px 0; }
+.side-label { font-size: 6pt; color: rgba(255,255,255,0.65); }
+.side-label.dark { color: var(--text-light); }
+.side-value { font-size: 6pt; font-weight: 600; color: var(--white); font-family: 'JetBrains Mono', monospace; }
+.side-value.dark { color: var(--primary-dark); }
+.side-value.accent { color: var(--accent); }
+.side-section-hdr {
+  font-size: 5.5pt;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-family: 'JetBrains Mono', monospace;
+  margin: 4px 0 2px;
+  font-weight: 700;
+}
+
+/* ═══ TABLES ═══ */
+.fin-table-wrap { margin-top: 6px; margin-bottom: 6px; }
+.fin-table-title {
+  font-size: 6.5pt;
+  font-weight: 700;
+  color: var(--primary-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 2px;
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 2px;
+}
+table { width: 100%; border-collapse: collapse; font-size: 6.5pt; }
+thead tr { background: var(--primary-dark); }
+thead th {
+  color: var(--white);
+  padding: 3px 5px;
+  text-align: right;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 6pt;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+thead th:first-child { text-align: left; }
+tbody tr:nth-child(odd) { background: var(--light-grey); }
+td {
+  padding: 2.5px 5px;
+  text-align: right;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 6.5pt;
+}
+td:first-child { text-align: left; font-weight: 500; color: var(--slate); font-family: 'Source Serif 4', serif; }
+td.bold { font-weight: 700; color: var(--primary-dark); }
+td.green { color: var(--green); font-weight: 600; }
+td.red { color: var(--red); font-weight: 600; }
+td.accent { color: var(--accent); font-weight: 700; }
+.tbl-highlight td { background: rgba(255,165,0,0.1) !important; font-weight: 700; }
+.tbl-section td { background: #e8eef8 !important; font-weight: 700; color: var(--primary-dark) !important; font-family: 'JetBrains Mono', monospace; font-size: 6.5pt; }
+
+/* ═══ METRIC STRIP ═══ */
+.metric-strip { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-bottom: 8px; }
+.metric-strip-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 8px; }
+.metric-strip-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-bottom: 8px; }
+.metric-card {
+  background: var(--primary-dark);
+  border-radius: 4px;
+  padding: 6px 7px;
+  text-align: center;
+}
+.metric-card.accent-bg { background: var(--accent); }
+.metric-card.mid-bg { background: var(--primary-mid); }
+.metric-card.teal-bg { background: var(--teal); }
+.metric-card.light-bg { background: var(--accent-light); border: 1px solid var(--accent); }
+.metric-card-label { font-size: 6pt; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.7px; font-family: 'JetBrains Mono', monospace; margin-bottom: 1px; }
+.metric-card.accent-bg .metric-card-label,
+.metric-card.light-bg .metric-card-label { color: var(--primary-dark); }
+.metric-card-value { font-size: 10pt; font-weight: 700; color: var(--white); font-family: 'JetBrains Mono', monospace; }
+.metric-card.accent-bg .metric-card-value,
+.metric-card.light-bg .metric-card-value { color: var(--primary-dark); }
+.metric-card-sub { font-size: 5pt; color: rgba(255,255,255,0.45); font-family: 'JetBrains Mono', monospace; margin-top: 1px; }
+.metric-card.accent-bg .metric-card-sub { color: rgba(31,70,144,0.65); }
+
+/* ═══ ANALYSIS / KEY SECTIONS ═══ */
+.analysis-block { margin-bottom: 7px; }
+.analysis-block p { font-size: 7pt; line-height: 1.5; color: var(--text); margin-bottom: 4px; }
+.analysis-bold { font-weight: 700; color: var(--primary-dark); }
+.key-section { margin-bottom: 5px; }
+.key-section-title {
+  font-weight: 700;
+  color: var(--primary-dark);
+  font-size: 7.5pt;
+  margin-bottom: 3px;
+}
+.key-section p { font-size: 7pt; color: var(--text); line-height: 1.45; }
+
+/* ═══ HIGHLIGHT BOXES ═══ */
+.highlight-box {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 6px 8px;
+  background: var(--light-grey);
+  margin-bottom: 6px;
+}
+.highlight-box.accent-border { border-left: 3px solid var(--accent); }
+.highlight-box.navy-border { border-left: 3px solid var(--primary-dark); }
+.highlight-box.green-border { border-left: 3px solid var(--green); }
+.highlight-box.red-border { border-left: 3px solid var(--red); }
+.highlight-box-title { font-weight: 700; color: var(--primary-dark); font-size: 7pt; margin-bottom: 2px; }
+.highlight-box p { font-size: 6.5pt; color: var(--text-light); line-height: 1.45; }
+
+/* ═══ CATALYST ITEMS ═══ */
+.catalyst-item { display: flex; gap: 7px; margin-bottom: 6px; padding: 5px 7px; background: var(--light-grey); border-radius: 3px; border-left: 3px solid var(--accent); }
+.catalyst-icon { font-size: 11pt; flex-shrink: 0; width: 18px; text-align: center; }
+.catalyst-body {}
+.catalyst-title { font-weight: 700; font-size: 7pt; color: var(--primary-dark); margin-bottom: 1px; }
+.catalyst-desc { font-size: 6.5pt; color: var(--text-light); line-height: 1.4; }
+.catalyst-badge { display: inline-block; background: var(--primary-dark); color: var(--accent); font-size: 5pt; padding: 1px 5px; border-radius: 2px; font-family: 'JetBrains Mono', monospace; margin-left: 4px; }
+
+/* ═══ RISK ITEMS ═══ */
+.risk-item { display: flex; gap: 7px; margin-bottom: 5px; padding-bottom: 5px; border-bottom: 1px solid var(--border); }
+.risk-badge {
+  flex-shrink: 0;
+  width: 34px;
+  height: 14px;
+  border-radius: 2px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 5pt;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.4px;
+}
+.risk-high { background: #fee2e2; color: var(--red); }
+.risk-med { background: #fef3c7; color: #92400e; }
+.risk-low { background: #d1fae5; color: var(--green); }
+.risk-text { font-size: 6.5pt; color: var(--text); line-height: 1.4; }
+.risk-title { font-weight: 700; color: var(--primary-dark); margin-bottom: 1px; font-size: 6.5pt; }
+
+/* ═══ SCENARIO GRID ═══ */
+.scenario-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 6px; }
+.scenario-card { border-radius: 4px; padding: 7px; text-align: center; }
+.scenario-card.bear { background: #fee2e2; border: 1px solid #fca5a5; }
+.scenario-card.base { background: var(--accent-light); border: 1px solid var(--accent); }
+.scenario-card.bull { background: #d1fae5; border: 1px solid #6ee7b7; }
+.scenario-label { font-size: 5.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; font-family: 'JetBrains Mono', monospace; margin-bottom: 2px; }
+.scenario-card.bear .scenario-label { color: var(--red); }
+.scenario-card.base .scenario-label { color: #8a5c00; }
+.scenario-card.bull .scenario-label { color: var(--green); }
+.scenario-tp { font-size: 14pt; font-weight: 700; font-family: 'JetBrains Mono', monospace; line-height: 1.1; }
+.scenario-card.bear .scenario-tp { color: var(--red); }
+.scenario-card.base .scenario-tp { color: var(--primary-dark); }
+.scenario-card.bull .scenario-tp { color: var(--green); }
+.scenario-updown { font-size: 6pt; font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
+.scenario-desc { font-size: 5.5pt; color: var(--text-light); margin-top: 3px; line-height: 1.35; }
+
+/* ═══ SCORECARD ═══ */
+.score-item { margin-bottom: 6px; padding-bottom: 5px; border-bottom: 1px solid var(--border); }
+.score-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1px; }
+.score-name { font-size: 7pt; font-weight: 700; color: var(--primary-dark); }
+.score-val { font-size: 7.5pt; font-weight: 700; color: var(--primary-dark); font-family: 'JetBrains Mono', monospace; }
+.score-bar-bg { background: var(--border); border-radius: 2px; height: 5px; margin-top: 2px; }
+.score-bar-fill { height: 100%; border-radius: 2px; }
+.score-desc { font-size: 6pt; color: var(--text-light); line-height: 1.35; margin-top: 2px; }
+
+/* ═══ SEGMENT CARDS ═══ */
+.segment-card { border: 1px solid var(--border); border-radius: 4px; padding: 7px; margin-bottom: 5px; }
+.segment-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.segment-name { font-weight: 700; font-size: 7.5pt; color: var(--primary-dark); font-family: 'Playfair Display', serif; }
+.segment-share { background: var(--primary-dark); color: var(--accent); font-size: 5.5pt; padding: 1px 6px; border-radius: 2px; font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+.segment-kpi { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 3px; }
+.kpi-chip { background: var(--accent-light); border: 1px solid var(--accent); border-radius: 2px; padding: 1px 5px; font-size: 5.5pt; font-family: 'JetBrains Mono', monospace; color: var(--primary-dark); font-weight: 700; }
+.segment-desc { font-size: 6pt; color: var(--text-light); line-height: 1.35; }
+
+/* ═══ TIMELINE ═══ */
+.timeline { position: relative; padding-left: 14px; }
+.timeline::before { content: ''; position: absolute; left: 4px; top: 0; bottom: 0; width: 2px; background: var(--border); }
+.timeline-item { position: relative; margin-bottom: 6px; padding-left: 10px; }
+.timeline-item::before { content: ''; position: absolute; left: -10px; top: 3px; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); border: 2px solid var(--white); box-shadow: 0 0 0 1px var(--accent); }
+.timeline-year { font-family: 'JetBrains Mono', monospace; font-size: 5.5pt; font-weight: 700; color: var(--accent); }
+.timeline-text { font-size: 7pt; color: var(--text); line-height: 1.35; }
+
+/* ═══ KPI GRID ═══ */
+.kpi-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 6px; }
+.kpi-box { background: var(--light-grey); border: 1px solid var(--border); border-radius: 3px; padding: 5px 7px; }
+.kpi-box-label { font-size: 5.5pt; color: var(--mid-grey); font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.5px; }
+.kpi-box-value { font-size: 9pt; font-weight: 700; color: var(--primary-dark); font-family: 'JetBrains Mono', monospace; }
+.kpi-box-sub { font-size: 5.5pt; color: var(--text-light); }
+
+/* ═══ MANAGEMENT ═══ */
+.mgmt-row { display: grid; grid-template-columns: 120px 80px 1fr; gap: 6px; padding: 3px 5px; border-bottom: 1px solid var(--border); align-items: start; }
+.mgmt-row:nth-child(odd) { background: var(--light-grey); }
+.mgmt-name { font-weight: 600; font-size: 6.5pt; color: var(--primary-dark); }
+.mgmt-role { font-size: 5.5pt; color: var(--mid-grey); }
+.mgmt-bio { font-size: 6.5pt; color: var(--text-light); line-height: 1.35; }
+
+/* ═══ FIGURES / CHARTS ═══ */
+.figure { margin-bottom: 6px; }
+.figure-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 6.5pt;
+  font-weight: 700;
+  color: var(--primary-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.2px;
+  margin-bottom: 4px;
+  padding: 3px 5px;
+  background: var(--light-grey);
+  border-left: 3px solid var(--accent);
+}
+.figure-source { font-size: 6pt; color: var(--mid-grey); margin-top: 2px; font-style: italic; }
+.figure-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.figure-grid-wide { display: grid; grid-template-columns: 1.5fr 1fr; gap: 10px; }
+.figure-grid-narrow { display: grid; grid-template-columns: 1fr 1.5fr; gap: 10px; }
+.legend-item { display: flex; align-items: center; gap: 4px; margin-bottom: 2px; }
+.legend-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.legend-label { font-size: 5.5pt; color: var(--text-light); font-family: 'JetBrains Mono', monospace; }
+.donut-wrap { display: flex; align-items: center; gap: 10px; }
+.donut-legend { flex: 1; display: flex; flex-wrap: wrap; gap: 6px; }
+.legend-pct { font-size: 5.5pt; font-weight: 700; color: var(--primary-dark); font-family: 'JetBrains Mono', monospace; }
+
+/* ═══ TAGS ═══ */
+.tag {
+  display: inline-block;
+  background: var(--primary-dark);
+  color: var(--white);
+  font-size: 5pt;
+  padding: 1px 5px;
+  border-radius: 2px;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.3px;
+  margin-right: 3px;
+}
+.tag.accent-tag { background: var(--accent); color: var(--primary-dark); }
+.tag.green-tag { background: var(--green); }
+
+/* ═══ FOOTER ═══ */
+.page-footer {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  border-top: 1px solid var(--border);
+  padding: 3px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--white);
+}
+.footer-left { font-size: 6pt; color: var(--mid-grey); font-family: 'JetBrains Mono', monospace; }
+.footer-right { font-size: 6pt; color: var(--mid-grey); font-family: 'JetBrains Mono', monospace; }
+.footer-center { font-size: 6pt; color: var(--primary-dark); font-family: 'Playfair Display', serif; font-weight: 600; }
+
+/* ═══ DISCLAIMER ═══ */
+.disclaimer {
+  background: var(--light-grey);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 5px 7px;
+  font-size: 5pt;
+  color: var(--mid-grey);
+  line-height: 1.45;
+  margin-top: 6px;
+}
+.disclosure-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 10px;
+  margin-top: 8px;
+}
+.disclosure-card {
+  background: var(--light-grey);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 8px 10px;
+}
+.disclosure-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 6pt;
+  font-weight: 700;
+  color: var(--primary-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 5px;
+}
+.disclosure-list { margin-left: 14px; }
+.disclosure-list li {
+  font-size: 6.2pt;
+  color: var(--text-light);
+  line-height: 1.55;
+  margin-bottom: 4px;
+}
+
+/* ═══ ENERGY PILLAR ═══ */
+.energy-pillar { background: var(--primary-dark); border-radius: 4px; padding: 7px 9px; margin-bottom: 5px; }
+.energy-pillar-title { color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 6.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+.energy-pillar-stat { color: var(--white); font-family: 'JetBrains Mono', monospace; font-size: 10pt; font-weight: 700; line-height: 1.1; }
+.energy-pillar-desc { color: rgba(255,255,255,0.6); font-size: 5.5pt; margin-top: 2px; line-height: 1.35; }
+
+/* ═══ PROGRESS BARS ═══ */
+.progress-item { margin-bottom: 4px; }
+.progress-label { display: flex; justify-content: space-between; margin-bottom: 1px; }
+.progress-name { font-size: 6pt; color: var(--text); }
+.progress-val { font-size: 6pt; font-weight: 600; color: var(--primary-dark); font-family: 'JetBrains Mono', monospace; }
+.progress-bar-bg { background: var(--border); border-radius: 2px; height: 5px; }
+.progress-bar-fill { height: 100%; border-radius: 2px; background: var(--primary-dark); }
+
+/* ═══ UTILITY ═══ */
+.full-width { grid-column: 1 / -1; }
+.pb48 { padding-bottom: 48px; }
+
+/* ═══ PRINT ═══ */
+@media print {
+  body { background: white; }
+  .page { box-shadow: none; margin: 0; page-break-after: always; overflow: hidden; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+    <div class="report-header">
+      <div class="header-top">
+        <div class="firm-brand">
+          <div class="firm-logo">T</div>
+          <div>
+            <div class="firm-name">Tikona Capital</div>
+            <div class="firm-tagline">Driven by Research, Built with Conviction</div>
+          </div>
+        </div>
+        <div class="report-type-badge">Equity Research — Initiating Coverage</div>
+      </div>
+      <div class="header-company-line">
+        <span class="company-name-hdr">Motilal Oswal Financial Services Ltd.</span>
+        <span class="rating-badge">BUY</span>
+        <span class="sector-tag">MOTILALOFS &nbsp;|&nbsp; Finance &nbsp;|&nbsp; Midcap</span>
+      </div>
+      <div class="header-stats-bar"><div class="hstat"><div class="hstat-label">CMP</div><div class="hstat-value">&#8377;800</div><div class="hstat-sub">As of latest pack</div></div><div class="hstat"><div class="hstat-label">Target Price</div><div class="hstat-value">&#8377;924</div><div class="hstat-sub">SOTP-led fair value</div></div><div class="hstat"><div class="hstat-label">Upside</div><div class="hstat-value green-v">+15.0%</div><div class="hstat-sub">vs current market price</div></div><div class="hstat"><div class="hstat-label">Market Cap</div><div class="hstat-value white">Midcap</div><div class="hstat-sub">Midcap</div></div><div class="hstat"><div class="hstat-label">Rating</div><div class="hstat-value">BUY</div><div class="hstat-sub">Tikona view</div></div></div>
+      <div class="report-date">Institutional Equity Research</div>
+    </div>
+        <div class="tagline-band"><div class="tagline-text">Diversified financial services platform capitalizing on India&#x27;s multi-decade financialization theme with 61% ARR contribution and superior return ratios.</div></div>
+        
+        <div class="three-col-wide" style="padding-bottom:72px;">
+          <div class="main-stack"><div class="thesis-box"><p><strong>Investment Thesis. </strong>MOFSL has transformed from a cyclical broking house into a predictable-revenue financial services platform with 61% ARR contribution and 45% fee-based revenue mix. This positions the company to capture India&#x27;s $1.6 trillion wealth management opportunity through FY29 while delivering superior 25%+ ROE. At 20-22x FY27E earnings, the stock offers 15% upside with limited downside risk given the quality of recurring revenue streams and structural tailwinds.</p></div><div class="key-section-title">Key Investment Catalysts</div><div class="catalyst-item"><div class="catalyst-icon">📈</div><div class="catalyst-body"><div class="catalyst-title">Wealth AUM Acceleration <span class="catalyst-badge">HIGH IMPACT</span></div><div class="catalyst-desc">Wealth management AUM growing at 25%+ CAGR driven by India&#x27;s millionaire household expansion and market share gains in HNI segment</div></div></div><div class="catalyst-item"><div class="catalyst-icon">💰</div><div class="catalyst-body"><div class="catalyst-title">Fee-Based Revenue Mix Expansion <span class="catalyst-badge">MEDIUM IMPACT</span></div><div class="catalyst-desc">Asset management and wealth advisory fees now represent 45% of revenue, reducing volatility and improving earnings quality</div></div></div><div class="catalyst-item"><div class="catalyst-icon">🎯</div><div class="catalyst-body"><div class="catalyst-title">Platform Operating Leverage <span class="catalyst-badge">MEDIUM IMPACT</span></div><div class="catalyst-desc">2,500+ location network and digital infrastructure enabling margin expansion as recurring revenue scales</div></div></div></div>
+          <div><div class="fin-table-wrap"><div class="fin-table-title">Financial Summary (₹ Crore unless stated)</div><table><thead><tr><th style="text-align:left;">Metric</th><th>FY25</th><th>FY26E</th><th>FY27E</th><th>FY28E</th><th>FY29E</th><th>FY30E</th></tr></thead><tbody><tr class="tbl-highlight"><td style="text-align:left;font-weight:600;">Revenue</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr><td style="text-align:left;font-weight:600;">EBITDA Margin</td><td>54</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr><tr class="tbl-section"><td colspan="7">Return Ratios</td></tr><tr><td style="text-align:left;font-weight:600;">ROE</td><td>23</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr></tbody></table><div class="figure-source">e = Tikona Capital estimates</div></div></div>
+          <div>
+    <div class="side-panel-card">
+      <div class="side-metric-title">Target Price</div>
+      <div class="side-metric-value">&#8377;924</div>
+      <div class="side-metric-sub">+15.0% vs CMP &#8377;800</div>
+      <div class="side-divider"></div><div class="side-row"><span class="side-label">Market Cap</span><span class="side-value">Midcap</span></div>
+      <div class="side-divider"></div><div class="side-section-hdr">Key Ratios</div><div class="side-row"><span class="side-label">P/E (TTM)</span><span class="side-value">20-22x FY27E</span></div><div class="side-row"><span class="side-label">D/E Ratio</span><span class="side-value">1.22</span></div><div class="side-row"><span class="side-label">ROE</span><span class="side-value">25.2</span></div>
+    </div>
+    <div class="side-panel-card light compact">
+      <div class="side-section-hdr" style="color:var(--primary-dark);margin-top:0;">SAARTHI Score</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:15pt;font-weight:700;
+                  color:var(--primary-dark);line-height:1.1;">78</div>
+      <div class="side-metric-sub dark">Proprietary Framework</div>
+      <div class="side-divider dark"></div>
+      <div class="side-row">
+        <span class="side-label dark">Rating</span>
+        <span class="side-value dark" style="color:var(--green);font-weight:700;">BUY</span>
+      </div>
+    </div></div>
+        </div>
+        <div style="position:absolute;left:18px;right:18px;bottom:20px;display:grid;grid-template-columns:repeat(4,1fr);background:#10284f;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);z-index:3;"><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">CMP</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">&#8377;800</span></div><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">TP</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">&#8377;924</span></div><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">Upside</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">+15.0%</span></div><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">MCap</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">Midcap</span></div></div>
+    <div class="page-footer">
+      <div class="footer-left">Tikona Capital Finserv Pvt. Ltd. | SEBI Reg. Research Analyst</div>
+      <div class="footer-center">Motilal Oswal Financial Services Ltd. — Equity Research</div>
+      <div class="footer-right">Page 1 of 14</div>
+    </div></div><div class="page">
+    <div class="mini-header">
+      <div class="mini-header-left">
+        <div class="mini-firm">Tikona Capital</div>
+        <div class="mini-company">The Story in Charts: From Broking to Predictable Revenue Platform</div>
+      </div>
+      <div class="mini-stats"><div class="mini-stat"><span class="mini-stat-label">Rating</span><span class="mini-stat-value buy">BUY</span></div><div class="mini-stat"><span class="mini-stat-label">CMP</span><span class="mini-stat-value">&#8377;800</span></div><div class="mini-stat"><span class="mini-stat-label">TP</span><span class="mini-stat-value accent">&#8377;924</span></div><div class="mini-stat"><span class="mini-stat-label">Upside</span><span class="mini-stat-value green-v">+15.0%</span></div><div class="mini-stat"><span class="mini-stat-label">Cap</span><span class="mini-stat-value">Midcap</span></div></div>
+    </div>
+        <div class="page-content pb48">
+          <div class="section-header"><span class="section-number">02</span><span class="section-title">The Story in Charts: From Broking to Predictable Revenue Platform</span></div>
+          <div class="main-stack"><div class="chart-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px;"><div style="border:1px solid #d5dce8;border-radius:8px;padding:7px;background:#fff;"><div class="figure"><div class="figure-title">EBITDA Margin Expansion Validates Business Model Shift</div><svg viewBox="0 0 560 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;"><line x1="44" x2="550" y1="104.0" y2="104.0" stroke="#d5dce8" stroke-width="0.5"/><text x="40" y="107.0" text-anchor="end" font-size="7" fill="#6b7c93" font-family="JetBrains Mono,monospace">0</text><line x1="44" x2="550" y1="72.7" y2="72.7" stroke="#d5dce8" stroke-width="0.5"/><text x="40" y="75.7" text-anchor="end" font-size="7" fill="#6b7c93" font-family="JetBrains Mono,monospace">19</text><line x1="44" x2="550" y1="41.3" y2="41.3" stroke="#d5dce8" stroke-width="0.5"/><text x="40" y="44.3" text-anchor="end" font-size="7" fill="#6b7c93" font-family="JetBrains Mono,monospace">38</text><line x1="44" x2="550" y1="10.0" y2="10.0" stroke="#d5dce8" stroke-width="0.5"/><text x="40" y="13.0" text-anchor="end" font-size="7" fill="#6b7c93" font-family="JetBrains Mono,monospace">58</text><rect x="65.1" y="47.8" width="35.8" height="56.2" fill="#1F4690" rx="1"/><text x="83.0" y="56.8" text-anchor="middle" font-size="6" fill="#ffffff" font-family="JetBrains Mono,monospace">34</text><rect x="149.4" y="13.1" width="35.8" height="90.9" fill="#1F4690" rx="1"/><text x="167.3" y="22.1" text-anchor="middle" font-size="6" fill="#ffffff" font-family="JetBrains Mono,monospace">56</text><rect x="233.8" y="23.4" width="35.8" height="80.6" fill="#1F4690" rx="1"/><text x="251.7" y="32.4" text-anchor="middle" font-size="6" fill="#ffffff" font-family="JetBrains Mono,monospace">49</text><rect x="318.1" y="30.6" width="35.8" height="73.4" fill="#1F4690" rx="1"/><text x="336.0" y="39.6" text-anchor="middle" font-size="6" fill="#ffffff" font-family="JetBrains Mono,monospace">45</text><rect x="402.4" y="10.0" width="35.8" height="94.0" fill="#1F4690" rx="1"/><text x="420.3" y="19.0" text-anchor="middle" font-size="6" fill="#ffffff" font-family="JetBrains Mono,monospace">58</text><rect x="486.7" y="14.9" width="35.8" height="89.1" fill="#1F4690" rx="1"/><text x="504.7" y="23.9" text-anchor="middle" font-size="6" fill="#ffffff" font-family="JetBrains Mono,monospace">54</text><text x="86.2" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY20</text><text x="170.5" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY21</text><text x="254.8" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY22</text><text x="339.2" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY23</text><text x="423.5" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY24</text><text x="507.8" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY25</text><polyline fill="none" stroke="#c58d1a" stroke-width="1.2" points="170.5,13.1 190.5,10.0"/><text x="194.5" y="10.0" font-size="6" fill="#5a4630" font-family="JetBrains Mono,monospace">COVID volatility</text><polyline fill="none" stroke="#c58d1a" stroke-width="1.2" points="507.8,14.9 527.8,10.0"/><text x="531.8" y="10.0" font-size="6" fill="#5a4630" font-family="JetBrains Mono,monospace">Stabilized mix</text><polyline fill="none" stroke="#c58d1a" stroke-width="1.2" points="50.0,28.0 532.0,14.0"/><text x="536.0" y="12.0" text-anchor="end" font-size="6.2" fill="#5a4630" font-family="JetBrains Mono,monospace">CAGR 9.6%</text></svg><div class="donut-legend" style="justify-content:flex-start;gap:10px;margin-top:4px;"><span class="legend-item"><span class="legend-dot" style="background:#1F4690;"></span><span class="legend-label">EBITDA Margin</span></span></div><div style="background:#FFE5B4;border:1px solid #f0c77a;border-radius:4px;padding:4px 7px;margin-top:4px;font-size:6.2pt;line-height:1.35;color:#5a4630;font-weight:600;">EBITDA margins consistently above 44% since FY22 demonstrate operating leverage from recurring revenue streams</div></div></div><div style="border:1px solid #d5dce8;border-radius:8px;padding:7px;background:#fff;"><div class="figure"><div class="figure-title">ROE and PAT Margin: Superior Return Profile Emerging</div><svg viewBox="0 0 560 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;"><line x1="44" x2="550" y1="104.0" y2="104.0" stroke="#d5dce8" stroke-width="0.5"/><text x="40" y="107.0" text-anchor="end" font-size="7" fill="#6b7c93" font-family="JetBrains Mono,monospace">0</text><line x1="44" x2="550" y1="72.7" y2="72.7" stroke="#d5dce8" stroke-width="0.5"/><text x="40" y="75.7" text-anchor="end" font-size="7" fill="#6b7c93" font-family="JetBrains Mono,monospace">12</text><line x1="44" x2="550" y1="41.3" y2="41.3" stroke="#d5dce8" stroke-width="0.5"/><text x="40" y="44.3" text-anchor="end" font-size="7" fill="#6b7c93" font-family="JetBrains Mono,monospace">23</text><line x1="44" x2="550" y1="10.0" y2="10.0" stroke="#d5dce8" stroke-width="0.5"/><text x="40" y="13.0" text-anchor="end" font-size="7" fill="#6b7c93" font-family="JetBrains Mono,monospace">35</text><polyline fill="none" stroke="#1F4690" stroke-width="1.8" points="86.2,88.1 170.5,24.9 254.8,38.4 339.2,64.0 423.5,27.0 507.8,42.7"/><circle cx="86.2" cy="88.1" r="2.2" fill="#1F4690"/><circle cx="170.5" cy="24.9" r="2.2" fill="#1F4690"/><circle cx="254.8" cy="38.4" r="2.2" fill="#1F4690"/><circle cx="339.2" cy="64.0" r="2.2" fill="#1F4690"/><circle cx="423.5" cy="27.0" r="2.2" fill="#1F4690"/><circle cx="507.8" cy="42.7" r="2.2" fill="#1F4690"/><polyline fill="none" stroke="#FFA500" stroke-width="1.8" points="86.2,82.9 170.5,10.0 254.8,21.6 339.2,43.8 423.5,11.1 507.8,23.0"/><circle cx="86.2" cy="82.9" r="2.2" fill="#FFA500"/><circle cx="170.5" cy="10.0" r="2.2" fill="#FFA500"/><circle cx="254.8" cy="21.6" r="2.2" fill="#FFA500"/><circle cx="339.2" cy="43.8" r="2.2" fill="#FFA500"/><circle cx="423.5" cy="11.1" r="2.2" fill="#FFA500"/><circle cx="507.8" cy="23.0" r="2.2" fill="#FFA500"/><text x="86.2" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY20</text><text x="170.5" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY21</text><text x="254.8" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY22</text><text x="339.2" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY23</text><text x="423.5" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY24</text><text x="507.8" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY25</text></svg><div class="donut-legend" style="justify-content:flex-start;gap:10px;margin-top:4px;"><span class="legend-item"><span class="legend-dot" style="background:#1F4690;"></span><span class="legend-label">ROE</span></span><span class="legend-item"><span class="legend-dot" style="background:#FFA500;"></span><span class="legend-label">PAT Margin</span></span></div><div style="background:#FFE5B4;border:1px solid #f0c77a;border-radius:4px;padding:4px 7px;margin-top:4px;font-size:6.2pt;line-height:1.35;color:#5a4630;font-weight:600;">ROE of 22.7% in FY25 with PAT margin at 30% validates the quality of earnings from transformed business mix</div></div></div><div style="border:1px solid #d5dce8;border-radius:8px;padding:7px;background:#fff;"><div class="figure"><div class="figure-title">ROCE Trajectory: Efficient Capital Deployment</div><svg viewBox="0 0 560 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;"><line x1="44" x2="550" y1="104.0" y2="104.0" stroke="#d5dce8" stroke-width="0.5"/><text x="40" y="107.0" text-anchor="end" font-size="7" fill="#6b7c93" font-family="JetBrains Mono,monospace">0</text><line x1="44" x2="550" y1="72.7" y2="72.7" stroke="#d5dce8" stroke-width="0.5"/><text x="40" y="75.7" text-anchor="end" font-size="7" fill="#6b7c93" font-family="JetBrains Mono,monospace">8</text><line x1="44" x2="550" y1="41.3" y2="41.3" stroke="#d5dce8" stroke-width="0.5"/><text x="40" y="44.3" text-anchor="end" font-size="7" fill="#6b7c93" font-family="JetBrains Mono,monospace">16</text><line x1="44" x2="550" y1="10.0" y2="10.0" stroke="#d5dce8" stroke-width="0.5"/><text x="40" y="13.0" text-anchor="end" font-size="7" fill="#6b7c93" font-family="JetBrains Mono,monospace">24</text><polyline fill="none" stroke="#1F4690" stroke-width="1.8" points="86.2,72.0 170.5,10.0 254.8,26.2 339.2,57.4 423.5,11.6 507.8,29.4"/><circle cx="86.2" cy="72.0" r="2.2" fill="#1F4690"/><circle cx="170.5" cy="10.0" r="2.2" fill="#1F4690"/><circle cx="254.8" cy="26.2" r="2.2" fill="#1F4690"/><circle cx="339.2" cy="57.4" r="2.2" fill="#1F4690"/><circle cx="423.5" cy="11.6" r="2.2" fill="#1F4690"/><circle cx="507.8" cy="29.4" r="2.2" fill="#1F4690"/><text x="86.2" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY20</text><text x="170.5" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY21</text><text x="254.8" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY22</text><text x="339.2" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY23</text><text x="423.5" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY24</text><text x="507.8" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY25</text></svg><div class="donut-legend" style="justify-content:flex-start;gap:10px;margin-top:4px;"><span class="legend-item"><span class="legend-dot" style="background:#1F4690;"></span><span class="legend-label">ROCE</span></span></div><div style="background:#FFE5B4;border:1px solid #f0c77a;border-radius:4px;padding:4px 7px;margin-top:4px;font-size:6.2pt;line-height:1.35;color:#5a4630;font-weight:600;">ROCE recovered to 18.9% in FY25, demonstrating improved capital efficiency as recurring revenue scales</div></div></div><div style="border:1px solid #d5dce8;border-radius:8px;padding:7px;background:#fff;"><div class="figure"><div class="figure-title">Revenue Mix Evolution: From Transaction to Recurring</div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;"><div style="border:1px solid #d5dce8;border-radius:6px;padding:7px;background:#fff;"><div style="font-size:6pt;color:#6b7c93;font-family:JetBrains Mono,monospace;">EBITDA Margin FY20</div><div style="font-size:11pt;font-weight:700;color:#1F4690;margin:2px 0 5px;">34</div><div style="height:10px;background:#eef2f7;border-radius:999px;overflow:hidden;"><div style="height:10px;width:63.1%;background:#1F4690;"></div></div></div><div style="border:1px solid #d5dce8;border-radius:6px;padding:7px;background:#fff;"><div style="font-size:6pt;color:#6b7c93;font-family:JetBrains Mono,monospace;">EBITDA Margin FY25</div><div style="font-size:11pt;font-weight:700;color:#1F4690;margin:2px 0 5px;">54</div><div style="height:10px;background:#eef2f7;border-radius:999px;overflow:hidden;"><div style="height:10px;width:100.0%;background:#FFA500;"></div></div></div><div style="border:1px solid #d5dce8;border-radius:6px;padding:7px;background:#fff;"><div style="font-size:6pt;color:#6b7c93;font-family:JetBrains Mono,monospace;">PAT Margin FY20</div><div style="font-size:11pt;font-weight:700;color:#1F4690;margin:2px 0 5px;">8</div><div style="height:10px;background:#eef2f7;border-radius:999px;overflow:hidden;"><div style="height:10px;width:14.3%;background:#3A5BA0;"></div></div></div><div style="border:1px solid #d5dce8;border-radius:6px;padding:7px;background:#fff;"><div style="font-size:6pt;color:#6b7c93;font-family:JetBrains Mono,monospace;">PAT Margin FY25</div><div style="font-size:11pt;font-weight:700;color:#1F4690;margin:2px 0 5px;">30</div><div style="height:10px;background:#eef2f7;border-radius:999px;overflow:hidden;"><div style="height:10px;width:55.0%;background:#0e7490;"></div></div></div></div><div style="background:#FFE5B4;border:1px solid #f0c77a;border-radius:4px;padding:4px 7px;margin-top:4px;font-size:6.2pt;line-height:1.35;color:#5a4630;font-weight:600;">Business model shift toward predictable streams evident in margin stability and ROE expansion from 5.9% to 22.7%</div></div></div><div style="border:1px solid #d5dce8;border-radius:8px;padding:7px;background:#fff;"><div class="figure"><div class="figure-title">PAT Compounding</div><svg viewBox="0 0 560 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;"><line x1="44" x2="550" y1="104.0" y2="104.0" stroke="#d5dce8" stroke-width="0.5"/><text x="40" y="107.0" text-anchor="end" font-size="7" fill="#6b7c93" font-family="JetBrains Mono,monospace">0</text><line x1="44" x2="550" y1="72.7" y2="72.7" stroke="#d5dce8" stroke-width="0.5"/><text x="40" y="75.7" text-anchor="end" font-size="7" fill="#6b7c93" font-family="JetBrains Mono,monospace">10</text><line x1="44" x2="550" y1="41.3" y2="41.3" stroke="#d5dce8" stroke-width="0.5"/><text x="40" y="44.3" text-anchor="end" font-size="7" fill="#6b7c93" font-family="JetBrains Mono,monospace">20</text><line x1="44" x2="550" y1="10.0" y2="10.0" stroke="#d5dce8" stroke-width="0.5"/><text x="40" y="13.0" text-anchor="end" font-size="7" fill="#6b7c93" font-family="JetBrains Mono,monospace">30</text><rect x="65.1" y="10.0" width="35.8" height="94.0" fill="#1F4690" rx="1"/><text x="83.0" y="19.0" text-anchor="middle" font-size="6" fill="#ffffff" font-family="JetBrains Mono,monospace">30</text><text x="86.2" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY25</text><text x="170.5" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY26E</text><text x="254.8" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY27E</text><text x="339.2" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY28E</text><text x="423.5" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY29E</text><text x="507.8" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY30E</text><polyline fill="none" stroke="#c58d1a" stroke-width="1.2" points="50.0,28.0 532.0,14.0"/><text x="536.0" y="12.0" text-anchor="end" font-size="6.2" fill="#5a4630" font-family="JetBrains Mono,monospace">CAGR 0.0%</text></svg><div class="donut-legend" style="justify-content:flex-start;gap:10px;margin-top:4px;"><span class="legend-item"><span class="legend-dot" style="background:#1F4690;"></span><span class="legend-label">PAT Margin</span></span></div><div style="background:#FFE5B4;border:1px solid #f0c77a;border-radius:4px;padding:4px 7px;margin-top:4px;font-size:6.2pt;line-height:1.35;color:#5a4630;font-weight:600;">Profit growth matters more than narrative if the stock is to re-rate sustainably.</div></div></div></div><div class="key-section-title">Revenue Mix Transformation: The Core Story</div><div class="metric-strip" style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:8px;"><div class="metric-card"><div class="metric-card-label">Annual Recurring Revenue</div><div class="metric-card-value">61%</div><div class="metric-card-sub">of total net revenues</div></div><div class="metric-card accent-bg"><div class="metric-card-label">Fee-Based Revenue</div><div class="metric-card-value">45%</div><div class="metric-card-sub">of total revenues</div></div><div class="metric-card mid-bg"><div class="metric-card-label">Total AUM Growth</div><div class="metric-card-value">33% YoY</div><div class="metric-card-sub">to ₹1.89 lakh Cr</div></div></div><div class="thesis-box"><p><strong>Visual Proof of Transformation. </strong>The charts demonstrate MOFSL&#x27;s fundamental business model shift. EBITDA margins stabilized above 44% post-FY22, ROE expanded from 5.9% in FY20 to 22.7% in FY25, and 61% ARR contribution now anchors predictable earnings. This transformation positions MOFSL to capture India&#x27;s wealth creation opportunity with superior return ratios and reduced volatility.</p></div></div>
+        </div>
+        <div style="position:absolute;left:18px;right:18px;bottom:20px;display:grid;grid-template-columns:repeat(4,1fr);background:#10284f;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);z-index:3;"><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">CMP</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">&#8377;800</span></div><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">TP</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">&#8377;924</span></div><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">Upside</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">+15.0%</span></div><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">MCap</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">Midcap</span></div></div>
+    <div class="page-footer">
+      <div class="footer-left">Tikona Capital Finserv Pvt. Ltd. | SEBI Reg. Research Analyst</div>
+      <div class="footer-center">Motilal Oswal Financial Services Ltd. — Equity Research</div>
+      <div class="footer-right">Page 2 of 14</div>
+    </div></div><div class="page">
+    <div class="mini-header">
+      <div class="mini-header-left">
+        <div class="mini-firm">Tikona Capital</div>
+        <div class="mini-company">Investment Thesis: Predictable Revenue Meets Structural Opportunity</div>
+      </div>
+      <div class="mini-stats"><div class="mini-stat"><span class="mini-stat-label">Rating</span><span class="mini-stat-value buy">BUY</span></div><div class="mini-stat"><span class="mini-stat-label">CMP</span><span class="mini-stat-value">&#8377;800</span></div><div class="mini-stat"><span class="mini-stat-label">TP</span><span class="mini-stat-value accent">&#8377;924</span></div><div class="mini-stat"><span class="mini-stat-label">Upside</span><span class="mini-stat-value green-v">+15.0%</span></div><div class="mini-stat"><span class="mini-stat-label">Cap</span><span class="mini-stat-value">Midcap</span></div></div>
+    </div>
+        <div class="page-content pb48">
+          <div class="section-header"><span class="section-number">03</span><span class="section-title">Investment Thesis: Predictable Revenue Meets Structural Opportunity</span></div>
+          <div class="main-stack"><div class="thesis-box"><p><strong>Core Investment Case. </strong>Motilal Oswal&#x27;s transformation into a predictable-revenue platform with 61% ARR contribution and 45% fee-based revenue mix positions it to capture India&#x27;s multi-decade financialization opportunity. Trading at 20-22x FY27E earnings with 25%+ ROE and ₹1.89 lakh crore AUM (up 33% YoY), the stock offers compelling risk-reward at ₹924 target price with 15% upside from current levels.</p></div><div class="key-section-title">Three Pillars Supporting the Thesis</div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;"><div class="highlight-box accent-border"><div class="highlight-box-title">Predictable Revenue Architecture</div><p>61% ARR contribution and 45% fee-based revenue reduce transaction volatility while delivering superior 25.2% ROE and 18.7% ROCE, significantly above sector median.</p></div><div class="highlight-box navy-border"><div class="highlight-box-title">Structural Tailwinds</div><p>India&#x27;s wealth management opportunity reaching $1.6 trillion by FY29, with millionaire households growing 90% since 2021 and mutual fund AUM at ₹75.6 lakh crore.</p></div><div class="highlight-box green-border"><div class="highlight-box-title">Market Leadership &amp; Scale</div><p>#1 ranking in IPOs and QIPs, 7.6% net MF inflow market share, and 5% SIP market share validate execution capability across 2,500+ locations serving 1.6 million customers.</p></div></div><div class="key-section-title">Quality Markers Justifying 20-22x Valuation</div><div class="metric-strip" style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px;"><div class="metric-card"><div class="metric-card-label">ARR Contribution</div><div class="metric-card-value">61%</div><div class="metric-card-sub">Reduces volatility</div></div><div class="metric-card accent-bg"><div class="metric-card-label">ROE</div><div class="metric-card-value">25.2%</div><div class="metric-card-sub">vs sector median 18%</div></div><div class="metric-card mid-bg"><div class="metric-card-label">AUM Growth</div><div class="metric-card-value">33% YoY</div><div class="metric-card-sub">To ₹1.89 lakh Cr</div></div><div class="metric-card"><div class="metric-card-label">Fee-Based Revenue</div><div class="metric-card-value">45%</div><div class="metric-card-sub">High-margin mix</div></div></div></div>
+        </div>
+        <div style="position:absolute;left:18px;right:18px;bottom:20px;display:grid;grid-template-columns:repeat(4,1fr);background:#10284f;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);z-index:3;"><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">CMP</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">&#8377;800</span></div><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">TP</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">&#8377;924</span></div><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">Upside</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">+15.0%</span></div><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">MCap</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">Midcap</span></div></div>
+    <div class="page-footer">
+      <div class="footer-left">Tikona Capital Finserv Pvt. Ltd. | SEBI Reg. Research Analyst</div>
+      <div class="footer-center">Motilal Oswal Financial Services Ltd. — Equity Research</div>
+      <div class="footer-right">Page 3 of 14</div>
+    </div></div><div class="page">
+    <div class="mini-header">
+      <div class="mini-header-left">
+        <div class="mini-firm">Tikona Capital</div>
+        <div class="mini-company">Industry Overview: India&#x27;s Multi-Decade Financialization Theme</div>
+      </div>
+      <div class="mini-stats"><div class="mini-stat"><span class="mini-stat-label">Rating</span><span class="mini-stat-value buy">BUY</span></div><div class="mini-stat"><span class="mini-stat-label">CMP</span><span class="mini-stat-value">&#8377;800</span></div><div class="mini-stat"><span class="mini-stat-label">TP</span><span class="mini-stat-value accent">&#8377;924</span></div><div class="mini-stat"><span class="mini-stat-label">Upside</span><span class="mini-stat-value green-v">+15.0%</span></div><div class="mini-stat"><span class="mini-stat-label">Cap</span><span class="mini-stat-value">Midcap</span></div></div>
+    </div>
+        <div class="page-content pb48">
+          <div class="section-header"><span class="section-number">04</span><span class="section-title">Industry Overview: India&#x27;s Multi-Decade Financialization Theme</span></div>
+          <div class="main-stack"><div class="key-section-title">Industry Scale &amp; Growth Trajectory</div><div class="metric-strip" style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px;"><div class="metric-card"><div class="metric-card-label">Mutual Fund AUM</div><div class="metric-card-value">₹75.6 Lakh Cr</div><div class="metric-card-sub">Sep 2025</div></div><div class="metric-card accent-bg"><div class="metric-card-label">Millionaire Households</div><div class="metric-card-value">8.71 Lakh</div><div class="metric-card-sub">+90% since 2021</div></div><div class="metric-card mid-bg"><div class="metric-card-label">Wealth AUM Opportunity FY24-29</div><div class="metric-card-value">US$1.6 Tn</div><div class="metric-card-sub">Deloitte estimate</div></div><div class="metric-card"><div class="metric-card-label">Retail Credit CAGR FY19-25</div><div class="metric-card-value">15.1%</div><div class="metric-card-sub">₹82 Lakh Cr base</div></div></div><div class="figure"><div class="figure-title">ROE Trajectory Validates Business Model Quality</div><svg viewBox="0 0 560 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;"><line x1="44" x2="550" y1="104.0" y2="104.0" stroke="#d5dce8" stroke-width="0.5"/><text x="40" y="107.0" text-anchor="end" font-size="7" fill="#6b7c93" font-family="JetBrains Mono,monospace">0</text><line x1="44" x2="550" y1="72.7" y2="72.7" stroke="#d5dce8" stroke-width="0.5"/><text x="40" y="75.7" text-anchor="end" font-size="7" fill="#6b7c93" font-family="JetBrains Mono,monospace">10</text><line x1="44" x2="550" y1="41.3" y2="41.3" stroke="#d5dce8" stroke-width="0.5"/><text x="40" y="44.3" text-anchor="end" font-size="7" fill="#6b7c93" font-family="JetBrains Mono,monospace">20</text><line x1="44" x2="550" y1="10.0" y2="10.0" stroke="#d5dce8" stroke-width="0.5"/><text x="40" y="13.0" text-anchor="end" font-size="7" fill="#6b7c93" font-family="JetBrains Mono,monospace">29</text><polyline fill="none" stroke="#1F4690" stroke-width="1.8" points="86.2,85.1 170.5,10.0 254.8,26.0 339.2,56.5 423.5,12.6 507.8,31.2"/><circle cx="86.2" cy="85.1" r="2.2" fill="#1F4690"/><circle cx="170.5" cy="10.0" r="2.2" fill="#1F4690"/><circle cx="254.8" cy="26.0" r="2.2" fill="#1F4690"/><circle cx="339.2" cy="56.5" r="2.2" fill="#1F4690"/><circle cx="423.5" cy="12.6" r="2.2" fill="#1F4690"/><circle cx="507.8" cy="31.2" r="2.2" fill="#1F4690"/><text x="86.2" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY20</text><text x="170.5" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY21</text><text x="254.8" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY22</text><text x="339.2" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY23</text><text x="423.5" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY24</text><text x="507.8" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY25</text></svg><div class="donut-legend" style="justify-content:flex-start;gap:10px;margin-top:4px;"><span class="legend-item"><span class="legend-dot" style="background:#1F4690;"></span><span class="legend-label">ROE</span></span></div><div style="background:#FFE5B4;border:1px solid #f0c77a;border-radius:4px;padding:4px 7px;margin-top:4px;font-size:6.2pt;line-height:1.35;color:#5a4630;font-weight:600;">ROE recovered to 22.7% in FY25 after FY23 dip, demonstrating resilience through market cycles</div></div><div class="thesis-box"><p><strong>Financialization Inflection Point. </strong>India&#x27;s shift from physical to financial assets is accelerating, with mutual fund AUM growing 16% annually from FY17 to FY24. The country is expected to become the fourth-largest private wealth market globally by 2028, with 16.57 lakh HNWIs by 2027. This structural transformation creates sustained demand for sophisticated wealth management platforms capable of serving affluent customers beyond traditional T30 cities.</p></div><div class="key-section-title">Key Industry Headwinds</div><div class="risk-item"><div class="risk-badge risk-med">MED</div><div><div class="risk-title">Market Volatility Impact</div><div class="risk-text">Transaction-based revenues and AUM-linked fees remain susceptible to capital market cycles, creating inherent earnings volatility during extended downturns.</div></div></div><div class="risk-item"><div class="risk-badge risk-med">MED</div><div><div class="risk-title">Regulatory Evolution</div><div class="risk-text">Ongoing regulatory changes affecting fee structures and operational flexibility require continuous compliance investments, pressuring margins for smaller players.</div></div></div><div class="risk-item"><div class="risk-badge risk-low">LOW</div><div><div class="risk-title">Technology Disruption</div><div class="risk-text">Democratization of information and AI tools commoditizes basic services, requiring differentiation through value-added advisory capabilities and digital infrastructure.</div></div></div></div>
+        </div>
+        <div style="position:absolute;left:18px;right:18px;bottom:20px;display:grid;grid-template-columns:repeat(4,1fr);background:#10284f;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);z-index:3;"><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">CMP</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">&#8377;800</span></div><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">TP</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">&#8377;924</span></div><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">Upside</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">+15.0%</span></div><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">MCap</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">Midcap</span></div></div>
+    <div class="page-footer">
+      <div class="footer-left">Tikona Capital Finserv Pvt. Ltd. | SEBI Reg. Research Analyst</div>
+      <div class="footer-center">Motilal Oswal Financial Services Ltd. — Equity Research</div>
+      <div class="footer-right">Page 4 of 14</div>
+    </div></div><div class="page">
+    <div class="mini-header">
+      <div class="mini-header-left">
+        <div class="mini-firm">Tikona Capital</div>
+        <div class="mini-company">Company Overview: 1.6 Million Customers Across 550+ Cities</div>
+      </div>
+      <div class="mini-stats"><div class="mini-stat"><span class="mini-stat-label">Rating</span><span class="mini-stat-value buy">BUY</span></div><div class="mini-stat"><span class="mini-stat-label">CMP</span><span class="mini-stat-value">&#8377;800</span></div><div class="mini-stat"><span class="mini-stat-label">TP</span><span class="mini-stat-value accent">&#8377;924</span></div><div class="mini-stat"><span class="mini-stat-label">Upside</span><span class="mini-stat-value green-v">+15.0%</span></div><div class="mini-stat"><span class="mini-stat-label">Cap</span><span class="mini-stat-value">Midcap</span></div></div>
+    </div>
+        <div class="page-content pb48">
+          <div class="section-header"><span class="section-number">05</span><span class="section-title">Company Overview: 1.6 Million Customers Across 550+ Cities</span></div>
+          <div class="main-stack"><div class="key-section-title">Scale &amp; Distribution Infrastructure</div><div class="metric-strip" style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:8px;"><div class="metric-card"><div class="metric-card-label">Customer Base</div><div class="metric-card-value">1.6 Million</div><div class="metric-card-sub">Across 550+ cities</div></div><div class="metric-card accent-bg"><div class="metric-card-label">Business Locations</div><div class="metric-card-value">2,500+</div><div class="metric-card-sub">Pan-India reach</div></div><div class="metric-card mid-bg"><div class="metric-card-label">Recurring Revenue</div><div class="metric-card-value">61%</div><div class="metric-card-sub">ARR contribution</div></div><div class="metric-card"><div class="metric-card-label">Fee-Based Revenue</div><div class="metric-card-value">45%</div><div class="metric-card-sub">Of total revenues</div></div><div class="metric-card teal-bg"><div class="metric-card-label">Return on Equity</div><div class="metric-card-value">25.2%</div><div class="metric-card-sub">FY25 actual</div></div></div><div class="key-section-title">Strategic Transformation: Broking to Predictable Revenue Platform</div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;"><div class="highlight-box accent-border"><div class="highlight-box-title">Distribution Infrastructure Built for Scale</div><p>2,500+ business locations across 550+ cities provide the distribution reach to capture India&#x27;s wealth management opportunity, with 1.6 million customers representing meaningful scale in retail and institutional segments.</p></div><div class="highlight-box navy-border"><div class="highlight-box-title">Revenue Mix Shift Reduces Volatility</div><p>Strategic pivot toward predictable income streams achieved 61% ARR contribution and 45% fee-based revenue mix, reducing dependence on volatile transaction-based broking while creating sustainable competitive advantages through client stickiness.</p></div><div class="highlight-box green-border"><div class="highlight-box-title">Market Leadership Across Verticals</div><p>Retained #1 ranking across IPOs and QIPs in CY25, cash volume market share at 6.9%, F&amp;O premium share at 8.4%, and net MF inflows share at 7.6%, demonstrating consistent market share gains across core businesses.</p></div><div class="highlight-box accent-border"><div class="highlight-box-title">Superior Return Profile Validates Model</div><p>ROE of 25.2% and ROCE of 18.7% significantly outperform sector benchmarks, while operating profit after tax grew 16% YoY to ₹611 Cr in Q3 FY26, demonstrating the earnings power of the transformed business mix.</p></div></div></div>
+        </div>
+        <div style="position:absolute;left:18px;right:18px;bottom:20px;display:grid;grid-template-columns:repeat(4,1fr);background:#10284f;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);z-index:3;"><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">CMP</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">&#8377;800</span></div><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">TP</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">&#8377;924</span></div><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">Upside</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">+15.0%</span></div><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">MCap</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">Midcap</span></div></div>
+    <div class="page-footer">
+      <div class="footer-left">Tikona Capital Finserv Pvt. Ltd. | SEBI Reg. Research Analyst</div>
+      <div class="footer-center">Motilal Oswal Financial Services Ltd. — Equity Research</div>
+      <div class="footer-right">Page 5 of 14</div>
+    </div></div><div class="page">
+    <div class="mini-header">
+      <div class="mini-header-left">
+        <div class="mini-firm">Tikona Capital</div>
+        <div class="mini-company">Business Segments: Four Engines Driving Predictable Growth</div>
+      </div>
+      <div class="mini-stats"><div class="mini-stat"><span class="mini-stat-label">Rating</span><span class="mini-stat-value buy">BUY</span></div><div class="mini-stat"><span class="mini-stat-label">CMP</span><span class="mini-stat-value">&#8377;800</span></div><div class="mini-stat"><span class="mini-stat-label">TP</span><span class="mini-stat-value accent">&#8377;924</span></div><div class="mini-stat"><span class="mini-stat-label">Upside</span><span class="mini-stat-value green-v">+15.0%</span></div><div class="mini-stat"><span class="mini-stat-label">Cap</span><span class="mini-stat-value">Midcap</span></div></div>
+    </div>
+        <div class="page-content pb48">
+          <div class="section-header"><span class="section-number">06</span><span class="section-title">Business Segments: Four Engines Driving Predictable Growth</span></div>
+          <div class="main-stack"><div class="fin-table-wrap"><div class="fin-table-title">Segment Performance Snapshot</div><table><thead><tr><th style="text-align:left;">Segment</th><th>Key Metric</th><th>Growth YoY</th><th>Strategic Role</th></tr></thead><tbody><tr class="tbl-highlight"><td class="bold">Wealth Management</td><td class="bold">Distribution Book: ₹42,775 Cr</td><td class="bold">+34%</td><td class="bold">Primary ARR driver with 6.9% cash market share</td></tr><tr><td>Asset Management</td><td>Total AUM: ₹1.89 Lakh Cr</td><td class="green">+33%</td><td>Fee-based revenue engine with 7.6% MF inflows share</td></tr><tr><td>Capital Markets</td><td>#1 IPO/QIP Ranking CY25</td><td>Market Leader</td><td>Premium pricing power through research excellence</td></tr><tr class="tbl-highlight"><td class="bold">Housing Finance</td><td class="bold">Loan Book: ₹6,630 Cr</td><td class="bold">+25%</td><td class="bold">Emerging predictable stream leveraging platform</td></tr></tbody></table></div><div class="figure"><div class="figure-title">Revenue Mix Transformation: Predictable Streams Dominate</div><div class="donut-wrap"><svg viewBox="0 0 90 90" style="width:110px;height:110px;"><circle cx="45" cy="45" r="34" fill="transparent" stroke="#1F4690" stroke-width="14" stroke-dasharray="130.31 213.63" stroke-dashoffset="-0.00" transform="rotate(-90 45 45)"/><circle cx="45" cy="45" r="34" fill="transparent" stroke="#FFA500" stroke-width="14" stroke-dasharray="83.32 213.63" stroke-dashoffset="-130.31" transform="rotate(-90 45 45)"/></svg><div class="donut-legend"><div class="legend-item"><span class="legend-dot" style="background:#1F4690;"></span><span class="legend-label">Annual Recurring Revenue</span><span class="legend-pct">61%</span></div><div class="legend-item"><span class="legend-dot" style="background:#FFA500;"></span><span class="legend-label">Transaction-Based Revenue</span><span class="legend-pct">39%</span></div></div></div></div><div class="metric-strip" style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:8px;"><div class="metric-card"><div class="metric-card-label">Total AUM Growth</div><div class="metric-card-value">33% YoY</div><div class="metric-card-sub">₹1.89 Lakh Cr</div></div><div class="metric-card accent-bg"><div class="metric-card-label">SIP Inflows Surge</div><div class="metric-card-value">55% YoY</div><div class="metric-card-sub">₹4,515 Cr</div></div><div class="metric-card mid-bg"><div class="metric-card-label">ARR Book Expansion</div><div class="metric-card-value">33% YoY</div><div class="metric-card-sub">61% of Net Revenue</div></div></div><div class="thesis-box"><p>The four-segment model creates complementary revenue streams that reduce volatility while capturing India&#x27;s financialization opportunity. Wealth and asset management drive predictable ARR growth, capital markets provide premium pricing power through research excellence, and housing finance leverages the platform for cross-selling synergies. This integrated architecture delivers superior 25%+ ROE while maintaining disciplined capital allocation.</p></div></div>
+        </div>
+        <div style="position:absolute;left:18px;right:18px;bottom:20px;display:grid;grid-template-columns:repeat(4,1fr);background:#10284f;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);z-index:3;"><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">CMP</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">&#8377;800</span></div><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">TP</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">&#8377;924</span></div><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">Upside</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">+15.0%</span></div><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">MCap</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">Midcap</span></div></div>
+    <div class="page-footer">
+      <div class="footer-left">Tikona Capital Finserv Pvt. Ltd. | SEBI Reg. Research Analyst</div>
+      <div class="footer-center">Motilal Oswal Financial Services Ltd. — Equity Research</div>
+      <div class="footer-right">Page 6 of 14</div>
+    </div></div><div class="page">
+    <div class="mini-header">
+      <div class="mini-header-left">
+        <div class="mini-firm">Tikona Capital</div>
+        <div class="mini-company">Management &amp; Governance: Promoter-Led Execution Since 1987</div>
+      </div>
+      <div class="mini-stats"><div class="mini-stat"><span class="mini-stat-label">Rating</span><span class="mini-stat-value buy">BUY</span></div><div class="mini-stat"><span class="mini-stat-label">CMP</span><span class="mini-stat-value">&#8377;800</span></div><div class="mini-stat"><span class="mini-stat-label">TP</span><span class="mini-stat-value accent">&#8377;924</span></div><div class="mini-stat"><span class="mini-stat-label">Upside</span><span class="mini-stat-value green-v">+15.0%</span></div><div class="mini-stat"><span class="mini-stat-label">Cap</span><span class="mini-stat-value">Midcap</span></div></div>
+    </div>
+        <div class="page-content pb48">
+          <div class="section-header"><span class="section-number">07</span><span class="section-title">Management &amp; Governance: Promoter-Led Execution Since 1987</span></div>
+          <div class="main-stack"><div class="key-section-title">Management Quality Indicators</div><div class="metric-strip" style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:8px;"><div class="metric-card"><div class="metric-card-label">Promoter Holding</div><div class="metric-card-value">67.62%</div><div class="metric-card-sub">Strategic control</div></div><div class="metric-card accent-bg"><div class="metric-card-label">ROE (FY25)</div><div class="metric-card-value">22.7%</div><div class="metric-card-sub">Efficient capital use</div></div><div class="metric-card mid-bg"><div class="metric-card-label">ROCE (FY25)</div><div class="metric-card-value">18.9%</div><div class="metric-card-sub">Strong returns</div></div><div class="metric-card"><div class="metric-card-label">Treasury XIRR</div><div class="metric-card-value">18.5%</div><div class="metric-card-sub">Since inception</div></div><div class="metric-card teal-bg"><div class="metric-card-label">Debt/Equity</div><div class="metric-card-value">1.3x</div><div class="metric-card-sub">Manageable leverage</div></div></div><div class="key-section-title">Execution Track Record &amp; Governance Quality</div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;"><div class="highlight-box accent-border"><div class="highlight-box-title">Strategic Transformation Delivered</div><p>Motilal Oswal and Raamdeo Agrawal have successfully pivoted the business from traditional broking to a diversified platform with 61% ARR contribution and 45% fee-based revenue, validating their vision of building predictable income streams.</p></div><div class="highlight-box navy-border"><div class="highlight-box-title">Strong Cash Conversion Quality</div><p>Operating PAT grew 16% YoY to ₹611 Cr in Q3 FY26 with healthy cash generation from asset-light model. Treasury book grew 16% YoY to ₹9,562 Cr with disciplined 18.5% XIRR, demonstrating prudent capital deployment.</p></div><div class="highlight-box green-border"><div class="highlight-box-title">Market Leadership Sustained</div><p>Retained #1 ranking across IPOs and QIPs in CY25 while maintaining 7.6% net MF inflows market share and 5% SIP market share, reflecting execution capability in competitive markets.</p></div><div class="highlight-box accent-border"><div class="highlight-box-title">Clean Governance Framework</div><p>Transparent reporting with no material red flags. Recent SEBI settlement (₹1 lakh penalty) indicates minor regulatory friction but manageable compliance. Forensic Classification: Clean &amp; Conservative with diversified revenue base reducing concentration risk.</p></div></div></div>
+        </div>
+        <div style="position:absolute;left:18px;right:18px;bottom:20px;display:grid;grid-template-columns:repeat(4,1fr);background:#10284f;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);z-index:3;"><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">CMP</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">&#8377;800</span></div><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">TP</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">&#8377;924</span></div><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">Upside</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">+15.0%</span></div><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">MCap</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">Midcap</span></div></div>
+    <div class="page-footer">
+      <div class="footer-left">Tikona Capital Finserv Pvt. Ltd. | SEBI Reg. Research Analyst</div>
+      <div class="footer-center">Motilal Oswal Financial Services Ltd. — Equity Research</div>
+      <div class="footer-right">Page 7 of 14</div>
+    </div></div><div class="page">
+    <div class="mini-header">
+      <div class="mini-header-left">
+        <div class="mini-firm">Tikona Capital</div>
+        <div class="mini-company">Financial Performance: 58% PAT Growth in Q3 FY26</div>
+      </div>
+      <div class="mini-stats"><div class="mini-stat"><span class="mini-stat-label">Rating</span><span class="mini-stat-value buy">BUY</span></div><div class="mini-stat"><span class="mini-stat-label">CMP</span><span class="mini-stat-value">&#8377;800</span></div><div class="mini-stat"><span class="mini-stat-label">TP</span><span class="mini-stat-value accent">&#8377;924</span></div><div class="mini-stat"><span class="mini-stat-label">Upside</span><span class="mini-stat-value green-v">+15.0%</span></div><div class="mini-stat"><span class="mini-stat-label">Cap</span><span class="mini-stat-value">Midcap</span></div></div>
+    </div>
+        <div class="page-content pb48">
+          <div class="section-header"><span class="section-number">08</span><span class="section-title">Financial Performance: 58% PAT Growth in Q3 FY26</span></div>
+          <div class="main-stack"><div class="chart-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px;"><div style="border:1px solid #d5dce8;border-radius:8px;padding:7px;background:#fff;"><div class="figure"><div class="figure-title">ROE &amp; PAT Margin Trajectory: Consistent Quality</div><svg viewBox="0 0 560 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;"><line x1="44" x2="550" y1="104.0" y2="104.0" stroke="#d5dce8" stroke-width="0.5"/><text x="40" y="107.0" text-anchor="end" font-size="7" fill="#6b7c93" font-family="JetBrains Mono,monospace">0</text><line x1="44" x2="550" y1="72.7" y2="72.7" stroke="#d5dce8" stroke-width="0.5"/><text x="40" y="75.7" text-anchor="end" font-size="7" fill="#6b7c93" font-family="JetBrains Mono,monospace">12</text><line x1="44" x2="550" y1="41.3" y2="41.3" stroke="#d5dce8" stroke-width="0.5"/><text x="40" y="44.3" text-anchor="end" font-size="7" fill="#6b7c93" font-family="JetBrains Mono,monospace">23</text><line x1="44" x2="550" y1="10.0" y2="10.0" stroke="#d5dce8" stroke-width="0.5"/><text x="40" y="13.0" text-anchor="end" font-size="7" fill="#6b7c93" font-family="JetBrains Mono,monospace">35</text><polyline fill="none" stroke="#1F4690" stroke-width="1.8" points="86.2,88.1 170.5,24.9 254.8,38.4 339.2,64.0 423.5,27.0 507.8,42.7"/><circle cx="86.2" cy="88.1" r="2.2" fill="#1F4690"/><circle cx="170.5" cy="24.9" r="2.2" fill="#1F4690"/><circle cx="254.8" cy="38.4" r="2.2" fill="#1F4690"/><circle cx="339.2" cy="64.0" r="2.2" fill="#1F4690"/><circle cx="423.5" cy="27.0" r="2.2" fill="#1F4690"/><circle cx="507.8" cy="42.7" r="2.2" fill="#1F4690"/><polyline fill="none" stroke="#FFA500" stroke-width="1.8" points="86.2,82.9 170.5,10.0 254.8,21.6 339.2,43.8 423.5,11.1 507.8,23.0"/><circle cx="86.2" cy="82.9" r="2.2" fill="#FFA500"/><circle cx="170.5" cy="10.0" r="2.2" fill="#FFA500"/><circle cx="254.8" cy="21.6" r="2.2" fill="#FFA500"/><circle cx="339.2" cy="43.8" r="2.2" fill="#FFA500"/><circle cx="423.5" cy="11.1" r="2.2" fill="#FFA500"/><circle cx="507.8" cy="23.0" r="2.2" fill="#FFA500"/><text x="86.2" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY20</text><text x="170.5" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY21</text><text x="254.8" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY22</text><text x="339.2" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY23</text><text x="423.5" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY24</text><text x="507.8" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY25</text></svg><div class="donut-legend" style="justify-content:flex-start;gap:10px;margin-top:4px;"><span class="legend-item"><span class="legend-dot" style="background:#1F4690;"></span><span class="legend-label">ROE</span></span><span class="legend-item"><span class="legend-dot" style="background:#FFA500;"></span><span class="legend-label">PAT Margin</span></span></div><div style="background:#FFE5B4;border:1px solid #f0c77a;border-radius:4px;padding:4px 7px;margin-top:4px;font-size:6.2pt;line-height:1.35;color:#5a4630;font-weight:600;">ROE averaging 22%+ since FY21 validates sustainable return profile despite market volatility</div></div></div><div style="border:1px solid #d5dce8;border-radius:8px;padding:7px;background:#fff;"><div class="figure"><div class="figure-title">EBITDA &amp; PAT Margin Evolution</div><svg viewBox="0 0 560 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;"><line x1="44" x2="550" y1="104.0" y2="104.0" stroke="#d5dce8" stroke-width="0.5"/><text x="40" y="107.0" text-anchor="end" font-size="7" fill="#6b7c93" font-family="JetBrains Mono,monospace">0</text><line x1="44" x2="550" y1="72.7" y2="72.7" stroke="#d5dce8" stroke-width="0.5"/><text x="40" y="75.7" text-anchor="end" font-size="7" fill="#6b7c93" font-family="JetBrains Mono,monospace">19</text><line x1="44" x2="550" y1="41.3" y2="41.3" stroke="#d5dce8" stroke-width="0.5"/><text x="40" y="44.3" text-anchor="end" font-size="7" fill="#6b7c93" font-family="JetBrains Mono,monospace">38</text><line x1="44" x2="550" y1="10.0" y2="10.0" stroke="#d5dce8" stroke-width="0.5"/><text x="40" y="13.0" text-anchor="end" font-size="7" fill="#6b7c93" font-family="JetBrains Mono,monospace">58</text><polyline fill="none" stroke="#1F4690" stroke-width="1.8" points="86.2,47.8 170.5,13.1 254.8,23.4 339.2,30.6 423.5,10.0 507.8,14.9"/><circle cx="86.2" cy="47.8" r="2.2" fill="#1F4690"/><circle cx="170.5" cy="13.1" r="2.2" fill="#1F4690"/><circle cx="254.8" cy="23.4" r="2.2" fill="#1F4690"/><circle cx="339.2" cy="30.6" r="2.2" fill="#1F4690"/><circle cx="423.5" cy="10.0" r="2.2" fill="#1F4690"/><circle cx="507.8" cy="14.9" r="2.2" fill="#1F4690"/><polyline fill="none" stroke="#FFA500" stroke-width="1.8" points="86.2,91.2 170.5,47.1 254.8,54.1 339.2,67.5 423.5,47.8 507.8,55.0"/><circle cx="86.2" cy="91.2" r="2.2" fill="#FFA500"/><circle cx="170.5" cy="47.1" r="2.2" fill="#FFA500"/><circle cx="254.8" cy="54.1" r="2.2" fill="#FFA500"/><circle cx="339.2" cy="67.5" r="2.2" fill="#FFA500"/><circle cx="423.5" cy="47.8" r="2.2" fill="#FFA500"/><circle cx="507.8" cy="55.0" r="2.2" fill="#FFA500"/><text x="86.2" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY20</text><text x="170.5" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY21</text><text x="254.8" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY22</text><text x="339.2" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY23</text><text x="423.5" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY24</text><text x="507.8" y="115" text-anchor="middle" font-size="7" fill="#3a4d6b" font-family="JetBrains Mono,monospace">FY25</text><polyline fill="none" stroke="#c58d1a" stroke-width="1.2" points="423.5,10.0 443.5,10.0"/><text x="447.5" y="10.0" font-size="6" fill="#5a4630" font-family="JetBrains Mono,monospace">Peak margins</text></svg><div class="donut-legend" style="justify-content:flex-start;gap:10px;margin-top:4px;"><span class="legend-item"><span class="legend-dot" style="background:#1F4690;"></span><span class="legend-label">EBITDA Margin</span></span><span class="legend-item"><span class="legend-dot" style="background:#FFA500;"></span><span class="legend-label">PAT Margin</span></span></div><div style="background:#FFE5B4;border:1px solid #f0c77a;border-radius:4px;padding:4px 7px;margin-top:4px;font-size:6.2pt;line-height:1.35;color:#5a4630;font-weight:600;">EBITDA margins consistently above 44% since FY20 demonstrate pricing power and operational efficiency</div></div></div></div><div class="key-section-title">Q3 FY26 Earnings Snapshot</div><div class="metric-strip" style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:8px;"><div class="metric-card"><div class="metric-card-label">Operating PAT</div><div class="metric-card-value">₹611 Cr</div><div class="metric-card-sub">+16% YoY</div></div><div class="metric-card accent-bg"><div class="metric-card-label">Total PAT</div><div class="metric-card-value">₹721 Cr</div><div class="metric-card-sub">+58% YoY</div></div><div class="metric-card mid-bg"><div class="metric-card-label">ROE</div><div class="metric-card-value">25.2%</div><div class="metric-card-sub">Sector-leading</div></div><div class="metric-card"><div class="metric-card-label">ROCE</div><div class="metric-card-value">18.7%</div><div class="metric-card-sub">Strong returns</div></div><div class="metric-card teal-bg"><div class="metric-card-label">Net Worth</div><div class="metric-card-value">₹11,569 Cr</div><div class="metric-card-sub">+40% YoY</div></div></div><div class="fin-table-wrap"><div class="fin-table-title">Historical Return Ratios &amp; Leverage</div><table><thead><tr><th style="text-align:left;">Metric</th><th>FY20</th><th>FY21</th><th>FY22</th><th>FY23</th><th>FY24</th><th>FY25</th></tr></thead><tbody><tr class="tbl-highlight"><td class="bold">ROE (%)</td><td class="bold">5.9</td><td class="bold">29.3</td><td class="bold">24.3</td><td class="bold">14.8</td><td class="bold">28.5</td><td class="bold">22.7</td></tr><tr><td>ROCE (%)</td><td>8.1</td><td>23.8</td><td>19.7</td><td>11.8</td><td>23.4</td><td>18.9</td></tr><tr class="tbl-highlight"><td class="bold">Debt/Equity (x)</td><td class="bold">1.5</td><td class="bold">1.3</td><td class="bold">1.1</td><td class="bold">1.6</td><td class="bold">1.6</td><td class="bold">1.3</td></tr></tbody></table><div class="figure-source">FY23 dip reflects market volatility impact; recovery in FY24-25 validates business model resilience</div></div><div class="highlight-box accent-border"><div class="highlight-box-title">Earnings Quality: Strong Cash Conversion</div><p>Operating PAT growth of 16% YoY demonstrates core business strength, while 58% total PAT surge includes treasury income contribution. The asset-light model naturally generates strong cash flows without significant working capital requirements, with net worth expanding 40% YoY to ₹11,569 crore validating capital efficiency.</p></div></div>
+        </div>
+        <div style="position:absolute;left:18px;right:18px;bottom:20px;display:grid;grid-template-columns:repeat(4,1fr);background:#10284f;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);z-index:3;"><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">CMP</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">&#8377;800</span></div><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">TP</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">&#8377;924</span></div><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">Upside</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">+15.0%</span></div><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">MCap</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">Midcap</span></div></div>
+    <div class="page-footer">
+      <div class="footer-left">Tikona Capital Finserv Pvt. Ltd. | SEBI Reg. Research Analyst</div>
+      <div class="footer-center">Motilal Oswal Financial Services Ltd. — Equity Research</div>
+      <div class="footer-right">Page 8 of 14</div>
+    </div></div><div class="page">
+    <div class="mini-header">
+      <div class="mini-header-left">
+        <div class="mini-firm">Tikona Capital</div>
+        <div class="mini-company">Valuation: 20-22x FY27E Earnings Offers 15% Upside</div>
+      </div>
+      <div class="mini-stats"><div class="mini-stat"><span class="mini-stat-label">Rating</span><span class="mini-stat-value buy">BUY</span></div><div class="mini-stat"><span class="mini-stat-label">CMP</span><span class="mini-stat-value">&#8377;800</span></div><div class="mini-stat"><span class="mini-stat-label">TP</span><span class="mini-stat-value accent">&#8377;924</span></div><div class="mini-stat"><span class="mini-stat-label">Upside</span><span class="mini-stat-value green-v">+15.0%</span></div><div class="mini-stat"><span class="mini-stat-label">Cap</span><span class="mini-stat-value">Midcap</span></div></div>
+    </div>
+        <div class="page-content pb48">
+          <div class="section-header"><span class="section-number">09</span><span class="section-title">Valuation: 20-22x FY27E Earnings Offers 15% Upside</span></div>
+          <div class="main-stack"><div class="key-section-title">Valuation Framework</div><div class="metric-strip" style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px;"><div class="metric-card"><div class="metric-card-label">Target Price</div><div class="metric-card-value">₹924</div><div class="metric-card-sub">15% upside</div></div><div class="metric-card accent-bg"><div class="metric-card-label">Valuation Multiple</div><div class="metric-card-value">20-22x FY27E</div><div class="metric-card-sub">P/E basis</div></div><div class="metric-card mid-bg"><div class="metric-card-label">ROE (FY27E)</div><div class="metric-card-value">25.2%</div><div class="metric-card-sub">Superior returns</div></div><div class="metric-card"><div class="metric-card-label">ARR Contribution</div><div class="metric-card-value">61%</div><div class="metric-card-sub">Predictable revenue</div></div></div><div class="key-section-title">Scenario Analysis: Balanced Risk-Reward Profile</div><div class="scenario-grid"><div class="scenario-card bear"><div class="scenario-label">Bear Case</div><div class="scenario-tp">630</div><div class="scenario-updown">-21.2% vs CMP</div><div class="scenario-desc">Regulatory headwinds on fee structures, market volatility impacts AUM growth, wealth management momentum stalls. 15x FY27E multiple reflects execution risk.</div></div><div class="scenario-card base"><div class="scenario-label">Base Case</div><div class="scenario-tp">924</div><div class="scenario-updown">+15.5% vs CMP</div><div class="scenario-desc">Sustained wealth AUM growth at 25-30% CAGR, ARR contribution stable at 60%+, ROE maintained above 25%. 22x FY27E multiple justified by quality mix and structural tailwinds.</div></div><div class="scenario-card bull"><div class="scenario-label">Bull Case</div><div class="scenario-tp">1100</div><div class="scenario-updown">+37.5% vs CMP</div><div class="scenario-desc">Accelerated wealth AUM growth exceeding 35% CAGR, market share gains in AMC, operating leverage drives ROE toward 28%+. 26x FY27E multiple reflects platform optionality.</div></div></div><div class="thesis-box"><p><strong>Valuation Rationale: Quality Premium Justified. </strong>The 20-22x FY27E earnings multiple reflects a justified quality premium for MOFSL&#x27;s transformed business model. With 61% ARR contribution reducing earnings volatility, 25%+ ROE demonstrating superior capital efficiency, and direct exposure to India&#x27;s multi-decade financialization opportunity, the valuation offers compelling risk-reward. Limited downside risk to ₹650-700 levels provides 15-20% cushion, while probability-weighted scenarios support base case target of ₹924 with 15% upside from current levels.</p></div></div>
+        </div>
+        <div style="position:absolute;left:18px;right:18px;bottom:20px;display:grid;grid-template-columns:repeat(4,1fr);background:#10284f;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);z-index:3;"><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">CMP</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">&#8377;800</span></div><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">TP</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">&#8377;924</span></div><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">Upside</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">+15.0%</span></div><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">MCap</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">Midcap</span></div></div>
+    <div class="page-footer">
+      <div class="footer-left">Tikona Capital Finserv Pvt. Ltd. | SEBI Reg. Research Analyst</div>
+      <div class="footer-center">Motilal Oswal Financial Services Ltd. — Equity Research</div>
+      <div class="footer-right">Page 9 of 14</div>
+    </div></div><div class="page">
+    <div class="mini-header">
+      <div class="mini-header-left">
+        <div class="mini-firm">Tikona Capital</div>
+        <div class="mini-company">SAARTHI Framework: Comprehensive Quality Assessment</div>
+      </div>
+      <div class="mini-stats"><div class="mini-stat"><span class="mini-stat-label">Rating</span><span class="mini-stat-value buy">BUY</span></div><div class="mini-stat"><span class="mini-stat-label">CMP</span><span class="mini-stat-value">&#8377;800</span></div><div class="mini-stat"><span class="mini-stat-label">TP</span><span class="mini-stat-value accent">&#8377;924</span></div><div class="mini-stat"><span class="mini-stat-label">Upside</span><span class="mini-stat-value green-v">+15.0%</span></div><div class="mini-stat"><span class="mini-stat-label">Cap</span><span class="mini-stat-value">Midcap</span></div></div>
+    </div>
+        <div class="page-content pb48">
+          <div class="section-header"><span class="section-number">10</span><span class="section-title">SAARTHI Framework: Comprehensive Quality Assessment</span></div>
+          <div class="main-stack"><div class="metric-strip" style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:8px;"><div class="metric-card"><div class="metric-card-label">SAARTHI Total Score</div><div class="metric-card-value">78/100</div><div class="metric-card-sub">BUY</div></div><div class="metric-card accent-bg"><div class="metric-card-label">Strongest Dimension</div><div class="metric-card-value">Reinvestment Quality</div><div class="metric-card-sub">14/15</div></div><div class="metric-card mid-bg"><div class="metric-card-label">Key Validation</div><div class="metric-card-value">Platform Transformation</div><div class="metric-card-sub">61% ARR</div></div></div><div class="highlight-box accent-border" style="margin-bottom:6px;"><div class="highlight-box-title">SAARTHI Framework — Tikona Capital Proprietary Scorecard</div><p>Seven-dimension quality assessment (Scalability, Assets, Accounting, Returns, Track Record, Hygiene, Integrity) scored out of 15 each; composite maps to rating band below.</p><div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-top:5px;"><div style="background:#1a7a4a;color:#fff;font-family:'JetBrains Mono',monospace;font-size:5.5pt;padding:3px 5px;border-radius:2px;text-align:center;">85–100 · STRONG BUY</div><div style="background:#3A5BA0;color:#fff;font-family:'JetBrains Mono',monospace;font-size:5.5pt;padding:3px 5px;border-radius:2px;text-align:center;">70–84 · BUY</div><div style="background:#FFA500;color:#1F4690;font-family:'JetBrains Mono',monospace;font-size:5.5pt;padding:3px 5px;border-radius:2px;text-align:center;font-weight:700;">55–69 · HOLD</div><div style="background:#b91c1c;color:#fff;font-family:'JetBrains Mono',monospace;font-size:5.5pt;padding:3px 5px;border-radius:2px;text-align:center;">40–54 · REDUCE</div><div style="background:#4a0e0e;color:#fff;font-family:'JetBrains Mono',monospace;font-size:5.5pt;padding:3px 5px;border-radius:2px;text-align:center;"><40 · SELL</div></div></div><div class="fin-table-title">Dimension-Level Assessment</div><div class="score-item"><div class="score-header"><span class="score-name">Scalability of Core Engine</span><span class="score-val">13 / 15</span></div><div class="score-bar-bg"><div class="score-bar-fill" style="width:87%;background:#FFA500;"></div></div><div class="score-desc">Asset-light model with 33% AUM growth and 61% ARR creates operating leverage</div></div><div class="score-item"><div class="score-header"><span class="score-name">Addressable Market &amp; Adjacency</span><span class="score-val">9 / 10</span></div><div class="score-bar-bg"><div class="score-bar-fill" style="width:90%;background:#1F4690;"></div></div><div class="score-desc">US$1.6 trillion wealth management opportunity through FY29 validates TAM expansion</div></div><div class="score-item"><div class="score-header"><span class="score-name">Asymmetric Pricing Power</span><span class="score-val">12 / 15</span></div><div class="score-bar-bg"><div class="score-bar-fill" style="width:80%;background:#3A5BA0;"></div></div><div class="score-desc">#1 ranking in IPOs/QIPs and research excellence offset distribution commoditization</div></div><div class="score-item"><div class="score-header"><span class="score-name">Reinvestment Quality</span><span class="score-val">14 / 15</span></div><div class="score-bar-bg"><div class="score-bar-fill" style="width:93%;background:#0e7490;"></div></div><div class="score-desc">25.2% ROE and 18.7% ROCE demonstrate efficient capital deployment across segments</div></div><div class="score-item"><div class="score-header"><span class="score-name">Track Record Through Adversity</span><span class="score-val">8 / 10</span></div><div class="score-bar-bg"><div class="score-bar-fill" style="width:80%;background:#1a7a4a;"></div></div><div class="score-desc">Diversified model provides resilience with 56% sequential recovery in Q3 FY26</div></div><div class="score-item"><div class="score-header"><span class="score-name">Human Capital &amp; Institutional DNA</span><span class="score-val">9 / 10</span></div><div class="score-bar-bg"><div class="score-bar-fill" style="width:90%;background:#6b7c93;"></div></div><div class="score-desc">37-year promoter track record with systematic research and relationship frameworks</div></div><div class="score-item"><div class="score-header"><span class="score-name">Inflection Point Identification</span><span class="score-val">13 / 15</span></div><div class="score-bar-bg"><div class="score-bar-fill" style="width:87%;background:#b91c1c;"></div></div><div class="score-desc">IBEF Fund V close and Private Credit launch position for sustained re-rating</div></div><div class="thesis-box"><p><strong>Framework Validates Transformation Quality. </strong>MOFSL&#x27;s 78/100 SAARTHI score confirms the business transformation from broking to predictable-revenue platform is genuine and sustainable. Exceptional marks in Reinvestment Quality (14/15) and Scalability (13/15) validate the 25%+ ROE delivery capability, while strong Inflection Point identification (13/15) supports the re-rating thesis as India&#x27;s financialization theme accelerates through FY29.</p></div></div>
+        </div>
+        <div style="position:absolute;left:18px;right:18px;bottom:20px;display:grid;grid-template-columns:repeat(4,1fr);background:#10284f;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);z-index:3;"><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">CMP</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">&#8377;800</span></div><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">TP</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">&#8377;924</span></div><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">Upside</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">+15.0%</span></div><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">MCap</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">Midcap</span></div></div>
+    <div class="page-footer">
+      <div class="footer-left">Tikona Capital Finserv Pvt. Ltd. | SEBI Reg. Research Analyst</div>
+      <div class="footer-center">Motilal Oswal Financial Services Ltd. — Equity Research</div>
+      <div class="footer-right">Page 10 of 14</div>
+    </div></div><div class="page">
+    <div class="mini-header">
+      <div class="mini-header-left">
+        <div class="mini-firm">Tikona Capital</div>
+        <div class="mini-company">Scenario Analysis: Bull/Base/Bear Case Framework</div>
+      </div>
+      <div class="mini-stats"><div class="mini-stat"><span class="mini-stat-label">Rating</span><span class="mini-stat-value buy">BUY</span></div><div class="mini-stat"><span class="mini-stat-label">CMP</span><span class="mini-stat-value">&#8377;800</span></div><div class="mini-stat"><span class="mini-stat-label">TP</span><span class="mini-stat-value accent">&#8377;924</span></div><div class="mini-stat"><span class="mini-stat-label">Upside</span><span class="mini-stat-value green-v">+15.0%</span></div><div class="mini-stat"><span class="mini-stat-label">Cap</span><span class="mini-stat-value">Midcap</span></div></div>
+    </div>
+        <div class="page-content pb48">
+          <div class="section-header"><span class="section-number">11</span><span class="section-title">Scenario Analysis: Bull/Base/Bear Case Framework</span></div>
+          <div class="main-stack"><div class="key-section-title">Three Scenarios: Outcome Range ₹630–₹1,100</div><div class="scenario-grid"><div class="scenario-card bear"><div class="scenario-label">Bear Case</div><div class="scenario-tp">₹630</div><div class="scenario-updown">-21.2% vs CMP</div><div class="scenario-desc">Market volatility pressures AUM growth to 20% annually. Fee income stagnates at 42% amid pricing pressure. Regulatory changes compress EBITDA margin to 48%. PAT reaches ₹2,100 Cr in FY27. Conservative 18x P/E reflects slower growth and margin headwinds.</div></div><div class="scenario-card base"><div class="scenario-label">Base Case</div><div class="scenario-tp">₹924</div><div class="scenario-updown">+15.5% vs CMP</div><div class="scenario-desc">Steady execution delivers 30% AUM CAGR, reaching ₹2.4 lakh crore by FY27. Fee income stabilizes at 48% of revenue. Operating PAT grows 18% CAGR with ROE at 24-25%. Revenue reaches ₹7,200 Cr with 52% EBITDA margin, generating PAT of ₹2,650 Cr. Fair value 22x P/E reflects steady growth trajectory.</div></div><div class="scenario-card bull"><div class="scenario-label">Bull Case</div><div class="scenario-tp">₹1,100</div><div class="scenario-updown">+37.5% vs CMP</div><div class="scenario-desc">Accelerated financialization drives 40%+ AUM growth, reaching ₹2.8 lakh crore. Fee income expands to 55% as alternative investments and private wealth scale. Operating leverage delivers 25%+ PAT CAGR with ROE expanding to 28%. Revenue grows to ₹8,500 Cr with 55% EBITDA margin, generating PAT of ₹3,200 Cr. Premium 26x P/E on superior growth and market leadership.</div></div></div><div class="key-section-title">Key Scenario Drivers</div><div class="metric-strip" style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:8px;"><div class="metric-card"><div class="metric-card-label">Base Case Probability</div><div class="metric-card-value">50%</div><div class="metric-card-sub">Aligned with management guidance</div></div><div class="metric-card accent-bg"><div class="metric-card-label">Bull Case Probability</div><div class="metric-card-value">30%</div><div class="metric-card-sub">Requires accelerated financialization</div></div><div class="metric-card mid-bg"><div class="metric-card-label">Bear Case Probability</div><div class="metric-card-value">20%</div><div class="metric-card-sub">Regulatory or volatility shock</div></div></div></div>
+        </div>
+        <div style="position:absolute;left:18px;right:18px;bottom:20px;display:grid;grid-template-columns:repeat(4,1fr);background:#10284f;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);z-index:3;"><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">CMP</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">&#8377;800</span></div><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">TP</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">&#8377;924</span></div><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">Upside</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">+15.0%</span></div><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">MCap</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">Midcap</span></div></div>
+    <div class="page-footer">
+      <div class="footer-left">Tikona Capital Finserv Pvt. Ltd. | SEBI Reg. Research Analyst</div>
+      <div class="footer-center">Motilal Oswal Financial Services Ltd. — Equity Research</div>
+      <div class="footer-right">Page 11 of 14</div>
+    </div></div><div class="page">
+    <div class="mini-header">
+      <div class="mini-header-left">
+        <div class="mini-firm">Tikona Capital</div>
+        <div class="mini-company">Entry, Review &amp; Exit Strategy: Actionable Framework</div>
+      </div>
+      <div class="mini-stats"><div class="mini-stat"><span class="mini-stat-label">Rating</span><span class="mini-stat-value buy">BUY</span></div><div class="mini-stat"><span class="mini-stat-label">CMP</span><span class="mini-stat-value">&#8377;800</span></div><div class="mini-stat"><span class="mini-stat-label">TP</span><span class="mini-stat-value accent">&#8377;924</span></div><div class="mini-stat"><span class="mini-stat-label">Upside</span><span class="mini-stat-value green-v">+15.0%</span></div><div class="mini-stat"><span class="mini-stat-label">Cap</span><span class="mini-stat-value">Midcap</span></div></div>
+    </div>
+        <div class="page-content pb48">
+          <div class="section-header"><span class="section-number">12</span><span class="section-title">Entry, Review &amp; Exit Strategy: Actionable Framework</span></div>
+          <div class="main-stack"><div class="thesis-box"><p><strong>Entry Recommendation. </strong>Enter at current levels of ₹750-800 targeting ₹924 over 12-18 months. Current price of ₹800 offers 15% upside to fair value with attractive risk-reward at 20-22x FY27E earnings. Build position gradually over 2-3 months through systematic accumulation, with initial 60% allocation followed by 40% on any correction below ₹750.</p></div><div class="key-section-title">Quarterly Review Framework: Monitor These KPIs</div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;"><div class="highlight-box accent-border"><div class="highlight-box-title">ARR Trajectory &amp; Revenue Mix</div><p>Track Annual Recurring Revenue contribution (target: maintain &gt;61%) and fee-based revenue as percentage of total (target: maintain &gt;45%). Increase position if ARR exceeds 65%.</p></div><div class="highlight-box navy-border"><div class="highlight-box-title">Wealth AUM Growth &amp; Market Share</div><p>Monitor AUM growth rates (target: &gt;25% YoY), SIP market share (target: maintain &gt;4.5%), and net MF inflows market share (target: maintain &gt;7%).</p></div><div class="highlight-box green-border"><div class="highlight-box-title">Profitability &amp; Returns</div><p>Ensure ROE sustainability above 22% and operating leverage demonstration through operating PAT growth exceeding revenue growth. Monitor regulatory changes affecting fee structures.</p></div></div><div class="key-section-title">Exit Triggers: When to Reduce or Exit Position</div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;"><div class="highlight-box accent-border"><div class="highlight-box-title">Upside Exit at ₹950-1,000</div><p>Take profits when valuation reaches 24-26x P/E or if sector rotation reduces financial services premium. Partial profit booking at ₹900 (22x P/E) to lock gains while maintaining core position.</p></div><div class="highlight-box navy-border"><div class="highlight-box-title">Defensive Exit Triggers</div><p>Exit if ARR contribution declines below 55%, sustained ROE compression below 20%, loss of top-3 ranking in key segments, or regulatory changes significantly impacting fee income. Stop-loss at ₹650 (18x P/E).</p></div></div></div>
+        </div>
+        <div style="position:absolute;left:18px;right:18px;bottom:20px;display:grid;grid-template-columns:repeat(4,1fr);background:#10284f;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);z-index:3;"><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">CMP</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">&#8377;800</span></div><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">TP</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">&#8377;924</span></div><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">Upside</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">+15.0%</span></div><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">MCap</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">Midcap</span></div></div>
+    <div class="page-footer">
+      <div class="footer-left">Tikona Capital Finserv Pvt. Ltd. | SEBI Reg. Research Analyst</div>
+      <div class="footer-center">Motilal Oswal Financial Services Ltd. — Equity Research</div>
+      <div class="footer-right">Page 12 of 14</div>
+    </div></div><div class="page">
+    <div class="mini-header">
+      <div class="mini-header-left">
+        <div class="mini-firm">Tikona Capital</div>
+        <div class="mini-company">Key Risks &amp; Catalysts: What Could Change the Thesis</div>
+      </div>
+      <div class="mini-stats"><div class="mini-stat"><span class="mini-stat-label">Rating</span><span class="mini-stat-value buy">BUY</span></div><div class="mini-stat"><span class="mini-stat-label">CMP</span><span class="mini-stat-value">&#8377;800</span></div><div class="mini-stat"><span class="mini-stat-label">TP</span><span class="mini-stat-value accent">&#8377;924</span></div><div class="mini-stat"><span class="mini-stat-label">Upside</span><span class="mini-stat-value green-v">+15.0%</span></div><div class="mini-stat"><span class="mini-stat-label">Cap</span><span class="mini-stat-value">Midcap</span></div></div>
+    </div>
+        <div class="page-content pb48">
+          <div class="section-header"><span class="section-number">13</span><span class="section-title">Key Risks &amp; Catalysts: What Could Change the Thesis</span></div>
+          <div class="main-stack"><div class="key-section-title">Key Catalysts: What Could Drive Upside</div><div class="catalyst-item"><div class="catalyst-icon">🚀</div><div class="catalyst-body"><div class="catalyst-title">IBEF Fund V Final Close <span class="catalyst-badge">NEAR-TERM</span></div><div class="catalyst-desc">Fund V has raised cumulative ₹8,000 crore with final close expected Q4 FY26, expanding alternative investment platform and contributing to high-margin fee income growth over next 12-18 months.</div></div></div><div class="catalyst-item"><div class="catalyst-icon">📈</div><div class="catalyst-body"><div class="catalyst-title">SIP Market Share Expansion <span class="catalyst-badge">STRUCTURAL</span></div><div class="catalyst-desc">SIP inflows surged 55% YoY to ₹4,515 crore with highest market share at 5%. Continued penetration will drive predictable AUM growth and strengthen recurring revenue base as retail participation accelerates.</div></div></div><div class="catalyst-item"><div class="catalyst-icon">💼</div><div class="catalyst-body"><div class="catalyst-title">Fee-Based Revenue Mix Shift <span class="catalyst-badge">STRUCTURAL</span></div><div class="catalyst-desc">Fee-based revenue now 45% of total with 61% ARR contribution. Further expansion toward 50%+ fee income will drive valuation re-rating and reduce earnings volatility.</div></div></div><div class="key-section-title">Key Risks: What Could Pressure the Thesis</div><div class="risk-item"><div class="risk-badge risk-high">HIGH</div><div><div class="risk-title">Market Volatility and Cyclical Earnings</div><div class="risk-text">Earnings remain susceptible to capital market volatility despite diversification. Extended downturns could pressure AUM-linked fee income and transaction volumes. Q3 FY26 showed YoY profit growth of only 0.26%, highlighting sensitivity to market conditions.</div></div></div><div class="risk-item"><div class="risk-badge risk-high">HIGH</div><div><div class="risk-title">Regulatory Changes and Compliance Costs</div><div class="risk-text">Evolving regulatory landscape could impact fee structures and business models. Recent SEBI settlement order resulted in ₹1 lakh penalty, indicating ongoing scrutiny. Rising compliance costs may impact profitability, particularly for newer business verticals.</div></div></div><div class="risk-item"><div class="risk-badge risk-med">MED</div><div><div class="risk-title">Execution Risk in New Ventures</div><div class="risk-text">Expansion into private credit and alternative investments introduces execution risk in scaling new verticals. Private Credit Fund targeting ₹3,000 crore requires credit underwriting capabilities that differ from traditional asset management. Failure to execute could impact returns and reputation.</div></div></div><div class="risk-item"><div class="risk-badge risk-med">MED</div><div><div class="risk-title">Competitive Intensity and Pricing Pressure</div><div class="risk-text">Increasing competition from banks, fintech players, and new entrants is intensifying pricing pressure. Democratization of information and technology is reducing barriers to entry while commoditizing basic services, requiring continuous investment in differentiation.</div></div></div></div>
+        </div>
+        <div style="position:absolute;left:18px;right:18px;bottom:20px;display:grid;grid-template-columns:repeat(4,1fr);background:#10284f;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);z-index:3;"><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">CMP</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">&#8377;800</span></div><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">TP</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">&#8377;924</span></div><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">Upside</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">+15.0%</span></div><div style="display:flex;flex-direction:column;gap:1px;padding:4px 8px;border-right:1px solid rgba(255,255,255,0.12);"><span style="font-size:5.2pt;color:#8ea0bd;text-transform:uppercase;letter-spacing:0.8px;font-family:JetBrains Mono,monospace;">MCap</span><span style="font-size:8pt;color:#ffffff;font-weight:700;font-family:JetBrains Mono,monospace;">Midcap</span></div></div>
+    <div class="page-footer">
+      <div class="footer-left">Tikona Capital Finserv Pvt. Ltd. | SEBI Reg. Research Analyst</div>
+      <div class="footer-center">Motilal Oswal Financial Services Ltd. — Equity Research</div>
+      <div class="footer-right">Page 13 of 14</div>
+    </div></div><div class="page">
+    <div class="mini-header">
+      <div class="mini-header-left">
+        <div class="mini-firm">Tikona Capital</div>
+        <div class="mini-company">Disclaimer &amp; Disclosures</div>
+      </div>
+      <div class="mini-stats"><div class="mini-stat"><span class="mini-stat-label">Rating</span><span class="mini-stat-value buy">BUY</span></div><div class="mini-stat"><span class="mini-stat-label">CMP</span><span class="mini-stat-value">&#8377;800</span></div><div class="mini-stat"><span class="mini-stat-label">TP</span><span class="mini-stat-value accent">&#8377;924</span></div><div class="mini-stat"><span class="mini-stat-label">Upside</span><span class="mini-stat-value green-v">+15.0%</span></div><div class="mini-stat"><span class="mini-stat-label">Cap</span><span class="mini-stat-value">Midcap</span></div></div>
+    </div>
+    <div class="page-content pb48">
+      <div class="section-header">
+        <span class="section-number">14</span>
+        <span class="section-title">Disclaimer &amp; Disclosures</span>
+      </div>
+      <div class="highlight-box accent-border" style="margin-bottom:6px;">
+        <div class="highlight-box-title" style="font-size:8pt;">Recommendation Recap â€” Motilal Oswal Financial Services Ltd.</div>
+        <div class="metric-strip" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:4px;">
+          <div class="metric-card light-bg"><div class="metric-card-label">Rating</div><div class="metric-card-value">BUY</div></div>
+          <div class="metric-card"><div class="metric-card-label">CMP</div><div class="metric-card-value">&#8377;800</div></div>
+          <div class="metric-card accent-bg"><div class="metric-card-label">Target Price</div><div class="metric-card-value">&#8377;924</div></div>
+          <div class="metric-card teal-bg"><div class="metric-card-label">Upside</div><div class="metric-card-value">+15.0%</div></div>
+        </div>
+      </div>
+      <div class="disclosure-grid">
+        <div>
+          <div class="disclosure-card">
+            <div class="disclosure-title">Regulatory Disclosure</div>
+            <div class="disclaimer" style="font-size:5.7pt;line-height:1.55;margin-top:0;">About Us: Research Analyst is registered with SEBI as Research Analyst with Registration No. INH000009807. The firm got its registration on June 13, 2022, and is engaged in research services.<br><br>Disciplinary history: No penalties / directions have been issued by SEBI under the SEBI Act or Regulations made there under. There are no pending material litigations or legal proceedings, findings of inspections or investigations for which action has been taken or initiated by any regulatory authority.<br><br>Details of its associates: No associates<br><br>Disclosures with respect to Research and Recommendations Services<br>· Research Analyst may have financial interest or actual / beneficial ownership in the securities recommended in its personal portfolio.<br>· There are no actual or potential conflicts of interest arising from any connection to or association with any issuer of products / securities.<br>· Research Analyst or its employee or its associates have not received any compensation from the company in past 12 months.<br>· Research Analyst or its employee or its associates have not managed or co-managed the public offering of Subject company in past 12 months.<br>· Research Analyst or its employee or its associates have not received any compensation for investment banking or merchant banking or brokerage services from the subject company in past 12 months.<br>· Research Analyst or its employee or its associates have not received any compensation for products or services other than above from the subject company in past 12 months.<br>· Research Analyst or its employee or its associates have not received any compensation or other benefits from the Subject Company or 3rd party in connection with the research report.<br>· The subject company was not a client of Research Analyst during twelve months preceding the date of distribution of the research report.<br>· Research Analysts or its employee or its associates has not served as an officer, director, or employee of the subject company.<br>· Registration granted by SEBI, membership of BASL and certification from NISM in no way guarantee performance of the Intermediary or provide any assurance of returns to investors.<br>· Investment in securities market are subject to market risks. Read all the related documents carefully before investing.</div>
+          </div>
+        </div>
+        <div>
+          <div class="disclosure-card">
+            <div class="disclosure-title">Research Desk</div>
+            <div class="side-row"><span class="side-label dark">SEBI Reg.</span><span class="side-value dark">INH000009807</span></div>
+            <div class="side-row"><span class="side-label dark">Email</span><span class="side-value dark">research@tikonacapital.in</span></div>
+            <div class="side-row"><span class="side-label dark">Web</span><span class="side-value dark">tikonacapital.in</span></div>
+            
+          </div>
+          <div class="disclosure-card" style="margin-top:8px;">
+            <div class="disclosure-title">Reader Notes</div>
+            <ul class="disclosure-list">
+              <li>This report is generated from a structured company pack, deterministic financial model, and editor-reviewed page plan.</li>
+              <li>Valuation, scenario, and recommendation pages should be read together because target price and risk framing are linked.</li>
+              <li>If company disclosures or market prices move materially after publication, the recommendation framework should be refreshed.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="page-footer">
+      <div class="footer-left">Tikona Capital Finserv Pvt. Ltd. | SEBI Reg. Research Analyst</div>
+      <div class="footer-center">Motilal Oswal Financial Services Ltd. — Equity Research</div>
+      <div class="footer-right">Page 14 of 14</div>
+    </div></div>
+</body>
+</html>

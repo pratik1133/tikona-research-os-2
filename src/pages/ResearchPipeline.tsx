@@ -29,12 +29,13 @@ import {
   saveSessionDocuments,
   getSessionDocuments,
   generateFinancialModel,
+  mirrorFinancialModelToStorage,
   unpublishReport,
   getReportBySession,
 } from '@/lib/api';
 import { createRecommendation, hasRecommendationForSession } from '@/lib/recommendations-api';
 import type { RecommendationRating } from '@/types/recommendations';
-import { runStage0, runStage1, runStage2, DEFAULT_PROMPTS } from '@/lib/anthropic-pipeline';
+import { runStage0, runStage1, runStage2, DEFAULT_PROMPTS, summarizeVaultDocuments } from '@/lib/anthropic-pipeline';
 import type { PromptOverrides } from '@/lib/anthropic-pipeline';
 import type { PipelineSession, PipelineProgress, PipelineStatus, SectorFramework } from '@/types/pipeline';
 import { PIPELINE_STAGE_LABELS, PIPELINE_MODELS, DEFAULT_PIPELINE_MODEL, getStageNumber } from '@/types/pipeline';
@@ -324,6 +325,16 @@ export default function ResearchPipeline() {
       setRecentSessions(prev => [{ ...newSession, pipeline_status: 'vault_ready' } as PipelineSession, ...prev]);
 
       toast.success('Vault created — choose your next step');
+
+      // Background: summarize vault docs with Haiku so Stage 1/2 can use them as primary source.
+      // Fire-and-forget — pipeline can start before this completes; stages will pick up cached briefing.
+      if (documents.length > 0) {
+        summarizeVaultDocuments(newSession.session_id, selectedCompany.company_name, selectedCompany.nse_symbol ?? '', documents)
+          .then(briefing => {
+            if (briefing) console.log('[Pipeline] Vault briefing cached:', briefing.length, 'chars');
+          })
+          .catch(err => console.warn('[Pipeline] Vault summarization failed:', err));
+      }
     } catch (err) {
       toast.error(`Failed to start pipeline: ${err instanceof Error ? err.message : 'Unknown error'}`);
       setVaultStatus('error');
@@ -349,12 +360,13 @@ export default function ResearchPipeline() {
         sector,
         vaultId
       );
+      const storageResult = await mirrorFinancialModelToStorage(selectedCompany.nse_symbol ?? '');
       setFinancialModelStatus('success');
-      setFinancialModelFileUrl(modelResult.fileUrl);
+      setFinancialModelFileUrl(storageResult.fileUrl);
       toast.success(`Financial model generated: ${modelResult.fileName}`);
 
-      // Persist financial model URL
-      await updatePipelineOutput(sessionId, { financial_model_file_url: modelResult.fileUrl });
+      // Persist the Supabase Storage URL so downstream services can fetch it reliably.
+      await updatePipelineOutput(sessionId, { financial_model_file_url: storageResult.fileUrl });
 
       await transitionPipelineStatus(sessionId, 'vault_ready', 'financial_model_generating');
       setPipelineStatus('vault_ready');
@@ -456,7 +468,8 @@ export default function ResearchPipeline() {
         financials ?? null,
         sectorFramework?.markdown || '',
         setProgress,
-        stage1Prompts
+        stage1Prompts,
+        sessionId,
       );
 
       setStage1Thesis(thesis);
@@ -496,7 +509,8 @@ export default function ResearchPipeline() {
         stage1Thesis,
         sectorFramework?.markdown || '',
         setProgress,
-        stage2Prompts
+        stage2Prompts,
+        sessionId,
       );
 
       await clearResearchSections(sessionId, 'stage2');
@@ -659,11 +673,11 @@ export default function ResearchPipeline() {
         validity_date: null,
         plans: [(plan as any)],
         trade_notes: null,
-        report_file_url: report.pdf_file_url || null,
+        report_file_url: report.pptx_pdf_file_url || report.pptx_file_url || null,
         session_id: sessionId,
         send_telegram: true,
         created_by: user?.email || null,
-        pdf_file_id: report.pdf_file_id || null,
+        pdf_file_id: null,
       });
 
       setTelegramSent(true);
@@ -1024,7 +1038,7 @@ export default function ResearchPipeline() {
                     {financialModelStatus === 'success' && financialModelFileUrl && (
                       <div className="mb-3 flex items-center gap-3 rounded-lg bg-accent-50 border border-accent-100 px-4 py-3">
                         <BarChart3 className="h-4 w-4 text-accent-600 shrink-0" />
-                        <span className="text-xs font-medium text-accent-800 flex-1">Financial Model — uploaded to vault</span>
+                        <span className="text-xs font-medium text-accent-800 flex-1">Financial Model — stored and ready</span>
                         <a
                           href={financialModelFileUrl}
                           target="_blank"
@@ -1303,7 +1317,9 @@ export default function ResearchPipeline() {
                 sessionId={sessionId}
                 companyName={session.company_name}
                 nseSymbol={session.company_nse_code}
+                sector={selectedSector || session.sector || null}
                 vaultId={vaultId}
+                financialModelFileUrl={financialModelFileUrl}
                 userEmail={user?.email || ''}
                 stage2Sections={stage2Sections}
                 onPublished={handlePublish}

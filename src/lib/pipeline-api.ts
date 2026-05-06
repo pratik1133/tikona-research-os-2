@@ -7,6 +7,7 @@ import type {
   PipelineStatus,
   SectorKnowledge,
   SectorPlaybook,
+  SectorPlaybookVersion,
   ResearchSection,
   SkbSuggestedUpdate,
 } from '@/types/pipeline';
@@ -248,6 +249,31 @@ export async function updateSectorPlaybook(
     sector_description?: string;
   }
 ): Promise<SectorPlaybook> {
+  // ── Archive the current version before overwriting ──
+  try {
+    const { data: current } = await supabase
+      .from('sector_playbooks')
+      .select('*')
+      .eq('id', playbookId)
+      .single();
+
+    if (current && updates.framework_content) {
+      const oldMarkdown = getFrameworkFromPlaybook(current);
+      if (oldMarkdown && oldMarkdown.length > 100) {
+        await supabase.from('sector_playbook_versions').insert({
+          playbook_id: playbookId,
+          sector_name: current.sector_name,
+          version: current.version || 1,
+          framework_content: oldMarkdown,
+          created_by: current.created_by || null,
+        });
+      }
+    }
+  } catch (archiveErr) {
+    // Non-fatal — don't block the update if archiving fails
+    console.warn('[Pipeline] Could not archive playbook version:', archiveErr);
+  }
+
   const updatePayload: Record<string, unknown> = {
     updated_at: new Date().toISOString(),
     last_updated: new Date().toISOString().split('T')[0],
@@ -261,14 +287,14 @@ export async function updateSectorPlaybook(
   }
 
   // Increment version
-  const { data: current } = await supabase
+  const { data: currentForVersion } = await supabase
     .from('sector_playbooks')
     .select('version')
     .eq('id', playbookId)
     .single();
 
-  if (current) {
-    updatePayload.version = (current.version || 1) + 1;
+  if (currentForVersion) {
+    updatePayload.version = (currentForVersion.version || 1) + 1;
   }
 
   const { data, error } = await supabase
@@ -280,6 +306,25 @@ export async function updateSectorPlaybook(
 
   if (error) throw new Error(`Failed to update sector playbook: ${error.message}`);
   return data;
+}
+
+/**
+ * Fetches all archived versions for a sector playbook, newest first.
+ */
+export async function getSectorPlaybookVersions(
+  playbookId: string
+): Promise<SectorPlaybookVersion[]> {
+  const { data, error } = await supabase
+    .from('sector_playbook_versions')
+    .select('*')
+    .eq('playbook_id', playbookId)
+    .order('version', { ascending: false });
+
+  if (error) {
+    console.warn('[Pipeline] Could not load playbook versions:', error.message);
+    return [];
+  }
+  return data ?? [];
 }
 
 /**

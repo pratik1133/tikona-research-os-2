@@ -122,6 +122,20 @@ export interface SectorPlaybook {
 }
 
 // ========================
+// Sector Playbook Version — historical snapshot
+// ========================
+
+export interface SectorPlaybookVersion {
+  id: string;
+  playbook_id: string;
+  sector_name: string;
+  version: number;
+  framework_content: string;
+  created_by: string | null;
+  created_at: string;
+}
+
+// ========================
 // Sector Framework — the AI-generated sector analysis markdown
 // Stored in sector_playbooks and copied to research_sessions.sector_framework
 // ========================

@@ -3,15 +3,15 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 import type { EquityUniverse } from '@/types/database';
-import { SECTORS } from '@/lib/sectors';
 import type { SectorFramework, PipelineProgress } from '@/types/pipeline';
+import type { VaultDocument } from '@/types/vault';
 import {
   getSectorPlaybook,
   createSectorPlaybook,
   updateSectorPlaybook,
   getFrameworkFromPlaybook,
 } from '@/lib/pipeline-api';
-import { getCurrentUserEmail } from '@/lib/supabase';
+import { getCurrentUserEmail, supabase } from '@/lib/supabase';
 
 // ========================
 // Anthropic Client
@@ -36,6 +36,75 @@ const DEFAULT_MODEL = 'claude-sonnet-4-20250514';
 export interface PromptOverrides {
   systemPrompt?: string;
   userPrompt?: string;
+}
+
+// ========================
+// Time / Freshness Context
+// ========================
+
+/**
+ * Indian fiscal year runs Apr 1 → Mar 31.
+ * Returns the current FY label (e.g., "FY26") and quarter (Q1..Q4) based on today.
+ */
+function getCurrentIndianFY(): { fyLabel: string; fyShort: string; quarter: string; quarterLabel: string; today: string } {
+  const now = new Date();
+  const month = now.getMonth(); // 0-indexed: Jan=0
+  const calYear = now.getFullYear();
+  // FY starts in April. Months Apr (3) - Mar (2 of next year) belong to FY ending in Mar of (calYear+1) if month>=3.
+  const fyEndYear = month >= 3 ? calYear + 1 : calYear;
+  const fyShort = `FY${String(fyEndYear).slice(2)}`;
+  const fyLabel = `FY${fyEndYear}`;
+  // Quarters: Q1 Apr-Jun, Q2 Jul-Sep, Q3 Oct-Dec, Q4 Jan-Mar
+  let quarter: string;
+  if (month >= 3 && month <= 5) quarter = 'Q1';
+  else if (month >= 6 && month <= 8) quarter = 'Q2';
+  else if (month >= 9 && month <= 11) quarter = 'Q3';
+  else quarter = 'Q4';
+  const quarterLabel = `${quarter} ${fyShort}`;
+  const today = now.toISOString().split('T')[0];
+  return { fyLabel, fyShort, quarter, quarterLabel, today };
+}
+
+/**
+ * Builds a freshness preamble injected into every stage system prompt.
+ * Forces Claude to anchor on current FY actuals, not stale priors.
+ */
+function buildFreshnessPreamble(): string {
+  const { fyShort, quarter, quarterLabel, today } = getCurrentIndianFY();
+  // Most recent reported quarter is usually 1 quarter behind current
+  const reportedQuarter = quarter === 'Q1' ? `Q4 FY${parseInt(fyShort.slice(2)) - 1}` :
+    quarter === 'Q2' ? `Q1 ${fyShort}` :
+    quarter === 'Q3' ? `Q2 ${fyShort}` : `Q3 ${fyShort}`;
+
+  return `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TEMPORAL CONTEXT — READ FIRST, NON-NEGOTIABLE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- TODAY'S DATE: ${today}
+- CURRENT INDIAN FISCAL YEAR: ${fyShort} (we are in ${quarterLabel})
+- MOST RECENT REPORTED QUARTER: ${reportedQuarter} (or later if web search finds newer)
+- LAST FULL FISCAL YEAR ACTUALS: FY${parseInt(fyShort.slice(2)) - 1}
+- PROJECTION YEARS: ${fyShort}E and beyond
+
+DATA FRESHNESS RULES — HARD REQUIREMENTS:
+1. Treat any data point older than 2 quarters as STALE. Search again with explicit quarter terms ("${reportedQuarter}", "${quarterLabel}", etc.) until you find current data.
+2. Your web_search queries MUST include current quarter/year markers — do NOT rely on the model's training-cutoff knowledge for financial figures, prices, or news.
+3. When citing CMP, market cap, P/E, ROE, etc., use the value from the most recent reported quarter — never a multi-year-old number.
+4. When discussing "recent" results, "latest" guidance, or "current" market conditions, the data MUST be from the last 90 days. If web_search returns older data, EXPLICITLY flag it ("As of [date]: …") and search for newer.
+5. Do NOT default to FY24 or FY25 examples in any analysis unless those ARE the latest actuals. The latest year of actuals you should anchor on is FY${parseInt(fyShort.slice(2)) - 1}, with ${fyShort} being current/in-progress.
+6. If a number you would otherwise cite is older than the most recent reported quarter, run another web_search before writing it.
+
+REQUIRED SEARCH TERMS (include at least 3 of these in your web_search calls):
+- "{COMPANY} ${reportedQuarter} results"
+- "{COMPANY} ${quarterLabel} guidance management commentary"
+- "{COMPANY} latest quarterly earnings ${fyShort}"
+- "{COMPANY} BSE NSE filing ${reportedQuarter}"
+- "{COMPANY} screener.in ${fyShort}"
+
+If web_search returns no fresh data after 3 attempts, state explicitly in the output: "⚠ Latest data unavailable as of ${today} — using [most recent date found]."
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+`;
 }
 
 // ========================
@@ -69,7 +138,7 @@ async function callAnthropicWithSearch(options: AnthropicCallOptions): Promise<A
   } = options;
 
   const tools: Anthropic.Tool[] = useWebSearch
-    ? [{ type: 'web_search_20250305' as const, name: 'web_search', max_uses: 10 } as unknown as Anthropic.Tool]
+    ? [{ type: 'web_search_20250305' as const, name: 'web_search', max_uses: 20 } as unknown as Anthropic.Tool]
     : [];
 
   // Use streaming to avoid Anthropic's 10-minute timeout on long requests.
@@ -106,6 +175,15 @@ async function callAnthropicWithSearch(options: AnthropicCallOptions): Promise<A
   }
 
   const tokensUsed = (response.usage?.input_tokens || 0) + (response.usage?.output_tokens || 0);
+
+  // Debug: log raw response for inspection in browser console
+  console.group('[Anthropic Pipeline] Raw Response');
+  console.log('Tokens used:', tokensUsed);
+  console.log('Citations:', [...new Set(citations)]);
+  console.log('--- RAW TEXT START ---');
+  console.log(text);
+  console.log('--- RAW TEXT END ---');
+  console.groupEnd();
 
   return { text, tokensUsed, citations: [...new Set(citations)] };
 }
@@ -153,6 +231,191 @@ function formatFinancialContext(financials: EquityUniverse | null): string {
 }
 
 // ========================
+// Vault Document Summarization (Haiku)
+//
+// Reads vault doc metadata + (optionally) full text via n8n webhook,
+// summarizes each with Haiku, and combines into a "Vault Briefing"
+// markdown that is injected into Stage 1 + Stage 2 prompts.
+//
+// Cached in research_sessions.condensed_briefing so resume is free.
+// ========================
+
+const HAIKU_MODEL = 'claude-haiku-4-5-20251001';
+
+// Anthropic PDF document API limits: 32 MB per file, ~100 pages per document.
+const PDF_MAX_BYTES = 32 * 1024 * 1024;
+const PDF_BASE64_BUDGET = Math.floor(PDF_MAX_BYTES * 0.74); // base64 ≈ 4/3 the byte size
+
+// Server-side webhook that downloads each Drive file and returns it as base64.
+// Required so the browser can send PDFs to Haiku without CORS or auth issues.
+// Webhook contract:
+//   POST {session_id, files: [{id, name, mime_type}]}
+//   200  {documents: [{drive_file_id, base64, mime_type, size_bytes, name}]}
+const VAULT_PDF_WEBHOOK_URL = (import.meta.env.VITE_VAULT_PDF_WEBHOOK_URL as string | undefined)
+  || 'https://n8n.tikonacapital.com/webhook/fetch-vault-pdfs';
+
+interface FetchedDocBytes {
+  drive_file_id: string;
+  base64: string;
+  mime_type: string;
+  size_bytes?: number;
+  name?: string;
+}
+
+/**
+ * Fetches each vault doc from Drive (server-side via n8n) and returns base64 bytes.
+ * Returns a map of file_id -> {base64, mime_type}.
+ */
+async function fetchVaultDocBytes(
+  sessionId: string,
+  documents: VaultDocument[],
+): Promise<Record<string, FetchedDocBytes>> {
+  if (!VAULT_PDF_WEBHOOK_URL || documents.length === 0) return {};
+  try {
+    const response = await fetch(VAULT_PDF_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        session_id: sessionId,
+        files: documents.map(d => ({ id: d.id, name: d.name, mime_type: d.mimeType })),
+      }),
+      signal: AbortSignal.timeout(180_000),
+    });
+    if (!response.ok) {
+      console.warn('[Pipeline] Vault PDF webhook returned', response.status);
+      return {};
+    }
+    const data = await response.json();
+    const docs: FetchedDocBytes[] = data.documents || [];
+    return Object.fromEntries(docs.map(d => [d.drive_file_id, d]));
+  } catch (e) {
+    console.warn('[Pipeline] Vault PDF webhook unavailable:', e);
+    return {};
+  }
+}
+
+/**
+ * Summarizes the vault — sends each PDF DIRECTLY to Haiku as a document block.
+ * Haiku reads text AND visual content (charts, diagrams) natively from the PDF.
+ *
+ * Falls back to metadata-only summary if the PDF webhook is unavailable.
+ * Result cached in research_sessions.condensed_briefing.
+ */
+export async function summarizeVaultDocuments(
+  sessionId: string,
+  companyName: string,
+  nseSymbol: string,
+  documents: VaultDocument[],
+  forceRegenerate = false,
+): Promise<string> {
+  if (documents.length === 0) return '';
+
+  if (!forceRegenerate) {
+    const { data } = await supabase
+      .from('research_sessions')
+      .select('condensed_briefing')
+      .eq('session_id', sessionId)
+      .maybeSingle();
+    if (data?.condensed_briefing && data.condensed_briefing.length > 200) {
+      return data.condensed_briefing;
+    }
+  }
+
+  const docBytes = await fetchVaultDocBytes(sessionId, documents);
+  const haveAnyBytes = Object.keys(docBytes).length > 0;
+
+  const client = getClient();
+  const summaries: string[] = [];
+
+  for (const doc of documents) {
+    const fetched = docBytes[doc.id];
+    const docHeader = `**${doc.name}** (${doc.category})`;
+    const isPdf = (fetched?.mime_type || doc.mimeType || '').toLowerCase().includes('pdf');
+    const base64 = fetched?.base64 || '';
+
+    if (isPdf && base64 && base64.length < PDF_BASE64_BUDGET) {
+      // Direct PDF → Haiku — model sees text + charts + diagrams natively
+      try {
+        const resp = await client.messages.create({
+          model: HAIKU_MODEL,
+          max_tokens: 1000,
+          system: `You extract analytically valuable content from equity research source documents — annual reports, investor presentations, concall transcripts, broker reports. Output dense bullet points. No filler. Read charts and diagrams in addition to text.`,
+          messages: [{
+            role: 'user',
+            content: [
+              {
+                type: 'document',
+                source: {
+                  type: 'base64',
+                  media_type: 'application/pdf',
+                  data: base64,
+                },
+              } as unknown as Anthropic.ContentBlockParam,
+              {
+                type: 'text',
+                text: `Source document for ${companyName} (NSE: ${nseSymbol}): ${doc.name} (${doc.category}).
+
+Produce a 250-450 word analytical summary covering:
+- **Headline financials** with periods (revenue, EBITDA, PAT for the most recent quarter/year shown)
+- **Charts & diagrams** — what do the visualizations show? Read trend lines, segment splits, capacity charts, revenue mix pies. Cite specific values you can see.
+- **Management guidance** — forward outlook with specific numbers (revenue/margin/capex targets)
+- **Capex / capacity / order book** if disclosed
+- **Segment performance** — which divisions grew/declined, by how much
+- **Risks, red flags, governance signals** worth noting
+- **Anything else analytically valuable** (acquisitions, regulatory, customer concentration)
+
+Format: dense markdown bullets. Lead each bullet with a **bold descriptor**. Cite every figure with its period (e.g., "Q2 FY26 revenue: ₹1,234 Cr"). Skip legal boilerplate, generic disclaimers, glossary, contact info, and reproductions of the income statement (just call out the headline numbers).`,
+              },
+            ],
+          }],
+        });
+        const content = resp.content
+          .filter((b): b is Anthropic.TextBlock => b.type === 'text')
+          .map(b => b.text)
+          .join('');
+        summaries.push(`### ${docHeader}\n${content}`);
+      } catch (e) {
+        console.warn(`[Vault Summary] Haiku failed for ${doc.name}:`, e);
+        summaries.push(`### ${docHeader}\n*(Haiku summarization failed — see vault link)*`);
+      }
+    } else if (isPdf && base64 && base64.length >= PDF_BASE64_BUDGET) {
+      summaries.push(`### ${docHeader}\n*(File exceeds 32 MB — too large for inline summarization. View directly: ${doc.viewUrl})*`);
+    } else {
+      // No bytes available — emit metadata-only entry
+      summaries.push(`### ${docHeader}\n- Filename: ${doc.name}\n- Type: ${doc.type}\n- Uploaded: ${doc.uploadedAt}\n- View: ${doc.viewUrl}`);
+    }
+  }
+
+  const fallbackNote = haveAnyBytes ? '' :
+    '\n*(PDF webhook unavailable — running in metadata-only mode. Set up the `fetch-vault-pdfs` n8n webhook to enable direct PDF→Haiku summarization with chart/diagram reading.)*\n';
+
+  const combined = `## Vault Document Briefing\n*Source documents from the company's investor relations, regulatory filings, and broker reports — analyzed directly by Haiku (text + charts + diagrams).*${fallbackNote}\n${summaries.join('\n\n')}`;
+
+  try {
+    await supabase
+      .from('research_sessions')
+      .update({ condensed_briefing: combined, updated_at: new Date().toISOString() })
+      .eq('session_id', sessionId);
+  } catch (e) {
+    console.warn('[Vault Summary] Could not persist:', e);
+  }
+
+  return combined;
+}
+
+/**
+ * Loads a previously-cached vault briefing for a session, returns empty string if none.
+ */
+export async function getCachedVaultBriefing(sessionId: string): Promise<string> {
+  const { data } = await supabase
+    .from('research_sessions')
+    .select('condensed_briefing')
+    .eq('session_id', sessionId)
+    .maybeSingle();
+  return data?.condensed_briefing || '';
+}
+
+// ========================
 // Default Prompts (exported for UI display & editing)
 // ========================
 
@@ -160,8 +423,8 @@ export const DEFAULT_PROMPTS = {
   stage0: {
     system: `You are a senior equity research analyst at a top-tier Indian institutional fund.
 You are writing a sector intelligence brief that will guide all company-level research in this sector.
-The current financial year is FY2025-26 (April 2025 – March 2026). Today's date context: early 2026.
-All data, estimates, and commentary must reflect this — anchor everything to FY24A, FY25A, FY26E, FY27E.
+Your analysis must be grounded in the current financial year and project estimates for the next 5+ years.
+All data, estimates, and commentary must clearly distinguish between the most recent actuals and future estimates.
 
 VOICE & STYLE — NON-NEGOTIABLE:
 - Write like a seasoned analyst briefing a portfolio manager. Sharp. Direct. Opinionated.
@@ -179,18 +442,18 @@ FORMATTING RULES:
 - Bold key numbers and company names for scannability.
 
 WEB SEARCH INSTRUCTIONS:
-- Search for the most recent FY25 results, FY26 budget announcements, and sector-specific data.
-- Look for: latest quarterly results (Q3FY26), government policy updates (Union Budget FY26), industry body data (SIAM, IBEF, CII, SEBI).
-- If web search returns stale data (pre-FY24), explicitly flag it as outdated and use best available estimate.`,
+- Search for the most recently concluded financial results, upcoming budget announcements, and sector-specific data.
+- Look for: latest quarterly results, recent government policy updates, industry body data (SIAM, IBEF, CII, SEBI).
+- If web search returns stale data (more than 2 years old), explicitly flag it as outdated and use the best available recent estimate.`,
 
     user: `Write a sector intelligence brief for the **{{SECTOR}}** sector in India.
 This will anchor all research on {{COMPANY}} (NSE: {{NSE_SYMBOL}}) and peer companies.
-Current context: FY2025-26. Use FY24A/FY25A actuals and FY26E/FY27E estimates throughout.
+Use the most recently concluded financial year for actuals and project 5+ years into the future for estimates.
 
 Cover exactly these nine sections in order. No preamble, no conclusion paragraph.
 
 ## 1. Sector Snapshot
-- India market size in ₹ Cr (FY25A) and projected size (FY27E) — with CAGR
+- India market size in ₹ Cr (current) and projected size (5+ years out) — with CAGR
 - Where India stands globally in this sector (rank, share of global output)
 - Current cycle position — early growth / mid-cycle / mature / turning — and why
 - One-line defining characteristic that sets this sector's investment thesis apart
@@ -198,7 +461,7 @@ Cover exactly these nine sections in order. No preamble, no conclusion paragraph
 ## 2. Key Metrics to Track
 - **3-4 financial KPIs** that directly drive stock performance in this sector (e.g., EBITDA/tonne, realization per unit, spread)
 - **3-4 operational metrics** that differentiate leaders from laggards — with typical ranges
-- **Valuation multiples** most relevant for this sector — state the FY25 median for Indian listed peers
+- **Valuation multiples** most relevant for this sector — state the current median for Indian listed peers
 
 ## 3. Value Chain & Margin Distribution
 - Sketch the value chain in 3-4 stages from raw material to end consumer
@@ -207,17 +470,17 @@ Cover exactly these nine sections in order. No preamble, no conclusion paragraph
 - Name 1-2 specific bottlenecks or dependencies that affect the whole chain
 
 ## 4. Competitive Landscape
-- Market structure: fragmented or consolidated? Top 3-5 listed Indian players with approximate revenue (FY25) and market position
+- Market structure: fragmented or consolidated? Top 3-5 listed Indian players with approximate recent revenue and market position
 - What separates the #1 player from the #3 player — be specific (cost, scale, technology, distribution)
 - Realistic barriers to entry — not generic, but specific to this sector in India
 - Pricing power: does this sector set prices or accept them? What drives realization?
 
 ## 5. Regulatory & Policy Landscape
 - 2-3 most impactful regulations currently governing this sector
-- Key policy changes in FY25-FY26 (Union Budget allocations, PLI tranches, new rules) and their direct business impact
-- 1-2 upcoming regulatory events in FY26-FY27 that could materially shift the sector
+- Key recent policy changes (Union Budget allocations, PLI tranches, new rules) and their direct business impact
+- 1-2 upcoming regulatory events in the near term that could materially shift the sector
 
-## 6. Structural Growth Drivers (FY26-FY29)
+## 6. Structural Growth Drivers (Next 5+ Years)
 - 3-4 demand drivers with quantification (e.g., "EV penetration reaching X% adds Y GW of demand")
 - Government spending or policy tailwind with ₹ Cr allocation or target
 - Technology shift or disruption that benefits or threatens this sector
@@ -599,7 +862,8 @@ export async function runStage0(
   // --- Path 2: Generate with Claude + web search ---
   onProgress?.({ stage: 'stage0', step: 'generating', message: `Generating ${sectorName} sector framework with web search...`, percent: 20 });
 
-  const systemPrompt = promptOverrides?.systemPrompt || DEFAULT_PROMPTS.stage0.system;
+  const baseSystem = promptOverrides?.systemPrompt || DEFAULT_PROMPTS.stage0.system;
+  const systemPrompt = buildFreshnessPreamble() + baseSystem;
   let userPrompt = promptOverrides?.userPrompt || DEFAULT_PROMPTS.stage0.user;
   userPrompt = userPrompt
     .replace(/\{\{SECTOR\}\}/g, sectorName)
@@ -646,6 +910,12 @@ export async function runStage0(
 
   onProgress?.({ stage: 'stage0', step: 'done', message: 'Sector framework generated', percent: 100 });
 
+  // Debug: log the final stage 0 output
+  console.group('[Stage 0] Sector Framework Result');
+  console.log('Sector:', sectorName, '| Version:', version, '| Tokens:', result.tokensUsed);
+  console.log(result.text);
+  console.groupEnd();
+
   return {
     framework: {
       sector_name: sectorName,
@@ -669,15 +939,18 @@ export async function runStage1(
   financials: EquityUniverse | null,
   sectorFrameworkMarkdown: string,
   onProgress?: (p: PipelineProgress) => void,
-  promptOverrides?: PromptOverrides
+  promptOverrides?: PromptOverrides,
+  sessionId?: string,
 ): Promise<{ thesis: string; tokensUsed: number }> {
   onProgress?.({ stage: 'stage1', step: 'preparing', message: 'Preparing context for thesis generation...', percent: 5 });
 
   const financialContext = formatFinancialContext(financials);
+  const vaultBriefing = sessionId ? await getCachedVaultBriefing(sessionId) : '';
 
   onProgress?.({ stage: 'stage1', step: 'generating', message: 'Generating investment thesis via Anthropic + web search...', percent: 15 });
 
-  const systemPrompt = promptOverrides?.systemPrompt || DEFAULT_PROMPTS.stage1.system;
+  const baseSystem1 = promptOverrides?.systemPrompt || DEFAULT_PROMPTS.stage1.system;
+  const systemPrompt = buildFreshnessPreamble() + baseSystem1;
 
   // Build context block (always injected)
   const contextBlock = `Company: **${companyName}** (NSE: ${nseSymbol}) | Sector: **${sectorName}**
@@ -685,7 +958,7 @@ export async function runStage1(
 ## Sector Framework (summary):
 ${sectorFrameworkMarkdown.slice(0, 4000)}
 
-${financialContext}`;
+${financialContext}${vaultBriefing ? `\n\n${vaultBriefing.slice(0, 8000)}\n\n*Use the Vault Briefing above as a primary source — these are the company's own filings + presentations. Cross-check web_search results against these.*` : ''}`;
 
   // User prompt — context + instructions
   let instructions = promptOverrides?.userPrompt || DEFAULT_PROMPTS.stage1.user;
@@ -705,6 +978,12 @@ ${financialContext}`;
   });
 
   onProgress?.({ stage: 'stage1', step: 'done', message: 'Investment thesis generated', percent: 100 });
+
+  // Debug: log the full thesis
+  console.group('[Stage 1] Investment Thesis Result');
+  console.log('Company:', companyName, '| Tokens:', result.tokensUsed);
+  console.log(result.text);
+  console.groupEnd();
 
   return { thesis: result.text, tokensUsed: result.tokensUsed };
 }
@@ -744,13 +1023,16 @@ export async function runStage2(
   thesis: string,
   sectorFrameworkMarkdown: string,
   onProgress?: (p: PipelineProgress) => void,
-  promptOverrides?: PromptOverrides
+  promptOverrides?: PromptOverrides,
+  sessionId?: string,
 ): Promise<{ sections: Array<{ key: string; title: string; content: string }>; tokensUsed: number }> {
   const financialContext = formatFinancialContext(financials);
+  const vaultBriefing = sessionId ? await getCachedVaultBriefing(sessionId) : '';
 
   onProgress?.({ stage: 'stage2', step: 'generating', message: 'Generating full report via Anthropic + web search...', percent: 10 });
 
-  const systemPrompt = promptOverrides?.systemPrompt || DEFAULT_PROMPTS.stage2.system;
+  const baseSystem2 = promptOverrides?.systemPrompt || DEFAULT_PROMPTS.stage2.system;
+  const systemPrompt = buildFreshnessPreamble() + baseSystem2;
 
   const contextBlock = `Company: **${companyName}** (NSE: ${nseSymbol}) | Sector: **${sectorName}**
 
@@ -760,7 +1042,7 @@ ${thesis.slice(0, 4000)}
 ## Sector Framework:
 ${sectorFrameworkMarkdown.slice(0, 3000)}
 
-${financialContext}`;
+${financialContext}${vaultBriefing ? `\n\n${vaultBriefing.slice(0, 8000)}\n\n*Use the Vault Briefing as primary source for company-specific facts (figures, guidance, capex) — it comes from official filings and presentations.*` : ''}`;
 
   let instructions = promptOverrides?.userPrompt || DEFAULT_PROMPTS.stage2.user;
   instructions = instructions
@@ -782,7 +1064,18 @@ ${financialContext}`;
 
   onProgress?.({ stage: 'stage2', step: 'parsing', message: 'Parsing report sections...', percent: 90 });
 
+  // Debug: log the raw Stage 2 response before parsing
+  console.group('[Stage 2] Full Report — Raw Response');
+  console.log('Company:', companyName, '| Tokens:', result.tokensUsed);
+  console.log(result.text);
+  console.groupEnd();
+
   const sections = parseSectionsFromResponse(result.text);
+
+  // Debug: log parsed sections
+  console.group('[Stage 2] Parsed Sections');
+  sections.forEach(s => console.log(`[${s.key}] ${s.title} — ${s.content.length} chars`));
+  console.groupEnd();
 
   onProgress?.({ stage: 'stage2', step: 'done', message: 'Report generation complete', percent: 100 });
 

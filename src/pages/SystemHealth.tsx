@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
 import {
-  Activity,
   CheckCircle2,
   XCircle,
   AlertCircle,
@@ -21,6 +20,7 @@ import {
   Mic,
   FileOutput,
   Brain,
+  ChevronDown,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabase';
@@ -325,58 +325,70 @@ function ServiceCard({ label, icon: Icon, url, health }: {
   url: string;
   health: ServiceHealth;
 }) {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
-    <div className="bg-white rounded-xl border border-neutral-200 p-5">
-      <div className="flex items-start justify-between mb-4">
+    <div className="bg-white rounded-xl border border-neutral-200 p-4 transition-all">
+      <div 
+        className="flex items-center justify-between cursor-pointer select-none group"
+        onClick={() => setIsOpen(!isOpen)}
+      >
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-lg bg-neutral-50 border border-neutral-200 flex items-center justify-center">
+          <div className="h-9 w-9 rounded-lg bg-neutral-50 border border-neutral-200 flex items-center justify-center group-hover:border-neutral-300 transition-colors">
             <Icon className="h-4 w-4 text-neutral-500" />
           </div>
           <div>
             <p className="text-sm font-semibold text-neutral-900">{label}</p>
-            <p className="text-xs text-neutral-400 font-mono">{url}</p>
+            <p className="text-xs text-neutral-400 font-mono hidden sm:block">{url}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <div className={`h-2 w-2 rounded-full ${statusColor(health.status)}`} />
-          <span className={`text-xs font-semibold ${statusTextColor(health.status)}`}>
-            {statusText(health.status)}
-          </span>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <div className={`h-2 w-2 rounded-full ${statusColor(health.status)}`} />
+            <span className={`text-xs font-semibold ${statusTextColor(health.status)} hidden sm:block`}>
+              {statusText(health.status)}
+            </span>
+          </div>
+          <ChevronDown className={`h-4 w-4 text-neutral-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-lg bg-neutral-50 px-3 py-2">
-          <p className="text-xs text-neutral-400 mb-1">Latency</p>
-          <p className="text-sm font-semibold text-neutral-900 tabular-nums">
-            {health.latencyMs !== null ? `${health.latencyMs}ms` : '—'}
-          </p>
-        </div>
-        <div className="rounded-lg bg-neutral-50 px-3 py-2">
-          <p className="text-xs text-neutral-400 mb-1">Last checked</p>
-          <p className="text-sm font-semibold text-neutral-900">
-            {health.lastChecked ? relativeTime(health.lastChecked.toISOString()) : '—'}
-          </p>
-        </div>
-      </div>
+      {isOpen && (
+        <div className="mt-4 pt-4 border-t border-neutral-100 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-lg bg-neutral-50 px-3 py-2">
+              <p className="text-xs text-neutral-400 mb-1">Latency</p>
+              <p className="text-sm font-semibold text-neutral-900 tabular-nums">
+                {health.latencyMs !== null ? `${health.latencyMs}ms` : '—'}
+              </p>
+            </div>
+            <div className="rounded-lg bg-neutral-50 px-3 py-2">
+              <p className="text-xs text-neutral-400 mb-1">Last checked</p>
+              <p className="text-sm font-semibold text-neutral-900">
+                {health.lastChecked ? relativeTime(health.lastChecked.toISOString()) : '—'}
+              </p>
+            </div>
+          </div>
 
-      {health.error && (
-        <p className="mt-3 text-xs text-red-600 bg-red-50 rounded-lg px-3 py-2 font-mono break-all">
-          {health.error}
-        </p>
-      )}
+          {health.error && (
+            <p className="mt-3 text-xs text-red-600 bg-red-50 rounded-lg px-3 py-2 font-mono break-all">
+              {health.error}
+            </p>
+          )}
 
-      {health.status === 'healthy' && Object.keys(health.details).length > 0 && (
-        <div className="mt-3 space-y-1 border-t border-neutral-100 pt-3">
-          {Object.entries(health.details)
-            .filter(([k]) => !['status', 'ok'].includes(k))
-            .slice(0, 4)
-            .map(([k, v]) => (
-              <div key={k} className="flex justify-between text-xs">
-                <span className="text-neutral-400">{k}</span>
-                <span className="text-neutral-700 font-mono">{String(v)}</span>
-              </div>
-            ))}
+          {health.status === 'healthy' && Object.keys(health.details).length > 0 && (
+            <div className="mt-3 space-y-1 border-t border-neutral-100 pt-3">
+              {Object.entries(health.details)
+                .filter(([k]) => !['status', 'ok'].includes(k))
+                .slice(0, 4)
+                .map(([k, v]) => (
+                  <div key={k} className="flex justify-between text-xs">
+                    <span className="text-neutral-400">{k}</span>
+                    <span className="text-neutral-700 font-mono">{String(v)}</span>
+                  </div>
+                ))}
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -393,6 +405,7 @@ function WebhookCard({
   workflows: N8nWorkflow[];
   recentExecutions: N8nExecution[];
 }) {
+  const [isOpen, setIsOpen] = useState(false);
   const Icon = webhook.icon;
 
   // Normalise a path to bare words for fuzzy matching (handles kebab/snake/camel)
@@ -414,10 +427,13 @@ function WebhookCard({
     : 'unknown';
 
   return (
-    <div className="bg-white rounded-xl border border-neutral-200 p-4 flex flex-col gap-3">
-      <div className="flex items-start justify-between">
+    <div className="bg-white rounded-xl border border-neutral-200 p-4 transition-all">
+      <div 
+        className="flex items-center justify-between cursor-pointer select-none group"
+        onClick={() => setIsOpen(!isOpen)}
+      >
         <div className="flex items-center gap-3 min-w-0">
-          <div className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 ${
+          <div className={`h-9 w-9 rounded-lg flex items-center justify-center shrink-0 group-hover:opacity-80 transition-opacity ${
             status === 'active'   ? 'bg-green-50'   :
             status === 'inactive' ? 'bg-neutral-100' :
             'bg-amber-50'
@@ -430,40 +446,48 @@ function WebhookCard({
           </div>
           <div className="min-w-0">
             <p className="text-sm font-semibold text-neutral-900 truncate">{webhook.label}</p>
-            <p className="text-xs text-neutral-400">{webhook.usedIn}</p>
+            <p className="text-xs text-neutral-400 truncate hidden sm:block">{webhook.usedIn}</p>
           </div>
         </div>
-        <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-md shrink-0 ml-2 ${
-          status === 'active'   ? 'bg-green-50 text-green-700'     :
-          status === 'inactive' ? 'bg-neutral-100 text-neutral-500' :
-          'bg-amber-50 text-amber-700'
-        }`}>
-          {status === 'active'   && <><Play   className="h-3 w-3" /> Active</>}
-          {status === 'inactive' && <><Pause  className="h-3 w-3" /> Inactive</>}
-          {status === 'unknown'  && <><AlertCircle className="h-3 w-3" /> Not found</>}
-        </span>
-      </div>
-
-      <p className="text-xs text-neutral-500">{webhook.description}</p>
-
-      {matched && (
-        <p className="text-xs text-neutral-400 bg-neutral-50 rounded px-2 py-1 truncate">
-          Workflow: <span className="font-medium text-neutral-600">{matched.name}</span>
-        </p>
-      )}
-
-      <div className="flex items-center justify-between text-xs border-t border-neutral-100 pt-2">
-        <span className="text-neutral-400 font-mono truncate">
-          /webhook/{webhook.webhook}
-        </span>
-        {lastExec ? (
-          <span className={`px-2 py-0.5 rounded-md font-semibold ${execStatusColor(lastExec.status)}`}>
-            {lastExec.status} · {relativeTime(lastExec.startedAt)}
+        <div className="flex items-center gap-3 ml-2 shrink-0">
+          <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-md ${
+            status === 'active'   ? 'bg-green-50 text-green-700'     :
+            status === 'inactive' ? 'bg-neutral-100 text-neutral-500' :
+            'bg-amber-50 text-amber-700'
+          }`}>
+            {status === 'active'   && <><Play   className="h-3 w-3" /> Active</>}
+            {status === 'inactive' && <><Pause  className="h-3 w-3" /> Inactive</>}
+            {status === 'unknown'  && <><AlertCircle className="h-3 w-3" /> Not found</>}
           </span>
-        ) : (
-          <span className="text-neutral-300">no recent runs</span>
-        )}
+          <ChevronDown className={`h-4 w-4 text-neutral-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        </div>
       </div>
+
+      {isOpen && (
+        <div className="mt-4 pt-4 border-t border-neutral-100 animate-in fade-in slide-in-from-top-2 duration-200 flex flex-col gap-3">
+          <p className="text-xs text-neutral-600">{webhook.description}</p>
+
+          {matched && (
+            <p className="text-xs text-neutral-500 bg-neutral-50 rounded-lg px-3 py-2 truncate flex flex-col">
+              <span className="text-neutral-400 mb-0.5">Workflow</span>
+              <span className="font-medium text-neutral-700">{matched.name}</span>
+            </p>
+          )}
+
+          <div className="flex items-center justify-between text-xs pt-1">
+            <span className="text-neutral-400 font-mono truncate mr-2 bg-neutral-50 px-2 py-1 rounded">
+              /webhook/{webhook.webhook}
+            </span>
+            {lastExec ? (
+              <span className={`px-2 py-1 rounded-md font-semibold whitespace-nowrap ${execStatusColor(lastExec.status)}`}>
+                {lastExec.status} · {relativeTime(lastExec.startedAt)}
+              </span>
+            ) : (
+              <span className="text-neutral-400 italic">no recent runs</span>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -595,7 +619,6 @@ export default function SystemHealth() {
         {overallStatus === 'healthy'  && <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />}
         {overallStatus === 'degraded' && <AlertCircle  className="h-5 w-5 text-amber-600 shrink-0" />}
         {overallStatus === 'down'     && <XCircle      className="h-5 w-5 text-red-600   shrink-0" />}
-        {overallStatus === 'checking' && <Activity     className="h-5 w-5 text-neutral-400 shrink-0 animate-pulse" />}
         <div>
           <p className={`text-sm font-semibold ${
             overallStatus === 'healthy'  ? 'text-green-800'  :
@@ -605,7 +628,6 @@ export default function SystemHealth() {
             {overallStatus === 'healthy'  && `All ${allServices.length} services operational`}
             {overallStatus === 'degraded' && `${healthyCount} of ${allServices.length} services healthy`}
             {overallStatus === 'down'     && 'All services unreachable'}
-            {overallStatus === 'checking' && 'Checking services…'}
           </p>
           <p className="text-xs text-neutral-500 mt-1">Auto-refreshes every 60 seconds</p>
         </div>
@@ -614,7 +636,7 @@ export default function SystemHealth() {
       {/* Summary stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {[
-          { label: 'Services Up',        value: overallStatus === 'checking' ? '—' : `${healthyCount}/${allServices.length}`, icon: Server,   color: 'text-green-600',   bg: 'bg-green-50'   },
+          { label: 'Services Up',        value: `${healthyCount}/${allServices.length}`, icon: Server,   color: 'text-green-600',   bg: 'bg-green-50'   },
           { label: 'Active Workflows',   value: hasN8nKey ? (n8nLoading ? '…' : String(activeWorkflows)) : 'No key',          icon: Play,     color: 'text-accent-600',  bg: 'bg-accent-50'  },
           { label: 'Exec Success Rate',  value: hasN8nKey ? (successRate !== null ? `${successRate}%` : '—') : 'No key',      icon: Zap,      color: 'text-amber-600',   bg: 'bg-amber-50'   },
           { label: 'Pipeline (7d)',      value: pipelineStats ? String(pipelineStats.last7Days) : '…',                         icon: BarChart3,color: 'text-neutral-600', bg: 'bg-neutral-50' },
@@ -631,32 +653,38 @@ export default function SystemHealth() {
         ))}
       </div>
 
-      {/* VPS Services */}
-      <h2 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-3">VPS Services</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        {allServices.map(s => <ServiceCard key={s.label} {...s} />)}
-      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        {/* Left Column: VPS Services */}
+        <div>
+          <h2 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-3">VPS Services</h2>
+          <div className="flex flex-col gap-3">
+            {allServices.map(s => <ServiceCard key={s.label} {...s} />)}
+          </div>
+        </div>
 
-      {/* n8n Workflows used in this project */}
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider">
-          n8n Workflows — This Project
-        </h2>
-        {!hasN8nKey && (
-          <span className="text-xs text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md">
-            Add VITE_N8N_API_KEY to see live status
-          </span>
-        )}
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-8">
-        {PROJECT_WEBHOOKS.map(wh => (
-          <WebhookCard
-            key={wh.webhook}
-            webhook={wh}
-            workflows={workflows}
-            recentExecutions={executions}
-          />
-        ))}
+        {/* Right Column: n8n Workflows */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider">
+              n8n Workflows — This Project
+            </h2>
+            {!hasN8nKey && (
+              <span className="text-xs text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md">
+                Add VITE_N8N_API_KEY to see live status
+              </span>
+            )}
+          </div>
+          <div className="flex flex-col gap-3">
+            {PROJECT_WEBHOOKS.map(wh => (
+              <WebhookCard
+                key={wh.webhook}
+                webhook={wh}
+                workflows={workflows}
+                recentExecutions={executions}
+              />
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Research Pipeline stats */}

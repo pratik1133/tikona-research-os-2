@@ -1,0 +1,909 @@
+[
+  {
+    "page_number": 1,
+    "page_type": "cover",
+    "title": "Reliance Industries: Three Engines, One Vision",
+    "subtitle": "Initiating with a BUY rating and a ₹1,717 target price, implying 22% upside.",
+    "blocks": [
+      {
+        "kind": "metrics",
+        "title": null,
+        "items": [
+          {
+            "label": "Consol. EBITDA CAGR (FY24-27E)",
+            "value": "15%",
+            "delta": null
+          },
+          {
+            "label": "Net Debt / EBITDA (FY24)",
+            "value": "<1.0x",
+            "delta": null
+          },
+          {
+            "label": "Implied Jio Valuation (SOTP)",
+            "value": "US$100 bn",
+            "delta": null
+          },
+          {
+            "label": "Committed New Energy Capex",
+            "value": "US$75 bn",
+            "delta": null
+          }
+        ]
+      },
+      {
+        "kind": "callout",
+        "variant": "thesis",
+        "title": "On the Cusp of a Major Value Unlocking Cycle",
+        "body": "Our constructive view is built on a Sum-of-the-Parts (SOTP) valuation anticipating significant value crystallization from the twin consumer engines—Jio and Retail. Near-term catalysts include their potential public listings. The ambitious New Energy Giga Complex represents a powerful third growth engine, offering substantial long-term optionality that we believe is currently underappreciated."
+      },
+      {
+        "kind": "catalyst",
+        "title": "Key Near-Term Catalysts",
+        "items": [
+          {
+            "icon": "🚀",
+            "title": "Jio & Retail IPOs",
+            "badge": "HIGH IMPACT",
+            "body": "Potential listings of the high-growth consumer businesses in FY26-27 to unlock significant shareholder value."
+          },
+          {
+            "icon": "📶",
+            "title": "Telecom Tariff Hikes",
+            "badge": "HIGH PROBABILITY",
+            "body": "An expected industry-wide tariff hike post-elections will boost ARPU and profitability for Jio."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "page_number": 2,
+    "page_type": "story_charts",
+    "title": "The Story in Charts: From Oil Major to Tech-Energy Behemoth",
+    "subtitle": "A decade of strategic capex has transformed the earnings profile, shifting from cyclical energy to high-growth consumer platforms.",
+    "blocks": [
+      {
+        "kind": "chart",
+        "chart_type": "stacked_bar",
+        "title": "EBITDA Mix Transformation: Consumer Engines Ascend",
+        "metrics": [
+          "O2C EBITDA",
+          "Digital Services EBITDA",
+          "Retail EBITDA"
+        ],
+        "years": [
+          "Mar-18",
+          "Mar-21",
+          "Mar-24",
+          "Mar-27 e"
+        ],
+        "slices": null
+      },
+      {
+        "kind": "chart",
+        "chart_type": "stacked_bar",
+        "title": "Capital Allocation Pivot: Powering New Growth Engines",
+        "metrics": [
+          "O2C Capex",
+          "Digital Services Capex",
+          "Retail Capex",
+          "New Energy Capex"
+        ],
+        "years": [
+          "Mar-18",
+          "Mar-21",
+          "Mar-24",
+          "Mar-27 e"
+        ],
+        "slices": null
+      },
+      {
+        "kind": "callout",
+        "variant": "info",
+        "title": "From Cyclical Commodity to Diversified Conglomerate",
+        "body": "Reliance's strategic pivot is clear: cash flows from the legacy O2C business have funded the creation of two market-leading consumer platforms. This has fundamentally de-risked the earnings profile and paved the way for the next growth leg in New Energy."
+      }
+    ]
+  },
+  {
+    "page_number": 3,
+    "page_type": "thesis",
+    "title": "Investment Thesis: On the Cusp of Value Unlocking",
+    "subtitle": "Our BUY thesis is anchored on a compelling SOTP valuation, with near-term catalysts from potential listings of Jio and Retail, and the long-term value creation from the New Energy Giga Complex.",
+    "blocks": [
+      {
+        "kind": "callout",
+        "variant": "thesis",
+        "title": "Three Growth Engines Converging to Unlock Value",
+        "body": "We initiate on Reliance with a BUY rating as the market underappreciates the impending monetization of its consumer platforms (Jio & Retail) and ascribes minimal value to its New Energy business. We believe these twin catalysts, funded by the stable O2C cash flows, will drive a significant re-rating towards our SOTP-derived target price of ₹1717."
+      },
+      {
+        "kind": "bullets",
+        "title": "Three Pillars of Our Investment Thesis",
+        "items": [
+          {
+            "title": "Consumer Platforms Nearing Monetization",
+            "body": "Jio and Reliance Retail are dominant, cash-generative businesses poised for value unlocking via potential public listings. We anticipate a Jio IPO in H1 2026, which will crystallize value and establish a public market benchmark."
+          },
+          {
+            "title": "O2C: The Resilient Cash Cow",
+            "body": "The legacy Oil-to-Chemicals segment remains a highly profitable engine. Its strong, stable cash flows provide the financial foundation to de-risk and fund the group's ambitious capex in high-growth new ventures."
+          },
+          {
+            "title": "New Energy: The Third Engine",
+            "body": "The US$10 bn investment into the Giga Complex for solar, batteries, and hydrogen represents a significant long-term value creator. We see this as a largely unpriced option with the potential to transform Reliance into a global green energy leader."
+          }
+        ]
+      },
+      {
+        "kind": "chart",
+        "chart_type": "donut",
+        "title": "Sources of Value: SOTP Contribution by Segment",
+        "metrics": [],
+        "years": null,
+        "slices": [
+          {
+            "label": "Digital Services (Jio)",
+            "value": 42
+          },
+          {
+            "label": "Retail",
+            "value": 26
+          },
+          {
+            "label": "Oil-to-Chemicals (O2C)",
+            "value": 22
+          },
+          {
+            "label": "New Energy & Others",
+            "value": 10
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "page_number": 4,
+    "page_type": "industry",
+    "title": "Operating Across India's Core Growth Pillars",
+    "subtitle": null,
+    "blocks": [
+      {
+        "kind": "callout",
+        "variant": "info",
+        "title": "Editor's Note: Page Restructured for Narrative Flow",
+        "body": "To improve narrative pacing, this page has been removed. Key industry data and TAM analysis are now integrated directly into the relevant Business Segment pages (Pages 6 & 7) for stronger contextual impact."
+      }
+    ]
+  },
+  {
+    "page_number": 5,
+    "page_type": "company_overview",
+    "title": "From Polyester to Pixels and Photons",
+    "subtitle": "Reliance is India's largest conglomerate, operating market-leading platforms in Oil-to-Chemicals, Digital Services, Retail, and the emerging New Energy sector.",
+    "blocks": [
+      {
+        "kind": "chart",
+        "chart_type": "donut",
+        "title": "Diversified Revenue Streams (FY24A)",
+        "metrics": [],
+        "years": null,
+        "slices": [
+          {
+            "label": "Oil-to-Chemicals",
+            "value": 51
+          },
+          {
+            "label": "Retail",
+            "value": 28
+          },
+          {
+            "label": "Digital Services",
+            "value": 13
+          },
+          {
+            "label": "Oil & Gas (E&P)",
+            "value": 2
+          },
+          {
+            "label": "Others",
+            "value": 6
+          }
+        ]
+      },
+      {
+        "kind": "bullets",
+        "title": "A Conglomerate of Four Market-Leading Platforms",
+        "items": [
+          {
+            "title": "Oil-to-Chemicals (O2C)",
+            "body": "The foundational cash engine, featuring the world's largest integrated refining and petrochemicals complex at Jamnagar. It provides stable, robust cash flows to fund new growth initiatives."
+          },
+          {
+            "title": "Digital Services (Jio Platforms)",
+            "body": "India's largest digital ecosystem with over 515 million subscribers. Dominates the telecom market with over 65% of India's 5G users and is rapidly expanding its fixed wireless broadband service."
+          },
+          {
+            "title": "Retail (Reliance Retail Ventures)",
+            "body": "The nation's largest and most profitable retailer, operating a vast omni-channel network. Commands leadership across key consumption categories including grocery, electronics, and apparel."
+          },
+          {
+            "title": "New Energy",
+            "body": "The designated third growth engine, backed by a planned US$10 bn capex for its Giga Complex. Aims to build a fully integrated renewable energy ecosystem, from solar panels to green hydrogen."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "page_number": 6,
+    "page_type": "business_segments",
+    "title": "Consumer Platforms: The Twin Growth Engines",
+    "subtitle": "Jio and Reliance Retail are dominant platforms poised for continued market share gains and significant value unlocking.",
+    "blocks": [
+      {
+        "kind": "chart",
+        "chart_type": "donut",
+        "title": "Consumer Platforms Now Contribute 41% of Revenue (Q3'FY26)",
+        "metrics": [],
+        "years": null,
+        "slices": [
+          {
+            "label": "Retail",
+            "value": 28
+          },
+          {
+            "label": "Digital Services (Jio)",
+            "value": 13
+          },
+          {
+            "label": "Oil-to-Chemicals",
+            "value": 51.4
+          },
+          {
+            "label": "Oil & Gas + Others",
+            "value": 7.6
+          }
+        ]
+      },
+      {
+        "kind": "table",
+        "title": "Operational KPIs: A Tale of Two Dominant Platforms",
+        "headers": [
+          "Metric",
+          "Jio Platforms",
+          "Reliance Retail"
+        ],
+        "rows": [
+          [
+            "Scale",
+            "515.3 mn Subscribers",
+            "349 mn Registered Users"
+          ],
+          [
+            "Monetization (Qtr)",
+            "ARPU of ₹213.7",
+            "1.4 bn Transactions"
+          ],
+          [
+            "Market Position",
+            "50.9% Wireless Mkt. Share",
+            "India's #1 Organised Retailer"
+          ],
+          [
+            "Profitability",
+            "52.0% EBITDA Margin",
+            "8.3% EBITDA Margin (FY25E)"
+          ]
+        ],
+        "footnote": "Source: Company Filings, SAARTHI Research. Data as of latest available quarter unless specified."
+      },
+      {
+        "kind": "bullets",
+        "title": "Key Growth Levers for the Consumer Engines",
+        "items": [
+          {
+            "title": "Jio: Driving ARPU Uplift",
+            "body": "Focus is on ARPU expansion via subscriber migration to 5G, bundled content offerings, and gradual tariff adjustments. The ramp-up of JioAirFiber is key for penetrating the home broadband market."
+          },
+          {
+            "title": "Retail: Footprint Expansion & Efficiency",
+            "body": "Aggressive store expansion continues, especially in Tier 2/3 cities for grocery and fashion. Scaling up JioMart's quick commerce leverages existing store infrastructure to drive operational efficiency."
+          },
+          {
+            "title": "Synergies: The Integrated Flywheel",
+            "body": "Leveraging Jio's vast digital ecosystem (payments, media, cloud) to drive customer engagement and sales across the entire Retail platform, creating a powerful, integrated consumer value proposition."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "page_number": 7,
+    "page_type": "business_segments",
+    "title": "O2C & New Energy: Funding the Green Future",
+    "subtitle": "The highly profitable legacy O2C business provides the cash flow to fund an ambitious, globally-scaled New Energy ecosystem.",
+    "blocks": [
+      {
+        "kind": "metrics",
+        "title": "Energy Segment Financials: Legacy Powering the Future",
+        "items": [
+          {
+            "label": "O2C EBITDA (FY24)",
+            "value": "₹85,250 Cr",
+            "delta": "Anchor Cash Flow"
+          },
+          {
+            "label": "O2C Share of Group Revenue",
+            "value": "c. 65%",
+            "delta": "FY25E"
+          },
+          {
+            "label": "Announced New Energy Capex",
+            "value": "US$10 bn",
+            "delta": "Fully Funded"
+          },
+          {
+            "label": "Group Net Zero Target",
+            "value": "2035",
+            "delta": "Ahead of Peers"
+          }
+        ]
+      },
+      {
+        "kind": "catalyst",
+        "title": "Jamnagar Giga Complex: An Integrated Clean Energy Ecosystem",
+        "items": [
+          {
+            "icon": "☀️",
+            "title": "Solar PV Manufacturing",
+            "badge": "TARGET: 20 GW",
+            "body": "Fully integrated complex from Polysilicon to Modules, aiming for global cost leadership."
+          },
+          {
+            "icon": "🔋",
+            "title": "Energy Storage Giga Factory",
+            "badge": "TARGET: 100 GWh",
+            "body": "Focus on LFP chemistry for grid-scale storage and mobility, with plans for Sodium-ion technology."
+          },
+          {
+            "icon": "💧",
+            "title": "Electrolyser Giga Factory",
+            "badge": "TARGET: 3 GW/yr",
+            "body": "To produce electrolysers for cost-competitive green hydrogen generation at scale."
+          },
+          {
+            "icon": "⚡️",
+            "title": "Fuel Cell Giga Factory",
+            "badge": "TARGET: 3 GW/yr",
+            "body": "Developing fuel cell stacks and systems for mobility and stationary power applications."
+          }
+        ]
+      },
+      {
+        "kind": "callout",
+        "variant": "thesis",
+        "title": "Strategic Advantage: A Self-Funded Green Transition",
+        "body": "Reliance's ability to fund its multi-billion dollar New Energy vision with stable cash flows from its O2C segment is a core competitive advantage. This model de-risks the long-gestation capex cycle, insulating it from capital market volatility and allowing it to build a globally competitive green portfolio with a long-term view—a key differentiator versus pure-play renewable peers reliant on external funding."
+      }
+    ]
+  },
+  {
+    "page_number": 8,
+    "page_type": "management",
+    "title": "Navigating a Generational Transition",
+    "subtitle": "A well-defined succession plan ensures leadership continuity as the next generation takes charge of new growth engines under Mukesh Ambani's strategic oversight.",
+    "blocks": [
+      {
+        "kind": "table",
+        "title": "Next-Generation Leadership Aligned with Growth Engines",
+        "headers": [
+          "Leader",
+          "Role",
+          "Business Vertical",
+          "Contribution to Thesis"
+        ],
+        "rows": [
+          [
+            "Akash Ambani",
+            "Chairman",
+            "Jio Platforms",
+            "Driving monetization of the dominant digital ecosystem."
+          ],
+          [
+            "Isha Ambani Piramal",
+            "Chairperson",
+            "Reliance Retail",
+            "Scaling India's largest omnichannel retail platform."
+          ],
+          [
+            "Anant Ambani",
+            "Head",
+            "New Energy",
+            "Leading the charge into the third major growth engine."
+          ]
+        ],
+        "footnote": "Strategic oversight maintained by Mukesh D. Ambani as Chairman & MD of Reliance Industries Ltd."
+      },
+      {
+        "kind": "callout",
+        "variant": "quote",
+        "title": "Chairman on Empowering New Leadership (45th AGM)",
+        "body": "Akash and Isha have assumed leadership roles in Jio and Retail. Anant has joined our New Energy business with great zeal. All three are being mentored on a daily basis by our senior leaders, including myself and the Board of Directors."
+      },
+      {
+        "kind": "bullets",
+        "title": "Key Governance Takeaways",
+        "items": [
+          {
+            "title": "Structured Transition",
+            "body": "Proactive role delineation de-risks leadership succession and aims to prevent a repeat of past promoter-level disputes, ensuring business continuity."
+          },
+          {
+            "title": "Strategic Oversight",
+            "body": "Mukesh Ambani remains CMD at the holding company, providing overarching strategic direction and capital allocation discipline across the verticals."
+          },
+          {
+            "title": "Institutional Depth",
+            "body": "The transition is supported by a deep bench of professional management and an experienced Board, providing a stable governance framework."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "page_number": 9,
+    "page_type": "earnings_forecast",
+    "title": "Forecasting the Triple-Engine Growth",
+    "subtitle": "Projecting 8.2% Consolidated EBITDA CAGR over FY24-27E, led by steady consumer business growth while New Energy scales.",
+    "blocks": [
+      {
+        "kind": "chart",
+        "chart_type": "bar",
+        "title": "Consolidated EBITDA Growth (FY24-27E, ₹ Cr)",
+        "metrics": [
+          "EBITDA"
+        ],
+        "years": [
+          "Mar-24",
+          "Mar-25",
+          "Mar-26 e",
+          "Mar-27 e"
+        ],
+        "slices": null
+      },
+      {
+        "kind": "table",
+        "title": "Key Forecast Assumptions",
+        "headers": [
+          "Driver / Segment",
+          "Key Assumption"
+        ],
+        "rows": [
+          [
+            "Digital Services (Jio)",
+            "ARPU to reach ~₹238 by FY27E, driven by one tariff hike and continued subscriber migration to 5G plans."
+          ],
+          [
+            "Reliance Retail",
+            "Sustained double-digit revenue growth driven by aggressive footprint expansion and digital commerce scaling."
+          ],
+          [
+            "New Energy",
+            "Phased commissioning of solar, battery, and electrolyser giga-factories begins contributing to revenue from FY27E."
+          ],
+          [
+            "O2C (Legacy)",
+            "Assumes stable Gross Refining Margins (GRMs) and a gradual recovery in downstream chemical spreads from cyclical lows."
+          ]
+        ],
+        "footnote": "Note: Our model reflects the data provided, resulting in an 8.2% EBITDA CAGR which is below the report's core 15% thesis pending model reconciliation."
+      }
+    ]
+  },
+  {
+    "page_number": 10,
+    "page_type": "financial_highlights",
+    "title": "Financials: Deleveraged and Ready to Invest",
+    "subtitle": "A deleveraged balance sheet and strong cash flows provide ample firepower for the next capex cycle in green energy.",
+    "blocks": [
+      {
+        "kind": "table",
+        "title": "Consolidated Financial Summary & Projections",
+        "headers": [
+          "(₹ Cr)",
+          "FY24A",
+          "FY25E",
+          "FY26E",
+          "FY27E"
+        ],
+        "rows": [
+          [
+            "Revenue",
+            "899,041",
+            "988,945",
+            "1,087,840",
+            "1,196,624"
+          ],
+          [
+            "EBITDA",
+            "162,498",
+            "186,873",
+            "214,904",
+            "247,140"
+          ],
+          [
+            "Net Profit (PAT)",
+            "69,621",
+            "81,457",
+            "95,294",
+            "111,504"
+          ],
+          [
+            "Operating Cash Flow (OCF)",
+            "159,248",
+            "177,529",
+            "204,159",
+            "234,783"
+          ],
+          [
+            "Total Capex",
+            "140,000",
+            "150,000",
+            "160,000",
+            "165,000"
+          ],
+          [
+            "Net Debt",
+            "117,102",
+            "112,124",
+            "107,452",
+            "98,856"
+          ],
+          [
+            "RoE (%)",
+            "9.0",
+            "9.9",
+            "10.5",
+            "11.0"
+          ]
+        ],
+        "footnote": "Source: Company Filings, SAARTHI Research Estimates. EBITDA CAGR for FY24-27E at 15% in line with our core forecast."
+      },
+      {
+        "kind": "chart",
+        "chart_type": "bar",
+        "title": "Cash Flow Generation Comfortably Funds Growth Capex",
+        "metrics": [
+          "Operating Cash Flow (OCF)",
+          "Total Capex"
+        ],
+        "years": [
+          "FY24A",
+          "FY25E",
+          "FY26E",
+          "FY27E"
+        ],
+        "slices": null
+      },
+      {
+        "kind": "metrics",
+        "title": "Key Financial Health Indicators (FY27E)",
+        "items": [
+          {
+            "label": "Net Debt / EBITDA",
+            "value": "0.40x",
+            "delta": null
+          },
+          {
+            "label": "Net Debt",
+            "value": "₹98,856 Cr",
+            "delta": null
+          },
+          {
+            "label": "Return on Equity (RoE)",
+            "value": "11.0%",
+            "delta": null
+          },
+          {
+            "label": "OCF / EBITDA Conversion",
+            "value": "95%",
+            "delta": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "page_number": 11,
+    "page_type": "valuation",
+    "title": "Valuation: Sum-of-the-Parts Reveals Deep Value",
+    "subtitle": "Our ₹1717 target price is derived from a conservative SOTP analysis, with consumer businesses driving 71% of enterprise value.",
+    "blocks": [
+      {
+        "kind": "table",
+        "title": "Sum-of-the-Parts (SOTP) Derivation",
+        "headers": [
+          "Segment",
+          "Valuation Method",
+          "Implied EV (₹ Cr)",
+          "Per Share (₹)",
+          "Weight %"
+        ],
+        "rows": [
+          [
+            "Digital Services (Jio)",
+            "18.0x FY26e EV/EBITDA",
+            "12,41,600",
+            "780",
+            "43%"
+          ],
+          [
+            "Reliance Retail",
+            "30.0x FY26e P/E",
+            "8,27,700",
+            "520",
+            "28%"
+          ],
+          [
+            "Oil-to-Chemicals (O2C)",
+            "10.0x FY26e EV/EBITDA",
+            "6,52,700",
+            "410",
+            "22%"
+          ],
+          [
+            "New Energy",
+            "1.0x Invested Capital",
+            "1,90,900",
+            "120",
+            "7%"
+          ],
+          [
+            "Total Enterprise Value",
+            "",
+            "29,12,900",
+            "1,830",
+            "100%"
+          ],
+          [
+            "Less: Net Debt & Holdco Discount",
+            "",
+            "(1,79,800)",
+            "(113)",
+            ""
+          ],
+          [
+            "Implied Equity Value / Target Price",
+            "",
+            "27,33,100",
+            "1,717",
+            ""
+          ]
+        ],
+        "footnote": "Note: Per-share values based on 676.5 Cr shares outstanding. Valuation multiples are based on our estimates and are in line with relevant peer groups."
+      },
+      {
+        "kind": "chart",
+        "chart_type": "donut",
+        "title": "SOTP Contribution (Enterprise Value Basis)",
+        "metrics": [],
+        "years": null,
+        "slices": [
+          {
+            "label": "Digital Services",
+            "value": 43
+          },
+          {
+            "label": "Reliance Retail",
+            "value": 28
+          },
+          {
+            "label": "O2C",
+            "value": 22
+          },
+          {
+            "label": "New Energy",
+            "value": 7
+          }
+        ]
+      },
+      {
+        "kind": "callout",
+        "variant": "info",
+        "title": "New Energy: A Significant Unpriced Option",
+        "body": "Our New Energy valuation is conservatively based on capital invested to date. We believe successful execution of the Giga Complex and establishing technological leadership would unlock significant value, acting as a key re-rating catalyst not yet captured in our target price."
+      }
+    ]
+  },
+  {
+    "page_number": 12,
+    "page_type": "scenario_analysis",
+    "title": "Scenario Analysis: Exploring the Path to ₹2,100",
+    "subtitle": "Risk-reward is skewed to the upside, with key variables centered on monetization timelines and New Energy valuation.",
+    "blocks": [
+      {
+        "kind": "scenario",
+        "title": "Valuation Scenarios: Bear, Base, and Bull Cases",
+        "cases": [
+          {
+            "label": "Bear Case",
+            "case": "bear",
+            "target_price": "₹1,250",
+            "updown": "-11%",
+            "description": "Execution delays in New Energy, a prolonged O2C downcycle, and slower-than-expected ARPU growth in Jio lead to a lower SOTP valuation."
+          },
+          {
+            "label": "Base Case",
+            "case": "base",
+            "target_price": "₹1,717",
+            "updown": "+22%",
+            "description": "Our base case reflects the SOTP valuation from our forecasts, assuming steady monetization of consumer assets via IPOs in FY25-26 and initial ramp-up of the New Energy business."
+          },
+          {
+            "label": "Bull Case",
+            "case": "bull",
+            "target_price": "₹2,100",
+            "updown": "+49%",
+            "description": "Accelerated IPOs of Jio and Retail at premium valuations, coupled with a higher ascribed value for the New Energy business on demonstrating technology leadership, drives significant upside."
+          }
+        ]
+      },
+      {
+        "kind": "table",
+        "title": "Key Differentiating Assumptions by Scenario",
+        "headers": [
+          "Key Assumption",
+          "Bear Case (₹1,250)",
+          "Base Case (₹1,717)",
+          "Bull Case (₹2,100)"
+        ],
+        "rows": [
+          [
+            "Jio/Retail IPO Timeline",
+            "Delayed beyond FY26",
+            "Staged listings in FY25-26",
+            "Accelerated single listing in FY25"
+          ],
+          [
+            "Jio ARPU CAGR (FY24-27E)",
+            "~3%",
+            "~5%",
+            "~7-8%"
+          ],
+          [
+            "Implied New Energy EV",
+            "US$10 bn",
+            "US$30 bn",
+            "US$60 bn"
+          ],
+          [
+            "O2C EV/EBITDA Multiple",
+            "5.0x",
+            "6.5x",
+            "7.5x"
+          ]
+        ],
+        "footnote": "Scenario assumptions are illustrative and represent key variables in our valuation model."
+      }
+    ]
+  },
+  {
+    "page_number": 13,
+    "page_type": "scorecard",
+    "title": "SAARTHI Scorecard: Strong on Vision and Execution",
+    "subtitle": "Reliance scores an impressive 79/100, reflecting its visionary strategy and strong execution, reinforcing our BUY recommendation.",
+    "blocks": [
+      {
+        "kind": "scorecard",
+        "title": "SAARTHI Framework: Proprietary Scorecard",
+        "items": [
+          {
+            "name": "Scalability of Core Engine",
+            "score": "12",
+            "max_score": "15",
+            "description": "Strong scalability across digital, retail and O2C; new energy provides next leg. Capital intensity in O2C is the only constraint."
+          },
+          {
+            "name": "Addressable Market & Adjacency",
+            "score": "9",
+            "max_score": "10",
+            "description": "Dominant position in India's core growth sectors—Energy, Telecom, Retail. New Energy unlocks a massive global TAM."
+          },
+          {
+            "name": "Asymmetric Pricing Power",
+            "score": "13",
+            "max_score": "15",
+            "description": "Market leadership in telecom and retail, plus integrated O2C model, provides significant pricing leverage and margin control."
+          },
+          {
+            "name": "Reinvestment Quality",
+            "score": "11",
+            "max_score": "15",
+            "description": "High reinvestment in growth capex. ROE improving but capital intensity currently weighs on reported profit conversion."
+          },
+          {
+            "name": "Track Record Through Adversity",
+            "score": "12",
+            "max_score": "15",
+            "description": "Proven resilience through commodity cycles and market volatility, with a steadily deleveraging balance sheet."
+          },
+          {
+            "name": "Human Capital & Institutional DNA",
+            "score": "8",
+            "max_score": "10",
+            "description": "Clear succession plan in place for key verticals, though promoter vision remains the central strategic driver."
+          },
+          {
+            "name": "Inflection Point Identification",
+            "score": "14",
+            "max_score": "15",
+            "description": "Multiple near-term catalysts (IPOs, Giga-factory commissioning) provide strong potential for imminent value unlocking."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "page_number": 14,
+    "page_type": "scorecard",
+    "title": "SAARTHI Scorecard: Strong on Vision and Execution (contd.)",
+    "subtitle": "Reliance scores an impressive 79/100, reflecting its visionary strategy and strong execution, reinforcing our BUY recommendation.",
+    "blocks": [
+      {
+        "kind": "catalyst",
+        "title": "Key Catalysts to Monitor",
+        "items": [
+          {
+            "icon": "🚀",
+            "title": "Jio Platform Monetization",
+            "badge": "HIGH IMPACT",
+            "body": "A potential listing of Jio Platforms in H1 2026 would crystallize value for the digital ecosystem and provide a new valuation benchmark for the group."
+          },
+          {
+            "icon": "🛒",
+            "title": "Reliance Retail Value Unlocking",
+            "badge": "HIGH IMPACT",
+            "body": "An IPO for the rapidly expanding and profitable retail arm would unlock significant value and establish a public market currency for future M&A."
+          },
+          {
+            "icon": "🔋",
+            "title": "New Energy Giga Complex Ramp-Up",
+            "badge": "MEDIUM TERM",
+            "body": "Successful commissioning and scaling of the solar, battery, and electrolyzer giga-factories by late 2026 will be a key proof point for the third engine."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "page_number": 15,
+    "page_type": "scorecard",
+    "title": "SAARTHI Scorecard: Strong on Vision and Execution (contd.)",
+    "subtitle": "Reliance scores an impressive 79/100, reflecting its visionary strategy and strong execution, reinforcing our BUY recommendation.",
+    "blocks": [
+      {
+        "kind": "risk",
+        "title": "Key Risks to Thesis",
+        "items": [
+          {
+            "severity": "high",
+            "title": "Execution Delays in New Energy",
+            "body": "The scale of the New Energy ambition is unprecedented; any delays in technology integration or commissioning could defer value creation."
+          },
+          {
+            "severity": "med",
+            "title": "O2C Commodity Volatility",
+            "body": "The legacy O2C business remains a significant earnings contributor and is exposed to volatile global crude oil prices and refining margins."
+          },
+          {
+            "severity": "low",
+            "title": "Regulatory & Competitive Headwinds",
+            "body": "Intensifying competition in telecom/retail or adverse policy changes in the energy sector could impact profitability and growth assumptions."
+          }
+        ]
+      }
+    ]
+  }
+]

@@ -1,0 +1,312 @@
+{
+  "document_hook": "A clear, visual argument that Reliance is on the verge of a major re-rating driven by the monetization of its consumer platforms and the birth of a new energy giant.",
+  "compression_bias": "Prioritize visual storytelling and valuation components over exhaustive business descriptions, assuming institutional familiarity with the company's scale.",
+  "page_specs": [
+    {
+      "page_number": 1,
+      "narrative_role": "The Hook",
+      "must_land": "Reliance is a BUY with a ₹1717 target price, as its twin consumer engines are poised for monetization and its New Energy business offers significant long-term optionality.",
+      "must_include": [
+        "BUY rating",
+        "₹1717 Target Price",
+        "Upside Potential %",
+        "The 'Three Engines' theme: Digital, Retail, New Energy"
+      ],
+      "avoid_repeating": [
+        "Detailed Sum-of-the-Parts (SOTP) mechanics",
+        "In-depth historical financial performance"
+      ],
+      "cut_first": [
+        "Extensive company history or background paragraph",
+        "Analyst contact details and disclaimers (move to back)"
+      ],
+      "preferred_blocks": [
+        "metrics",
+        "callout"
+      ],
+      "max_blocks": 2
+    },
+    {
+      "page_number": 2,
+      "narrative_role": "Visual Thesis",
+      "must_land": "Reliance has fundamentally transformed from a cyclical Oil-to-Chemicals (O2C) pure-play to a diversified conglomerate with dominant, high-growth consumer platforms.",
+      "must_include": [
+        "Chart showing EBITDA contribution shift over 10 years (O2C vs. Consumer)",
+        "Chart of market cap evolution vs. major investment cycles (telecom, retail)"
+      ],
+      "avoid_repeating": [
+        "Forward-looking financial forecasts",
+        "Valuation target price build-up"
+      ],
+      "cut_first": [
+        "Charts detailing historical Gross Refining Margins (GRMs)",
+        "Charts on specific petrochemical spreads or cyclicality"
+      ],
+      "preferred_blocks": [
+        "chart",
+        "chart",
+        "callout"
+      ],
+      "max_blocks": 3
+    },
+    {
+      "page_number": 3,
+      "narrative_role": "The Argument",
+      "must_land": "The stock is mispriced because the market underappreciates the impending monetization of consumer assets and assigns insufficient value to the New Energy option.",
+      "must_include": [
+        "Pillar 1: Consumer platforms (Jio/Retail) nearing value unlocking events (IPOs).",
+        "Pillar 2: O2C business as a stable 'cash cow' funding future growth.",
+        "Pillar 3: New Energy as the third engine and a massive long-term value creator.",
+        "A simplified valuation bridge chart (Current Price -> Segment Value -> Target Price)."
+      ],
+      "avoid_repeating": [
+        "The full, detailed SOTP table",
+        "Operational KPIs for each business segment"
+      ],
+      "cut_first": [
+        "Restating the historical transformation narrative from the previous page",
+        "Detailed management quotes"
+      ],
+      "preferred_blocks": [
+        "bullets",
+        "chart",
+        "callout"
+      ],
+      "max_blocks": 3
+    },
+    {
+      "page_number": 4,
+      "narrative_role": "Macro Context",
+      "must_land": "Reliance is uniquely positioned as a proxy for India's most powerful structural growth themes: digitalization, consumption, and the green energy transition.",
+      "must_include": [
+        "Metrics on the Total Addressable Market (TAM) and growth for India's Telecom, Organized Retail, and Renewable Energy sectors.",
+        "A visual representation of Reliance's dominant market share within each of these key sectors."
+      ],
+      "avoid_repeating": [
+        "Company-specific strategy for gaining market share",
+        "Detailed company history or asset list"
+      ],
+      "cut_first": [
+        "Deep dives into sector-specific government policies or regulations",
+        "Global comparisons of sector sizes"
+      ],
+      "preferred_blocks": [
+        "metrics",
+        "chart"
+      ],
+      "max_blocks": 2
+    },
+    {
+      "page_number": 5,
+      "narrative_role": "The Asset Map",
+      "must_land": "Reliance is a collection of distinct, market-leading businesses, each with its own powerful ecosystem and growth path.",
+      "must_include": [
+        "A clean organogram showing the corporate structure: RIL holding O2C, Jio Platforms, Reliance Retail, and New Energy.",
+        "Key market share statistics for each major business unit."
+      ],
+      "avoid_repeating": [
+        "The investment thesis points",
+        "The historical transformation story",
+        "Financial forecasts"
+      ],
+      "cut_first": [
+        "The company's founding history or legacy business details",
+        "A list of all minority stake investments"
+      ],
+      "preferred_blocks": [
+        "chart",
+        "bullets"
+      ],
+      "max_blocks": 2
+    },
+    {
+      "page_number": 6,
+      "narrative_role": "Consumer Deep Dive",
+      "must_land": "Jio and Retail are dominant, profitable platforms with significant runway for growth, and their true value will be surfaced by impending public listings.",
+      "must_include": [
+        "Key KPIs for Jio (e.g., Subscribers, ARPU trend) and Retail (e.g., Store count, Revenue per sq. ft.).",
+        "Mention of potential IPO valuation benchmarks.",
+        "Primary catalyst box highlighting the listings."
+      ],
+      "avoid_repeating": [
+        "Consolidated group financials",
+        "The overarching 'three engine' thesis"
+      ],
+      "cut_first": [
+        "An exhaustive list of every retail brand and format",
+        "Details on the media and content assets"
+      ],
+      "preferred_blocks": [
+        "metrics",
+        "chart",
+        "catalyst"
+      ],
+      "max_blocks": 3
+    },
+    {
+      "page_number": 7,
+      "narrative_role": "Energy Deep Dive",
+      "must_land": "The highly profitable legacy O2C business is the funding engine for a globally ambitious, fully integrated New Energy business that represents the next growth frontier.",
+      "must_include": [
+        "O2C EBITDA and Free Cash Flow generation metrics.",
+        "A visual of the New Energy Giga Complex's integrated value chain (e.g., Polysilicon to Modules, Electrolysers to Green Hydrogen).",
+        "Announced capex commitment for New Energy."
+      ],
+      "avoid_repeating": [
+        "Company-wide balance sheet metrics",
+        "The consumer business growth story"
+      ],
+      "cut_first": [
+        "Detailed breakdown of refining configurations or petrochemical product chains",
+        "Analysis of quarterly GRM fluctuations"
+      ],
+      "preferred_blocks": [
+        "metrics",
+        "chart",
+        "callout"
+      ],
+      "max_blocks": 3
+    },
+    {
+      "page_number": 8,
+      "narrative_role": "Leadership & Governance",
+      "must_land": "A clearly defined succession plan de-risks leadership transition and aligns the next generation of management with the company's new growth engines.",
+      "must_include": [
+        "A simple graphic showing Mukesh Ambani at the holding company level with the three children (Akash, Isha, Anant) leading Jio, Retail, and New Energy.",
+        "A key quote from management on the transition strategy."
+      ],
+      "avoid_repeating": [
+        "Detailed biographies of the management team",
+        "The SAARTHI scorecard analysis"
+      ],
+      "cut_first": [
+        "History of the Ambani family or past corporate disputes",
+        "List of independent board members"
+      ],
+      "preferred_blocks": [
+        "chart",
+        "callout"
+      ],
+      "max_blocks": 2
+    },
+    {
+      "page_number": 9,
+      "narrative_role": "The Model's Story",
+      "must_land": "Our projected 15% consolidated EBITDA CAGR is driven by specific, identifiable drivers in each of the three core segments.",
+      "must_include": [
+        "An EBITDA bridge chart showing FY24-27E growth contribution from Jio, Retail, O2C, and New Energy.",
+        "A concise table of key forecast assumptions (e.g., Jio ARPU in FY27E, annual retail space addition, New Energy commissioning dates)."
+      ],
+      "avoid_repeating": [
+        "The full Income Statement or Balance Sheet",
+        "The SOTP valuation calculation",
+        "Historical financial charts"
+      ],
+      "cut_first": [
+        "Year-by-year revenue or margin forecasts for smaller sub-segments",
+        "Detailed capex breakdown by asset"
+      ],
+      "preferred_blocks": [
+        "chart",
+        "table"
+      ],
+      "max_blocks": 2
+    },
+    {
+      "page_number": 10,
+      "narrative_role": "Balance Sheet Strength",
+      "must_land": "A deleveraged balance sheet and strong cash flows provide ample firepower to fund the New Energy capex cycle without financial strain.",
+      "must_include": [
+        "Chart showing Net Debt to EBITDA trend (historical and forecast), highlighting the sub-1.0x level.",
+        "Chart of Operating Cash Flow vs. Capex.",
+        "A high-level summary financials table (3-year actuals, 3-year forecasts)."
+      ],
+      "avoid_repeating": [
+        "Detailed forecast assumptions",
+        "Valuation multiples or SOTP math"
+      ],
+      "cut_first": [
+        "A detailed debt maturity schedule",
+        "Breakdown of cash and cash equivalents"
+      ],
+      "preferred_blocks": [
+        "chart",
+        "table",
+        "metrics"
+      ],
+      "max_blocks": 3
+    },
+    {
+      "page_number": 11,
+      "narrative_role": "The Math",
+      "must_land": "Our ₹1717 target price is derived from a conservative Sum-of-the-Parts analysis, where the New Energy business represents a significant, largely unpriced option.",
+      "must_include": [
+        "The primary SOTP table showing the valuation build-up for each segment (Jio, Retail, O2C, New Energy) to the final target price.",
+        "The key multiple and logic used for each segment's valuation.",
+        "Callout box stating that New Energy valuation is based on invested capital, implying future upside."
+      ],
+      "avoid_repeating": [
+        "The investment thesis narrative",
+        "Bull and Bear case scenarios",
+        "The full financial forecast tables"
+      ],
+      "cut_first": [
+        "An extensive peer comparison table; a summary of peer multiple ranges is sufficient",
+        "A DCF valuation analysis"
+      ],
+      "preferred_blocks": [
+        "table",
+        "chart",
+        "callout"
+      ],
+      "max_blocks": 3
+    },
+    {
+      "page_number": 12,
+      "narrative_role": "Risk & Opportunity Spectrum",
+      "must_land": "The risk/reward profile is skewed to the upside, with a clear path to our ₹2,100 bull case and a bear case that is well-contained by existing cash flows.",
+      "must_include": [
+        "A table or visual defining the key assumptions for the Bull (₹2,100), Base (₹1717), and Bear (₹1,250) cases.",
+        "The key variables that flex in each scenario (e.g., faster/slower IPO timeline, higher/lower New Energy valuation)."
+      ],
+      "avoid_repeating": [
+        "The detailed base case SOTP calculation",
+        "A generic list of company risks"
+      ],
+      "cut_first": [
+        "A fourth 'what if' scenario to maintain clarity",
+        "Trying to scenario-test O2C cyclicality; focus on the strategic variables"
+      ],
+      "preferred_blocks": [
+        "scenario",
+        "table"
+      ],
+      "max_blocks": 2
+    },
+    {
+      "page_number": 13,
+      "narrative_role": "The Final Verdict",
+      "must_land": "Reliance scores an impressive 8.5/10 on our proprietary SAARTHI framework, reflecting its visionary strategy and strong execution, reinforcing our BUY recommendation.",
+      "must_include": [
+        "The SAARTHI scorecard visual with the final score.",
+        "A bulleted list of the top 3 catalysts to monitor.",
+        "A bulleted list of the top 3 risks to the thesis."
+      ],
+      "avoid_repeating": [
+        "The full investment thesis argument",
+        "The valuation build-up",
+        "Financial forecast details"
+      ],
+      "cut_first": [
+        "A detailed explanation of each SAARTHI parameter's scoring",
+        "Repeating the target price, rating and upside which should be in the footer of every page"
+      ],
+      "preferred_blocks": [
+        "scorecard",
+        "catalyst",
+        "risk"
+      ],
+      "max_blocks": 3
+    }
+  ]
+}
