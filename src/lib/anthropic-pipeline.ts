@@ -12,6 +12,12 @@ import {
   getFrameworkFromPlaybook,
 } from '@/lib/pipeline-api';
 import { getCurrentUserEmail, supabase } from '@/lib/supabase';
+import {
+  buildPptCopyPrompt,
+  extractJsonObject,
+  sanitisePptContent,
+  type PptCopyMetadata,
+} from '@/lib/ppt-copy-schema';
 
 // ========================
 // Anthropic Client
@@ -1149,6 +1155,63 @@ ${financialContext}${financialModelContext.contextText ? `\n\n${financialModelCo
   onProgress?.({ stage: 'stage2', step: 'done', message: 'Report generation complete', percent: 100 });
 
   return { sections, tokensUsed: result.tokensUsed };
+}
+
+// ============================================================================
+// PPT Copywriting Pass — runs after Stage 2 approval, before PPTX generation
+// ============================================================================
+//
+// The schema / prompt builder / sanitiser live in ./ppt-copy-schema.ts so the
+// terminal CLI (scripts/generate_ppt_copy.ts) and this browser path use the
+// same source of truth. Only the Anthropic call wrapper lives here.
+/**
+ * Runs the dedicated PPT copywriting LLM pass.
+ *
+ * Single Sonnet call. No web search (purely transforming approved content).
+ * Output is a JSON object keyed by master_template placeholder names; values
+ * are length-clipped against the per-field schema before being returned.
+ */
+export async function runPptCopywriting(
+  companyName: string,
+  nseSymbol: string,
+  sectorName: string,
+  sections: Array<{ key: string; title: string; content: string }>,
+  metadata: PptCopyMetadata,
+  onProgress?: (p: PipelineProgress) => void,
+): Promise<{ content: Record<string, string>; tokensUsed: number }> {
+  onProgress?.({ stage: 'stage2', step: 'generating', message: 'Generating slide-specific copy...', percent: 10 });
+
+  const { system, user } = buildPptCopyPrompt(companyName, nseSymbol, sectorName, metadata, sections);
+
+  const result = await callAnthropicWithSearch({
+    systemPrompt: system,
+    userPrompt: user,
+    maxTokens: 16000,
+    temperature: 0.25,
+    useWebSearch: false,
+  });
+
+  onProgress?.({ stage: 'stage2', step: 'parsing', message: 'Validating PPT copy JSON...', percent: 85 });
+
+  const jsonText = extractJsonObject(result.text);
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(jsonText);
+  } catch (err) {
+    console.error('[PPT Copywriting] JSON parse failed. Raw:', result.text);
+    throw new Error(`PPT copywriting produced invalid JSON: ${(err as Error).message}`);
+  }
+
+  const sanitised = sanitisePptContent(parsed);
+
+  // Debug visibility — useful when iterating on the prompt.
+  console.group('[PPT Copywriting] Result');
+  console.log('Tokens:', result.tokensUsed, '| Fields:', Object.keys(sanitised).length);
+  console.log(sanitised);
+  console.groupEnd();
+
+  onProgress?.({ stage: 'stage2', step: 'done', message: 'PPT copy generated', percent: 100 });
+  return { content: sanitised, tokensUsed: result.tokensUsed };
 }
 
 /**

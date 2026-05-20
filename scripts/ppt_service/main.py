@@ -2,16 +2,14 @@
 PPTX Generation API Server
 ==========================
 Single-purpose FastAPI service that turns approved research reports into
-.pptx (and optional .pdf) using the local `reportgen` library at ../../pptx.
+.pptx (and optional .pdf) using the local PPT generation service code.
 
 Required env vars:
   SUPABASE_URL
   SUPABASE_SERVICE_KEY
-  REPORTGEN_OPENROUTER_API_KEY    # used by reportgen planner when use_mock=False
   PORT                             # optional, default 8501
 
 Run:
-  pip install -e ../../pptx           # one-time, install the local library
   pip install -r requirements.txt
   python main.py
 """
@@ -42,7 +40,6 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import uvicorn
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, str(REPO_ROOT / "PPT-generator"))
 
 from pptx_generator import generate_pptx_for_report, preview_ppt_placeholders
 
@@ -100,20 +97,10 @@ class GeneratePptxResponse(BaseModel):
 
 @app.get("/health")
 def health():
-    reportgen_ok = False
-    try:
-        import reportgen.orchestration.pipeline  # noqa: F401
-
-        reportgen_ok = True
-    except Exception as exc:
-        logger.warning("reportgen import failed: %s", exc)
-
     return {
         "status": "ok",
-        "reportgen": reportgen_ok,
         "libreoffice": shutil.which("soffice") is not None,
         "supabase": bool(os.environ.get("SUPABASE_URL") and os.environ.get("SUPABASE_SERVICE_KEY")),
-        "openrouter_key": bool(os.environ.get("REPORTGEN_OPENROUTER_API_KEY")),
     }
 
 
@@ -155,22 +142,12 @@ def generate_pptx(req: GeneratePptxRequest):
 
 
 def _print_banner(port: int) -> None:
-    try:
-        import reportgen  # noqa: F401
-
-        rg_version = getattr(reportgen, "__version__", "editable")
-    except Exception:
-        rg_version = "NOT INSTALLED"
-
-    has_or = bool(os.environ.get("REPORTGEN_OPENROUTER_API_KEY"))
     has_sb = bool(os.environ.get("SUPABASE_URL") and os.environ.get("SUPABASE_SERVICE_KEY"))
     libre = shutil.which("soffice") is not None
 
     bar = "=" * 60
     print(bar)
     print(f" PPTX Generation Service  ->  http://0.0.0.0:{port}")
-    print(f"  reportgen        : {rg_version}")
-    print(f"  openrouter key   : {'yes' if has_or else 'MISSING (use_mock=true required)'}")
     print(f"  supabase env     : {'yes' if has_sb else 'MISSING'}")
     print(f"  libreoffice      : {'yes' if libre else 'no (PDF will be skipped)'}")
     print(f"  bucket           : research-reports-pptx")

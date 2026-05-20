@@ -2,6 +2,41 @@
 
 This document summarizes how the current PPT generation flow works, how it was debugged using `GRAVITA`, what code changes were made, what is currently working, and what still needs attention.
 
+## Current State
+
+The most important context for a new agent is:
+
+- the user replaced the old PPT with a new cleaned-up [master_template.pptx](/abs/path/c:/Users/pratik/tikona-research-os-2/master_template.pptx)
+- the previous template was kept as [master_template_old.pptx](/abs/path/c:/Users/pratik/tikona-research-os-2/master_template_old.pptx)
+- the generator has now been partially realigned to the new template
+- most remaining work is no longer "why is injection broken?" and is now mostly:
+  - placeholder alignment edge cases
+  - slide-specific content shaping
+  - future PPT-specific micro-copy generation
+
+As of the latest Gravita validation run, the core slide mechanics are mostly working:
+
+- slide 1 summary table renders
+- slide 2 financial charts render
+- slide 3 operational charts render
+- slide 6 pie charts render
+- slide 7 timeline table renders
+- slide 9 peer charts render
+- slide 10 catalyst timeline visual renders
+- slide 12 governance table renders
+- slides 13 to 15 table renders work
+- slide 17 probability-weight table renders
+- slide 18 risk table renders
+- slide 19 bottom strip calculations are fixed
+
+What is still mainly weak:
+
+- some text boxes still use raw section text and need better PPT-shaped copy
+- some commentary panels are still too long or too report-like
+- there is still no dedicated PPT-specific LLM pass for short-box content
+- `Financial summary slide injection count` still reports `0` in the final warning array even though slide 1 is visually working
+- `Peer comparison injection count` currently reports `0` in the latest run and should be treated as an area for later cleanup if slide 10 evolves further
+
 ## Purpose
 
 This file is meant to help another agent take over PPT-generator work without needing to rediscover:
@@ -133,6 +168,30 @@ The current direction is:
 
 This is more stable and easier to style.
 
+### Text generation vs PPT generation
+
+Important architecture point:
+
+- the PPT generator does not usually make a fresh LLM call for slide text
+- the long-form report content is generated earlier in the research pipeline
+- that content is split into structured sections and saved in the database
+- the PPT generator later reads those saved sections and maps them into slide placeholders
+
+So:
+
+- research pipeline = generates report text
+- PPT generator = formats saved report text into the slide layout
+
+This is why current slide text quality is limited by heuristics such as:
+
+- section selection
+- sentence splitting
+- truncation
+- short-summary extraction
+- deterministic financial-model fallbacks
+
+It is not yet using a dedicated "presentation copywriting" pass.
+
 ### Why charts moved away from Excel
 
 `openpyxl` could render sheet cells as images, but not embedded charts reliably.
@@ -196,7 +255,176 @@ Important implication:
 
 - if a custom image render fails, cleanup will overwrite the placeholder with explanatory text
 
+## New Template Alignment
+
+The generator has been updated to support the new template placeholder scheme introduced in the new `master_template.pptx`.
+
+### Main placeholders now supported
+
+By slide:
+
+- slide 1:
+  - `company_name`, `nse_code`, `cmp`, `target`, `m_cap`, `m_category`, `saarthi_s`, `tagline`
+  - `investment_thesis_s1`
+  - `investment_ideas_1..4`
+  - `financial_summary_image`
+- slide 2:
+  - `financial_charts`
+- slide 3:
+  - `operational_charts`
+- slide 4:
+  - `investment_thesis_heading_s4`
+  - `investment_thesis_s4`
+  - `key_catalyst_heading_1..3`
+  - `key_catalyst_1..3`
+  - `saarthi_summary_s4`
+  - note: the template also had variants with spaces in the token name, so the code currently tolerates those
+- slide 5:
+  - `industry_structure`
+  - `key_industry_tailwainds`
+  - `key_industry_risks`
+  - `KPI_heading_1..6`
+  - `KPI_1..6`
+  - note: `tailwainds` is a template typo, and the code supports the typo as-is
+- slide 6:
+  - `company_overview`
+  - `competitive_moat_1`
+  - `competitive_moat_2`
+  - `key_insights`
+  - `percentage_revenue_pie_chart`
+  - `percentage_EBIT_pie_chart`
+- slide 7:
+  - `company_timeline`
+- slide 8:
+  - `business_model_1..6`
+- slide 9:
+  - `competitive_advantage`
+  - `peer_comparison_chart_1`
+  - `peer_comparison_chart_2`
+- slide 10:
+  - `investment_thesis_detailed`
+  - `key_catalyst`
+  - `catalyst_timeline_chart`
+- slide 11:
+  - `management_commentry_heading_1..8`
+  - `management_content_1..8`
+- slide 12:
+  - `governance_table`
+  - `indicators_1..6`
+- slide 13:
+  - `earnings_forecast_table`
+  - `forecast_assumptions`
+- slide 14:
+  - `financials_table`
+  - `financial_commentary`
+- slide 15:
+  - `valuations_table`
+  - `valuation_commentary`
+- slide 16:
+  - `saarthi_s_content`
+  - `saarthi_a1_content`
+  - `saarthi_a2_content`
+  - `saarthi_r_content`
+  - `saarthi_t_content`
+  - `saarthi_h_content`
+  - `saarthi_i_content`
+  - `saarthi_summary_s16`
+- slide 17:
+  - `bull`, `base`, `bear`
+  - `bull_p`, `base_p`, `bear_p`
+  - `valuation_bull`, `valuation_base`, `valuation_bear`
+  - `bull_content`, `base_content`, `bear_content`
+  - `probability_weight_table`
+- slide 18:
+  - `key_risks_table`
+- slide 19:
+  - `entry_strategy`
+  - `review_strategy`
+  - `exit_strategy`
+  - `buy`, `tar_pr`, `stp_loss`, `up`, `down`, `pnt`
+
+### Important template notes
+
+- the new template is much cleaner than the old one and should be treated as the source of truth
+- the generator still contains some backward-compatibility logic for old placeholder names
+- not every old alias should be removed immediately because some fallback logic still relies on them
+
 ## Main Fixes Already Implemented
+
+The rest of this section contains older debugging history. The latest practical state is summarized below.
+
+## What Is Actually Working Now
+
+This reflects the latest user-validated Gravita output.
+
+### Slide mechanics that are now working
+
+- slide 1:
+  - custom summary table is present
+- slide 2:
+  - custom financial chart collage injects into `{{financial_charts}}`
+- slide 3:
+  - custom operational chart collage injects into `{{operational_charts}}`
+- slide 6:
+  - revenue-mix and EBIT-mix pie charts inject and persist
+- slide 7:
+  - custom timeline table injects into `{{company_timeline}}`
+- slide 9:
+  - peer bar charts inject into `{{peer_comparison_chart_1}}` and `{{peer_comparison_chart_2}}`
+- slide 10:
+  - catalyst timeline chart area now gets a rendered visual
+- slide 12:
+  - governance table injects with branded structured rendering
+- slide 13:
+  - earnings forecast table render works
+- slide 14:
+  - financials table render works
+- slide 15:
+  - valuations table render works
+- slide 17:
+  - scenario values render correctly
+  - probability-weight table now injects
+- slide 18:
+  - key-risks table render works
+- slide 19:
+  - bottom strip calculations now show sensible values
+
+### Important fixes already made in code
+
+- story charts no longer depend on copied Excel chart objects
+- slide 2 and 3 charts now use Python/matplotlib rendering
+- historical-only logic is enforced for story charts
+- company overview pie charts use dedicated slide 6 injectors
+- timeline rendering uses a dedicated custom renderer
+- competitive-advantage charts use dedicated peer comparison chart renderers
+- scenario slide has a dedicated probability-weight table renderer
+- slide 19 `Risk/Reward` now uses actual upside/downside math instead of CMP
+- utilization percent scaling was fixed so the slide does not show absurd values like `8700%`
+
+### Latest validated warning array
+
+From the latest successful Gravita generation:
+
+```text
+Financial summary slide injection count: 0
+Company overview pie injection count: 2
+Company timeline injection count: 1
+Catalyst timeline injection count: 1
+Competitive advantage injection count: 2
+Peer comparison injection count: 0
+Governance table injection count: 1
+Earnings forecast injection count: 1
+Financials table injection count: 1
+Valuations table injection count: 1
+Key risks table injection count: 1
+Probability weight injection count: 1
+```
+
+Interpretation:
+
+- most custom injectors are now working
+- slide 1 warning count is misleading because slide 1 still renders visually through earlier template-fill image insertion
+- peer-comparison count currently shows `0` in the final warning array even though the right-side competitive charts are visually working on slide 9
 
 ### 1. Slide 2 and Slide 3 story charts moved to Python-rendered visuals
 
@@ -642,36 +870,51 @@ These are known to be improved and generally working better than before:
 
 ## Known Remaining Problems
 
-### Slide 6
+At this stage the remaining issues are mostly quality issues, not injection failures.
 
-- pie charts still not sticking reliably in final PPT
-- top and bottom text may still need further tuning
+### Main remaining work
 
-### Slides 7 to 10 still need verification
+- slide 1:
+  - thesis panel is still too dense
+  - the warning count for summary injection remains confusing
+- slide 4:
+  - thesis/catalyst content still needs better box-specific shaping
+- slide 10:
+  - left and top-right text are still too raw and report-like
+- slide 12:
+  - governance indicator cards are still somewhat long
+- slides 14 and 15:
+  - commentary boxes are still mostly raw paragraph paste
+- slide 16:
+  - SAARTHI cards still rely on heuristic splitting and can repeat or feel too similar
+- overall:
+  - there is still no dedicated PPT-specific micro-content generation layer
 
-Recent code was added for:
+### Architectural gap still open
 
-- slide 7 custom timeline
-- slide 8 business-model content cards
-- slide 9 peer charts
-- slide 10 peer table
+The generator currently goes from:
 
-These should be considered pending visual QA until regenerated screenshots confirm:
+- long-form report sections
 
-- the custom visuals actually persist into the final deck
-- layout fit is acceptable
-- the new text density is appropriate
-- Excel fallback content is no longer leaking through where custom renderers should win
+to:
 
-### Other unresolved placeholders
+- slide placeholders
 
-Recent logs still show cleanup for:
+using mostly heuristics, trimming, splitting, and deterministic formatting.
 
-- `{{competitive_chart_1}}`
-- `{{competitive_chart_2}}`
-- `{{probability_weight_table}}`
+That is enough to make the deck work mechanically, but not enough to make every box feel truly presentation-ready.
 
-These slides likely still need custom rendering or proper Excel/image injection.
+The likely future improvement is:
+
+- add a PPT-specific structured content generation step
+- probably hybrid:
+  - deterministic for metrics/charts/tables
+  - LLM-assisted for short slide copy such as:
+    - catalyst cards
+    - business model boxes
+    - management commentary cards
+    - governance indicator snippets
+    - financial/valuation commentary
 
 ### PDF generation
 
@@ -683,19 +926,18 @@ So PDF export is skipped locally unless `soffice` becomes available.
 
 ## Suggested Next Steps for Another Agent
 
-1. Finish slide 6 by making the pie visuals persist in the final PPT.
-2. Verify whether bottom-right overview text is actually using `__slide6_bottom_overview` in final output.
-3. Validate slides 7 to 10 visually after regeneration.
-4. If slide 9 still shows fallback text, inspect grouped placeholder replacement behavior on overlapping competitive-chart shapes.
-5. If slide 10 still shows Excel-derived visuals, inspect whether `inject_peer_comparison_slide(...)` is being overwritten by later save passes.
-6. Review slides with remaining cleanup placeholders:
-   - competitive charts
-   - probability-weight table
-7. Decide whether slide 6 EBIT pie should use:
-   - segment PBIT from workbook
-   - operational volume proxy
-   - or a user-approved alternate definition
-8. Continue slide-by-slide review with screenshots rather than broad refactors.
+1. Keep the current custom visual pipeline stable and avoid regressing the working injectors.
+2. Focus next on copy quality, not basic mechanics.
+3. Start with the most visibly weak text slides:
+   - slide 1
+   - slide 4
+   - slide 10
+   - slide 12
+   - slide 14
+   - slide 15
+   - slide 16
+4. If implementing PPT-specific content generation, design explicit per-slide fields instead of relying on heavy truncation.
+5. Keep using screenshots for validation because many issues are layout-specific, not code-exception-specific.
 
 ## Files Most Relevant for Continuing Work
 

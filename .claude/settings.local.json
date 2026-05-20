@@ -132,7 +132,13 @@
       "Bash(python -c \"import paramiko; print\\('paramiko ok'\\)\")",
       "Bash(python3)",
       "Bash(python3 -c ' *)",
-      "Bash(python -m py_compile scripts/financial_model_v5.py)"
+      "Bash(python -m py_compile scripts/financial_model_v5.py)",
+      "Bash(.venv/Scripts/python.exe -c \"from openpyxl import load_workbook; wb = load_workbook\\('output/GRAVITA_model.xlsx', data_only=False\\); print\\(wb.sheetnames\\)\")",
+      "Bash(.venv/Scripts/python.exe -c ' *)",
+      "Bash(.venv/Scripts/python.exe -c \"import ast; ast.parse\\(open\\('scripts/ppt_service/pptx_generator.py', encoding='utf-8'\\).read\\(\\)\\); print\\('OK'\\)\")",
+      "Bash(git stash *)",
+      "Bash(npx tsx *)",
+      "Bash(.venv/Scripts/python.exe -m pip list)"
     ]
   }
 }

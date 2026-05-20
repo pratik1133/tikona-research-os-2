@@ -15,7 +15,29 @@
       "Bash(grep -l \"index.css\" /c/Users/pratik/tikona-research-os-2/src/*.tsx /c/Users/pratik/tikona-research-os-2/*.html)",
       "Bash(xargs ls:*)",
       "Read(//c/Users/pratik/tikona-research-os-2/**)",
-      "Bash(sort -k1 -r)"
+      "Bash(sort -k1 -r)",
+      "Bash(.venv/Scripts/python.exe -m pip install --quiet pypdf)",
+      "Bash(.venv/Scripts/python.exe -c ' *)",
+      "Bash(findstr /n \"===== SLIDE\")",
+      "Bash(awk 'NR>=3797 && NR<=4600 && /^    # ═+ [A-Z]/ {print NR\": \"$0}' scripts/financial_model_v5.py)",
+      "Bash(awk 'NR>=3797 && NR<=4700 && /^    # ═/ {print NR\": \"$0}' scripts/financial_model_v5.py)",
+      "Bash(grep -nE \"_ext_left$|_ext_left\\\\b\" scripts/financial_model_v5.py)",
+      "Bash(awk '/^    # ═.* COVER/ {print NR\": \"$0}' scripts/financial_model_v5.py)",
+      "Bash(awk '/^    # ═.* VALUATION ═/ {print NR\": \"$0}' scripts/financial_model_v5.py)",
+      "Bash(.venv/Scripts/python.exe -c \"import openpyxl, pydantic, anthropic, yfinance, cloudscraper, bs4; print\\('all imports OK'\\)\")",
+      "Bash(.venv/Scripts/python.exe -c \"import openpyxl, pydantic; print\\('core imports OK'\\); print\\('openpyxl', openpyxl.__version__\\); print\\('pydantic', pydantic.__version__\\)\")",
+      "Bash(.venv/Scripts/python.exe scripts/offline_test_build_model.py)",
+      "Bash(awk '/# Main rating banner/,/A\\\\{r\\\\}.alignment = center/' scripts/financial_model_v5.py)",
+      "Bash(awk '/^    # ═.* BALANCE SHEET ═|^    # ═.* CASH FLOW ═/ {print NR\": \"$0}' scripts/financial_model_v5.py)",
+      "Bash(.venv/Scripts/python.exe -c \"import paramiko; print\\('paramiko', paramiko.__version__\\)\")",
+      "Bash(.venv/Scripts/python.exe scripts/deploy_fm_to_vps.py)",
+      "Bash(curl -sS https://bmpvcjbfeyvkkbvclwkb.supabase.co/storage/v1/object/public/research-reports-html/financial-models/GRAVITA/GRAVITA_model.json -o /tmp/gravita.json)",
+      "Bash(python3 -c ' *)",
+      "Bash(curl -sS -o output/GRAVITA_latest.json https://bmpvcjbfeyvkkbvclwkb.supabase.co/storage/v1/object/public/research-reports-html/financial-models/GRAVITA/GRAVITA_model.json)",
+      "Bash(curl -sS -o output/GRAVITA_latest.xlsx \"https://bmpvcjbfeyvkkbvclwkb.supabase.co/storage/v1/object/public/research-reports-html/financial-models/GRAVITA/GRAVITA_model.xlsx\")",
+      "Bash(python -m py_compile scripts/ppt_service/pptx_generator.py)",
+      "Bash(python scripts/ppt_service/_test_collage.py)",
+      "Bash(python -c ' *)"
     ]
   }
 }

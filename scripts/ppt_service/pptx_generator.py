@@ -38,6 +38,97 @@ PPTX_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.presentationm
 PDF_CONTENT_TYPE = "application/pdf"
 
 _NUM_RE = re.compile(r"[\d,]+\.?\d*")
+
+# Fields whose values should render with inline **bold** segments preserved.
+# Sanitiser on the TS side keeps the `**...**` markers for these keys; the
+# Python writer below splits them into bold/non-bold runs.
+_INLINE_BOLD_KEYS: set[str] = {"investment_thesis_s1"}
+
+# SAARTHI per-dimension score placeholders on slide 16 are SINGLE-brace tokens
+# in the template ({s_s}, {a1_s}, ...) — the renderer's standard {{key}} pass
+# misses them. We do a second pass that also tries the single-brace form
+# for these specific keys.
+_SAARTHI_SCORE_PLACEHOLDERS: set[str] = {"s_s", "a1_s", "a2_s", "r_s", "t_s", "h_s", "i_s"}
+
+# Bullet-shaped placeholders on slides 5 + 19. If the TS sanitiser missed (or
+# the override JSON was authored elsewhere), these may arrive as a single
+# paragraph with bullet markers embedded mid-string. We split defensively so
+# the renderer's per-line paragraph emitter receives one bullet per line.
+_BULLET_LIST_KEYS: set[str] = {
+    "industry_structure",
+    "key_industry_tailwinds",
+    "key_industry_risks",
+    "entry_strategy",
+    "review_strategy",
+    "exit_strategy",
+}
+
+
+def _ensure_bullet_lines(value: str) -> str:
+    """Normalise a bullets value to newline-separated `• <line>` lines.
+
+    Accepts: (a) already-newline-separated; (b) one-paragraph with embedded
+    bullet markers; (c) plain prose with sentence-level periods.
+    """
+    if not isinstance(value, str) or not value.strip():
+        return value
+    text = value.strip()
+    if "\n" in text:
+        lines = [ln.strip() for ln in text.split("\n") if ln.strip()]
+    else:
+        # Split on any embedded bullet marker.
+        parts = re.split(r"(?=[•●▪◦])\s*", text)
+        parts = [p.strip() for p in parts if p.strip()]
+        if len(parts) <= 1:
+            # No bullet markers — split on sentence boundary as a last resort.
+            parts = [s.strip() for s in re.split(r"(?<=[.!?])\s+", text) if s.strip()]
+        lines = parts
+    out_lines: list[str] = []
+    for ln in lines:
+        cleaned = re.sub(r"^[\-\*•●▪◦·#>\s]+", "", ln).strip()
+        if cleaned:
+            out_lines.append(f"• {cleaned}")
+    return "\n".join(out_lines) if out_lines else value
+
+# Pure-numeric value? Used by fmt_number to decide whether to format or pass through.
+_PURE_NUM_RE = re.compile(r"^-?\d[\d,]*\.?\d*$")
+
+
+def fmt_number(value, *, force_decimal: bool = False) -> str:
+    """Format a number with commas. Drop decimals when |value| > 150,
+    keep one decimal otherwise. Pass through non-numeric strings unchanged.
+
+    Examples:
+        1809.3   -> '1,809'
+        129.7    -> '129.7'
+        12460    -> '12,460'
+        0.45     -> '0.5'
+        'BUY'    -> 'BUY'
+        None,''  -> ''
+    """
+    if value is None:
+        return ""
+    if isinstance(value, str):
+        s = value.strip()
+        if not s:
+            return ""
+        # Allow leading currency / sign characters when checking for pure number
+        candidate = s.replace(",", "").replace("₹", "").replace("$", "").strip()
+        if not _PURE_NUM_RE.match(candidate.lstrip("-")) and not _PURE_NUM_RE.match(candidate):
+            # Not a pure number string — pass through (e.g. "BUY", "₹1,200 Cr").
+            return s
+        try:
+            num = float(candidate)
+        except ValueError:
+            return s
+    else:
+        try:
+            num = float(value)
+        except (TypeError, ValueError):
+            return str(value)
+    if abs(num) > 150 and not force_decimal:
+        return f"{num:,.0f}"
+    return f"{num:,.1f}"
 _PLACEHOLDER_RE = re.compile(r"not included in the generated report|content pending", re.I)
 _OPENROUTER_PATCHED = False
 _HOUSE_PLANNER_PATCHED = False
@@ -52,6 +143,8 @@ _ORPHAN_NUMBER_RE = re.compile(
 _EXCEL_INJECTION_TOKENS: set[str] = {
     "{{financial_model_from_excel}}",
     "{{financial_model_from_excel_operational_sheet}}",
+    "{{financial_charts}}",
+    "{{operational_charts}}",
     "{{financial_summary_image}}",
     "{{earnings_forecast_table}}",
     "{{financials_table}}",
@@ -60,10 +153,16 @@ _EXCEL_INJECTION_TOKENS: set[str] = {
     "{{peer_comparision}}",
     "{{governance_table}}",
     "{{timeline}}",
+    "{{company_timeline}}",
     "{{competitive_chart_1}}",
     "{{competitive_chart_2}}",
+    "{{peer_comparison_chart_1}}",
+    "{{peer_comparison_chart_2}}",
     "{{pie_chart_1}}",
     "{{pie_chart_2}}",
+    "{{percentage_revenue_pie_chart}}",
+    "{{percentage_EBIT_pie_chart}}",
+    "{{catalyst_timeline_chart}}",
     "{{probability_weight_table}}",
 }
 
@@ -548,6 +647,9 @@ def _build_financial_model(ticker: str, model_json: dict | None, warnings: list[
         "industry_tailwinds",
         "industry_risks",
         "trading_strategy",
+        "historical_ratios",
+        "historical_pl",
+        "projected_pl",
     ):
         _copy_if_present(base, model_json, key)
 
@@ -861,6 +963,72 @@ def _fmt_mcap(market_cap_raw: str) -> str:
     return f"₹{mcap:,.0f} Cr"
 
 
+_SAARTHI_LETTER_ORDER = ("S", "A", "A", "R", "T", "H", "I")
+_SAARTHI_CARD_KEYS = ("s", "a1", "a2", "r", "t", "h", "i")
+_SAARTHI_DIMENSION_NAMES = {
+    "s":  "Scalability of Core Engine",
+    "a1": "Addressable Market & Adjacency",
+    "a2": "Asymmetric Pricing Power",
+    "r":  "Reinvestment Quality",
+    "t":  "Track Record Through Adversity",
+    "h":  "Human Capital & Institutional DNA",
+    "i":  "Inflection Point Identification",
+}
+
+
+def _split_saarthi_framework(text: str, saarthi: dict) -> dict[str, str]:
+    """Split a SAARTHI framework narrative into the 7 letter cards.
+
+    Looks for letter prefixes like ``S —`` / ``A —`` / ``R —`` etc. at the start
+    of lines or after sentence breaks. Falls back to the structured
+    ``saarthi.dimensions`` data, then to a generic prompt, so every card always
+    gets distinct copy even when the source narrative is missing or single-letter.
+    """
+    result: dict[str, str] = {k: "" for k in _SAARTHI_CARD_KEYS}
+
+    cleaned_text = (text or "").strip()
+    if cleaned_text:
+        pattern = re.compile(
+            r"(?:^|\n|(?<=[.!?\)\]]\s))\s*([SARTHIsarthi])\s*[—–\-:]\s+(?=[A-Za-z])",
+        )
+        matches = list(pattern.finditer(cleaned_text))
+        segments: list[tuple[str, str]] = []
+        for idx, match in enumerate(matches):
+            start = match.start()
+            end = matches[idx + 1].start() if idx + 1 < len(matches) else len(cleaned_text)
+            body = cleaned_text[start:end].strip()
+            segments.append((match.group(1).upper(), body))
+
+        # Greedy mapping: walk expected letter sequence S,A,A,R,T,H,I and consume
+        # the first matching segment we have not yet used.
+        used = [False] * len(segments)
+        for card_key, expected in zip(_SAARTHI_CARD_KEYS, _SAARTHI_LETTER_ORDER):
+            for idx, (letter, body) in enumerate(segments):
+                if used[idx] or letter != expected:
+                    continue
+                used[idx] = True
+                result[card_key] = body
+                break
+
+    dims = saarthi.get("dimensions") or []
+    for idx, card_key in enumerate(_SAARTHI_CARD_KEYS):
+        if result[card_key]:
+            continue
+        if idx < len(dims):
+            d = dims[idx]
+            name = str(d.get("name") or _SAARTHI_DIMENSION_NAMES[card_key]).strip()
+            score = d.get("score")
+            max_score = d.get("max_score") or 15
+            evidence = (d.get("key_evidence") or d.get("assessment") or "").strip()
+            score_part = f"{score}/{max_score}" if score is not None else ""
+            head = f"{name}: {score_part}".strip(": ").rstrip()
+            result[card_key] = (head + (". " + evidence if evidence else "")).strip()
+        else:
+            result[card_key] = _SAARTHI_DIMENSION_NAMES[card_key]
+
+    return result
+
+
 def _synthesise_saarthi_assessment(saarthi: dict) -> str:
     """Derive a short overall_assessment from dimension evidence when the field is absent."""
     dims = saarthi.get("dimensions") or []
@@ -941,9 +1109,13 @@ def map_replacements(company, metadata, fin_model, sections):
     m_category = _classify_market_cap(mcap_raw)
     m_cap_disp = _fmt_mcap(mcap_raw)
 
-    # Upside display
+    # Upside display — round to 1 decimal so we don't render "-55.529999%".
     upside_raw = str(metadata.get("upside_pct", "") or "")
-    upside_disp = (upside_raw + "%") if upside_raw and not upside_raw.endswith("%") else upside_raw
+    _upside_num = _parse_number(upside_raw)
+    if _upside_num is not None:
+        upside_disp = f"{_upside_num:.1f}%"
+    else:
+        upside_disp = (upside_raw + "%") if upside_raw and not upside_raw.endswith("%") else upside_raw
 
     today_str = date.today().strftime("%d %b %Y")
     thesis_sentences = _sentences(thesis, limit=4, max_len=260)
@@ -1016,7 +1188,10 @@ def map_replacements(company, metadata, fin_model, sections):
     if latest_total_volume:
         overview_metrics.append(f"{int(latest_total_volume):,} MT latest throughput")
     if utils:
-        overview_metrics.append(f"{float(utils[-1]) * 100:.0f}% utilisation")
+        latest_util = float(utils[-1])
+        if latest_util <= 1.0:
+            latest_util *= 100
+        overview_metrics.append(f"{latest_util:.0f}% utilisation")
     if m_cap_disp:
         overview_metrics.append(f"{m_cap_disp} market cap")
     bottom_overview = " | ".join(overview_metrics[:4])
@@ -1038,9 +1213,12 @@ def map_replacements(company, metadata, fin_model, sections):
         "Communication Style",
         "Shareholder Alignment",
     ]
-    management_cards = [_truncate_words(text, 26, max_len=190) for text in management_sentences[:10]]
+    # Card width on slide 11 fits ~35 words cleanly; lower than that produces
+    # ugly mid-clause cut-offs like "focusing on." even when distinct sentences
+    # are available.
+    management_cards = [_truncate_words(text, 35, max_len=230) for text in management_sentences[:10]]
     while len(management_cards) < 10:
-        management_cards.append(_truncate_words(mgmt, 26, max_len=190))
+        management_cards.append(_truncate_words(mgmt, 35, max_len=230))
     governance_text = _section_by_any(sections, ["governance", "forensic", "indicator"]) or mgmt
     governance_cards = _sentences(governance_text, limit=6, max_len=170)
     while len(governance_cards) < 6:
@@ -1050,12 +1228,18 @@ def map_replacements(company, metadata, fin_model, sections):
         # ── Slide 1: Cover ────────────────────────────────────────────────────
         "company_name": company.get("name", "Company"),
         "nse_code":     company.get("ticker", ""),
-        "cmp":          metadata.get("cmp", ""),
-        "target":       metadata.get("target_price", ""),
+        "cmp":          fmt_number(metadata.get("cmp", "")),
+        "target":       fmt_number(metadata.get("target_price", "")),
         "m_cap":        m_cap_disp,
         "m_category":   m_category,
         "saarthi_s":    str(saarthi.get("total_score", "70")),
         "tagline":      "Initiation Report",
+        # ── Slide 1 atomic placeholders the cover template references ────────
+        # Both upside and rating are exposed as separate keys here (in addition
+        # to the legacy `up` / `m_category` / etc.) because the cover slide
+        # uses {{upside}} and {{rating}} tokens directly.
+        "upside":       upside_disp,
+        "rating":       _normalize_rating(metadata.get("rating", "") or fin_model.get("rating", "") or "BUY"),
         # ── Slides 1, 4: Investment Thesis ────────────────────────────────────
         "investment_thesis_heading": "Investment Thesis",
         "investment_thesis":         thesis_panel_text,
@@ -1068,13 +1252,13 @@ def map_replacements(company, metadata, fin_model, sections):
         # ── Slide 5: Industry Analysis ────────────────────────────────────────
         "date":     today_str,
         " date ":   today_str,
-        "cell":     metadata.get("cmp", ""),
+        "cell":     fmt_number(metadata.get("cmp", "")),
         "cell_cap": m_category,
         "mod_cap":  m_cap_disp,
         "mod":      metadata.get("upside_pct", ""),
-        "tar_pr":   metadata.get("target_price", ""),
-        "tar":      metadata.get("target_price", ""),  # Slide 5 uses {{tar}}
-        "buy":      metadata.get("cmp", ""),
+        "tar_pr":   fmt_number(metadata.get("target_price", "")),
+        "tar":      fmt_number(metadata.get("target_price", "")),  # Slide 5 uses {{tar}}
+        "buy":      fmt_number(metadata.get("cmp", "")),
         "up":       upside_disp,
         "industry_structure": _clean_prose(industry, max_len=900),
         "key_industry":       _clean_prose(industry_tailwinds_text, max_len=900),
@@ -1146,6 +1330,123 @@ def map_replacements(company, metadata, fin_model, sections):
         ),
     }
 
+    replacements.update({
+        "investment_thesis_s1": thesis_panel_text,
+        "investment_ideas_1": thesis_bullets[0] if len(thesis_bullets) > 0 else "",
+        "investment_ideas_2": thesis_bullets[1] if len(thesis_bullets) > 1 else "",
+        "investment_ideas_3": thesis_bullets[2] if len(thesis_bullets) > 2 else "",
+        "investment_ideas_4": thesis_bullets[3] if len(thesis_bullets) > 3 else "",
+        "investment_thesis_heading_s4": "Investment Thesis",
+        "investment_thesis_s4": thesis_panel_text,
+        "key_catalyst_1": thesis_box_texts[0] if len(thesis_box_texts) > 0 else "",
+        "key_catalyst_2": thesis_box_texts[1] if len(thesis_box_texts) > 1 else "",
+        "key_catalyst_3": thesis_box_texts[2] if len(thesis_box_texts) > 2 else "",
+        "key_catalyst_heading_1": thesis_box_headings[0] if len(thesis_box_headings) > 0 else "Key Catalyst 1",
+        "key_catalyst_heading_2": thesis_box_headings[1] if len(thesis_box_headings) > 1 else "Key Catalyst 2",
+        "key_catalyst_heading_3": thesis_box_headings[2] if len(thesis_box_headings) > 2 else "Key Catalyst 3",
+        "key catalyst_heading_1": thesis_box_headings[0] if len(thesis_box_headings) > 0 else "Key Catalyst 1",
+        "key catalyst_heading_2": thesis_box_headings[1] if len(thesis_box_headings) > 1 else "Key Catalyst 2",
+        "key catalyst_heading_3": thesis_box_headings[2] if len(thesis_box_headings) > 2 else "Key Catalyst 3",
+        "saarthi_summary_s4": thesis_bottom_summary,
+        "key_industry_tailwainds": _clean_prose(industry_tailwinds_text, max_len=900),
+        "key_industry_tailwinds": _clean_prose(industry_tailwinds_text, max_len=900),
+        "key_industry_risks": _clean_prose(industry_risks_text, max_len=900),
+        "KPI_heading_1": "Market Cap",
+        "KPI_heading_2": "CMP",
+        "KPI_heading_3": "Target Price",
+        "KPI_heading_4": "Upside",
+        "KPI_heading_5": "Category",
+        "KPI_heading_6": "SAARTHI",
+        "KPI_1": m_cap_disp,
+        "KPI_2": fmt_number(metadata.get("cmp", "")),
+        "KPI_3": fmt_number(metadata.get("target_price", "")),
+        "KPI_4": upside_disp,
+        "KPI_5": m_category,
+        "KPI_6": str(saarthi.get("total_score", "70")),
+        "company_overview": top_overview,
+        "competitive_moat_1": comp_bullets[0] if len(comp_bullets) > 0 else "",
+        "competitive_moat_2": comp_bullets[1] if len(comp_bullets) > 1 else "",
+        "key_insights": bottom_overview,
+        "company_timeline": replacements["COMPANY_TIMELINE"],
+        "investment_thesis_detailed": thesis_panel_text,
+        # Right-top box on slide 10. Must be visibly distinct from the left
+        # `investment_thesis_detailed` panel — pull from the catalyst / driver
+        # section first, then fall back to industry tailwinds, then to the
+        # short thesis snippets as a last resort.
+        "key_catalyst": _clean_prose(
+            catalyst
+            or industry_tailwinds_text
+            or " ".join(thesis_box_texts[:3]),
+            max_len=900,
+        ),
+        "business_model_1": business_cards[0] if len(business_cards) > 0 else "",
+        "business_model_2": business_cards[1] if len(business_cards) > 1 else "",
+        "business_model_3": business_cards[2] if len(business_cards) > 2 else "",
+        "business_model_4": business_cards[3] if len(business_cards) > 3 else "",
+        "business_model_5": business_cards[4] if len(business_cards) > 4 else "",
+        "business_model_6": business_cards[5] if len(business_cards) > 5 else "",
+        "competitive_advantage": _clean_prose(" ".join(comp_bullets[:4]), max_len=1200),
+        # New narrative heading placeholders introduced on slides 9 + 10.
+        # If the LLM copywriter does not populate these via cs_ppt_data, the
+        # template would otherwise show the literal {{...}} token — write a
+        # sensible default so the slide remains visually clean.
+        "competitive_advantage_heading": "Strategic Edge",
+        "investment_thesis_detailed_heading": "Long-Term Thesis Drivers",
+        "management_commentry_heading_1": management_headings[0],
+        "management_commentry_heading_2": management_headings[1],
+        "management_commentry_heading_3": management_headings[2],
+        "management_commentry_heading_4": management_headings[3],
+        "management_commentry_heading_5": management_headings[4],
+        "management_commentry_heading_6": management_headings[5],
+        "management_commentry_heading_7": management_headings[6],
+        "management_commentry_heading_8": management_headings[7],
+        "management_content_1": management_cards[0],
+        "management_content_2": management_cards[1],
+        "management_content_3": management_cards[2],
+        "management_content_4": management_cards[3],
+        "management_content_5": management_cards[4],
+        "management_content_6": management_cards[5],
+        "management_content_7": management_cards[6],
+        "management_content_8": management_cards[7],
+        "indicators_1": governance_cards[0],
+        "indicators_2": governance_cards[1],
+        "indicators_3": governance_cards[2],
+        "indicators_4": governance_cards[3],
+        "indicators_5": governance_cards[4],
+        "indicators_6": governance_cards[5],
+        "forecast_assumptions": _clean_prose(
+            _section_by_any(sections, ["forecast", "assumption", "growth", "capex", "working capital"]) or
+            business_model_text or thesis_panel_text,
+            max_len=900,
+        ),
+        "financial_commentary": replacements["financial_commentry"],
+        "valuation_commentary": replacements["commentry"],
+        **{
+            f"saarthi_{key}_content": _clean_prose(value, max_len=420)
+            for key, value in _split_saarthi_framework(
+                _section_by_any(sections, ["saarthi"]) or _section_value(sections, "saarthi_framework"),
+                saarthi,
+            ).items()
+        },
+        "saarthi_summary_s16": _clean_prose(saarthi_assessment, max_len=520),
+    })
+
+    # ── SAARTHI per-dimension scores (Slide 16: {{s_s}}, {{a1_s}}, ...) ──────
+    _saarthi_dims_list = saarthi.get("dimensions") or []
+    for _idx, _card_key in enumerate(_SAARTHI_CARD_KEYS):
+        _placeholder = f"{_card_key}_s"
+        if _idx < len(_saarthi_dims_list):
+            _d = _saarthi_dims_list[_idx]
+            _score = _d.get("score")
+            _max = _d.get("max_score") or 15
+            if _score is not None:
+                try:
+                    replacements[_placeholder] = f"{float(_score):.0f}/{int(_max)}"
+                    continue
+                except (TypeError, ValueError):
+                    pass
+        replacements[_placeholder] = ""
+
     # ── Scenario data (Slides 16, 18) ─────────────────────────────────────────
     scenarios = fin_model.get("scenarios") or []
     bear_tp_f = 0.0
@@ -1155,19 +1456,21 @@ def map_replacements(company, metadata, fin_model, sections):
         prob  = str(s.get("probability_pct", "") or "")
         tp    = str(s.get("target_price", "") or "")
         prob_disp = (prob + "%") if prob and not prob.endswith("%") else prob
+        tp_fmt = fmt_number(tp)
         if "bull" in name:
-            replacements["valuation_bull"] = tp
-            replacements["bull"]           = tp
+            replacements["valuation_bull"] = tp_fmt
+            replacements["bull"]           = tp_fmt
             replacements["bull_p"]         = prob_disp
             replacements["bull_content"]   = notes
         elif "bear" in name:
-            replacements["valuation_bear"] = tp
-            replacements["bear"]           = tp
+            replacements["valuation_bear"] = tp_fmt
+            replacements["bear"]           = tp_fmt
             replacements["bear_p"]         = prob_disp
             replacements["bear_content"]   = notes
             bear_tp_f = _parse_number(tp) or 0.0
         elif "base" in name:
-            replacements["base"]           = tp   # template uses {{base}}, not {{valuation_base}}
+            replacements["base"]           = tp_fmt
+            replacements["valuation_base"] = tp_fmt
             replacements["base_p"]         = prob_disp
             replacements["base_content"]   = notes
 
@@ -1195,6 +1498,9 @@ def map_replacements(company, metadata, fin_model, sections):
     replacements["entry_strategy_1"]  = entry_text
     replacements["review_strategy_2"] = review_text
     replacements["exit_strategy_3"]   = exit_text
+    replacements["entry_strategy"] = entry_text
+    replacements["review_strategy"] = review_text
+    replacements["exit_strategy"] = exit_text
 
     # Slide 18 price analytics — downside % and stop-loss derived from bear scenario
     cmp_val_f = _parse_number(metadata.get("cmp") or "") or 0.0
@@ -1203,14 +1509,28 @@ def map_replacements(company, metadata, fin_model, sections):
     stp_loss_val = round(bear_tp_f, 1)
     if cmp_val_f > 0:
         down_pct  = round((bear_tp_f - cmp_val_f) / cmp_val_f * 100, 1)
-        down_disp = f"{down_pct}%"
+        # Template already provides the trailing "%", so emit a bare number.
+        down_disp = f"{down_pct:.1f}"
     else:
         down_disp = ""
-    replacements["stp_loss"] = str(stp_loss_val)
+    replacements["stp_loss"] = fmt_number(stp_loss_val)
     replacements["down"]     = down_disp
-    replacements["pnt"]      = metadata.get("cmp", "")  # accumulation pivot point
+    upside_num = _parse_number(metadata.get("upside_pct") or "") or 0.0
+    downside_abs = abs(_parse_number(down_disp) or 0.0)
+    rr_ratio = round((upside_num / downside_abs), 1) if downside_abs > 0 else 0.0
+    replacements["pnt"]      = f"{rr_ratio:.1f}" if rr_ratio else ""
+    replacements["up"]       = f"{upside_num:.1f}" if upside_num else ""
     replacements["__slide4_right_headings"] = thesis_box_headings
     replacements["__slide4_right_texts"] = thesis_box_texts
+
+    # Normalise bullet-shaped placeholders so the renderer's per-line paragraph
+    # emitter (in _replace_text_in_frame) gets one bullet per line — without
+    # this, a single paragraph with embedded "• " markers would render as one
+    # run of prose on the slide instead of the visible bullet list the
+    # template was designed for.
+    for _bk in _BULLET_LIST_KEYS:
+        if _bk in replacements and isinstance(replacements[_bk], str):
+            replacements[_bk] = _ensure_bullet_lines(replacements[_bk])
 
     return replacements
 
@@ -1364,12 +1684,81 @@ def _fill_table_from_model(table, table_key: str, fin_model: dict) -> None:
             logger.warning("Table row %d write failed: %s", ri, e)
 
 
+def _apply_run_font(run, saved_font: dict, *, bold_override: bool | None = None) -> None:
+    if not saved_font:
+        if bold_override is not None:
+            run.font.bold = bold_override
+        return
+    if saved_font.get("name"):
+        run.font.name = saved_font["name"]
+    if saved_font.get("size"):
+        run.font.size = saved_font["size"]
+    if bold_override is not None:
+        run.font.bold = bold_override
+    elif saved_font.get("bold") is not None:
+        run.font.bold = saved_font["bold"]
+    if saved_font.get("color"):
+        try:
+            run.font.color.rgb = saved_font["color"]
+        except Exception:
+            pass
+
+
+def _write_paragraph_text(paragraph, text: str, saved_font: dict, *, allow_bold: bool) -> None:
+    """Write `text` into a cleared paragraph.
+
+    If `allow_bold` is True and the text contains `**...**` segments, those
+    segments are emitted as bold runs while the rest inherit the saved font.
+    Otherwise any stray `**` markers are stripped and the text becomes one run.
+    """
+    if allow_bold and "**" in text:
+        parts = re.split(r"\*\*([^*]+?)\*\*", text)
+        # parts alternates: [plain, bold, plain, bold, ..., plain]
+        first = True
+        for idx, seg in enumerate(parts):
+            if not seg:
+                continue
+            is_bold = (idx % 2 == 1)
+            run = paragraph.add_run() if not first else paragraph.add_run()
+            first = False
+            run.text = seg
+            _apply_run_font(run, saved_font, bold_override=True if is_bold else None)
+        if first:  # nothing was written (all empty parts) — emit empty run
+            run = paragraph.add_run()
+            run.text = ""
+            _apply_run_font(run, saved_font)
+        return
+    # Defensive: strip any stray markdown bold for non-bold fields.
+    clean = text.replace("**", "").replace("__", "")
+    run = paragraph.add_run()
+    run.text = clean
+    _apply_run_font(run, saved_font)
+
+
 def _replace_text_in_frame(text_frame, replacements: dict) -> None:
-    """Replace {{key}} tokens in a text frame, preserving run font properties."""
-    for paragraph in text_frame.paragraphs:
+    """Replace {{key}} tokens in a text frame, preserving run font properties.
+
+    Special cases:
+      - When the paragraph contains a placeholder whose key is in
+        ``_INLINE_BOLD_KEYS`` (currently just ``investment_thesis_s1``), any
+        ``**phrase**`` segments inside the substituted value are rendered as
+        bold runs while surrounding text uses the original paragraph font.
+      - For all other fields, stray ``**`` markers are stripped defensively.
+      - Paragraph breaks inside the value (``\\n\\n``) are honoured by emitting
+        additional paragraphs in the same text frame.
+    """
+    paragraphs = list(text_frame.paragraphs)
+    for paragraph in paragraphs:
         full_text = paragraph.text
-        if not any(f"{{{{{k}}}}}" in full_text for k in replacements):
+        present_keys = [k for k in replacements if f"{{{{{k}}}}}" in full_text]
+        # Also detect single-brace SAARTHI score placeholders ({s_s} etc).
+        single_brace_keys = [
+            k for k in _SAARTHI_SCORE_PLACEHOLDERS
+            if k in replacements and f"{{{k}}}" in full_text and f"{{{{{k}}}}}" not in full_text
+        ]
+        if not present_keys and not single_brace_keys:
             continue
+        present_keys = present_keys + single_brace_keys
 
         # Capture font from first run before clearing
         saved_font: dict = {}
@@ -1385,17 +1774,79 @@ def _replace_text_in_frame(text_frame, replacements: dict) -> None:
                 except Exception:
                     pass
 
+        allow_bold = any(k in _INLINE_BOLD_KEYS for k in present_keys)
+
         for k, v in replacements.items():
             full_text = full_text.replace(f"{{{{{k}}}}}", str(v) if v is not None else "")
+        # Single-brace pass for the small whitelisted set of SAARTHI score keys
+        # (the template author chose `{s_s}` etc. instead of `{{s_s}}`).
+        for k in _SAARTHI_SCORE_PLACEHOLDERS:
+            v = replacements.get(k)
+            if v is None:
+                continue
+            full_text = full_text.replace(f"{{{k}}}", str(v))
 
+        # Honour explicit paragraph breaks (\n\n) and single newlines (bullets).
+        # python-pptx paragraphs cannot contain newlines, so split and emit one
+        # paragraph per line. Blank lines collapse into an empty paragraph.
+        lines = full_text.split("\n")
         paragraph.clear()
-        run = paragraph.add_run()
-        run.text = full_text
-        if saved_font:
-            if saved_font["name"]:  run.font.name  = saved_font["name"]
-            if saved_font["size"]:  run.font.size  = saved_font["size"]
-            if saved_font["bold"] is not None: run.font.bold = saved_font["bold"]
-            if saved_font["color"]: run.font.color.rgb = saved_font["color"]
+        if not lines:
+            return
+        _write_paragraph_text(paragraph, lines[0], saved_font, allow_bold=allow_bold)
+        from pptx.oxml.ns import qn  # local import to avoid top-level dep noise
+        from pptx.text.text import _Paragraph
+        for extra in lines[1:]:
+            # Create a sibling <a:p> right after the current paragraph element.
+            # lxml's addnext() returns None, so build the element first and keep
+            # a reference to it before inserting.
+            new_p_el = paragraph._p.makeelement(qn("a:p"), {})
+            paragraph._p.addnext(new_p_el)
+            new_para = _Paragraph(new_p_el, text_frame)
+            _write_paragraph_text(new_para, extra, saved_font, allow_bold=allow_bold)
+            paragraph = new_para  # so next iteration inserts after this one
+
+
+def _apply_literal_text_subs(slide, subs: list[tuple[str, str]]) -> None:
+    """Apply literal find→replace passes against every paragraph on a slide.
+
+    Used for hard-coded strings baked into the master template (e.g. a stale
+    company name in the disclosure clause) that the {{key}} replacer cannot
+    address. Run-level edits are skipped because the literal may straddle
+    multiple runs; we rewrite the paragraph text instead and keep the first
+    run's font.
+    """
+    def _process_text_frame(tf) -> None:
+        for paragraph in tf.paragraphs:
+            full_text = paragraph.text
+            if not any(old in full_text for old, _ in subs):
+                continue
+            new_text = full_text
+            for old, new in subs:
+                new_text = new_text.replace(old, new)
+            if new_text == full_text:
+                continue
+            saved_font: dict = {}
+            if paragraph.runs:
+                f = paragraph.runs[0].font
+                saved_font["name"] = f.name
+                saved_font["size"] = f.size
+                saved_font["bold"] = f.bold
+            paragraph.text = new_text
+            if paragraph.runs and saved_font:
+                f = paragraph.runs[0].font
+                if saved_font.get("name"):  f.name = saved_font["name"]
+                if saved_font.get("size"):  f.size = saved_font["size"]
+                if saved_font.get("bold") is not None: f.bold = saved_font["bold"]
+
+    for shape in slide.shapes:
+        if shape.has_table:
+            for row in shape.table.rows:
+                for cell in row.cells:
+                    if hasattr(cell, "text_frame") and cell.text_frame:
+                        _process_text_frame(cell.text_frame)
+        elif hasattr(shape, "text_frame") and shape.text_frame:
+            _process_text_frame(shape.text_frame)
 
 
 def _replace_text_in_table(shape, replacements: dict) -> None:
@@ -1636,11 +2087,17 @@ def _remove_shape(shape) -> None:
         pass
 
 
-def _read_timeline_rows(excel_path: str) -> list[tuple[str, str, str, str]]:
+def _read_timeline_rows(
+    excel_path: str,
+    *,
+    sheet_name: str = "Timeline",
+) -> list[tuple[str, str, str, str]]:
     from openpyxl import load_workbook
 
     wb = load_workbook(excel_path, data_only=True)
-    ws = wb["Timeline"]
+    if sheet_name not in wb.sheetnames:
+        return []
+    ws = wb[sheet_name]
     rows: list[tuple[str, str, str, str]] = []
     for r in range(5, ws.max_row + 1):
         year = ws.cell(r, 1).value
@@ -1653,8 +2110,96 @@ def _read_timeline_rows(excel_path: str) -> list[tuple[str, str, str, str]]:
     return rows
 
 
-def _render_timeline_table(excel_path: str) -> bytes | None:
-    rows = _read_timeline_rows(excel_path)
+def _wrap_table_cells(
+    cell_rows: list[list[Any]],
+    col_widths: list[float],
+    *,
+    fig_width_inches: float,
+    chars_per_inch: float = 11.0,
+    skip_header: bool = True,
+) -> tuple[list[list[str]], list[int]]:
+    """Pre-wrap every cell's text so it fits inside its column width.
+
+    matplotlib's ``Table`` does not wrap text natively — overflow is clipped at
+    the column edge, which is the "text getting cut" problem visible on the
+    timeline / risks / governance tables. This helper inserts explicit ``\\n``
+    line breaks using ``textwrap`` sized to each column's share of the figure
+    width, and returns the wrapped rows alongside a per-row line count so the
+    caller can scale cell heights via :func:`_apply_row_line_heights`.
+
+    ``chars_per_inch`` is an empirical calibration for fontsize ~8-9pt on the
+    standard serif/sans render — bump it down for larger fonts or up for
+    tighter ones. ``skip_header`` keeps the first row at 1 line which usually
+    looks better; pass ``False`` if a header label is itself too long.
+    """
+    import textwrap
+    wrapped: list[list[str]] = []
+    line_counts: list[int] = []
+    full_chars = max(20.0, fig_width_inches * chars_per_inch)
+    for ri, row in enumerate(cell_rows):
+        new_row: list[str] = []
+        max_lines = 1
+        for ci, raw in enumerate(row):
+            text = "" if raw is None else str(raw)
+            col_w = col_widths[ci] if ci < len(col_widths) else 1.0 / max(1, len(row))
+            width = max(8, int(full_chars * col_w))
+            if "\n" in text:
+                new_row.append(text)
+                max_lines = max(max_lines, text.count("\n") + 1)
+                continue
+            if len(text) <= width:
+                new_row.append(text)
+                continue
+            lines = textwrap.wrap(text, width=width, break_long_words=False, break_on_hyphens=True) or [text]
+            new_row.append("\n".join(lines))
+            if len(lines) > max_lines:
+                max_lines = len(lines)
+        wrapped.append(new_row)
+        if skip_header and ri == 0:
+            line_counts.append(1)
+        else:
+            line_counts.append(max_lines)
+    return wrapped, line_counts
+
+
+def _apply_row_line_heights(table, line_counts: list[int]) -> None:
+    """Scale each cell's height proportional to its row's wrapped-line count.
+
+    matplotlib ``Table`` cell heights are fractions of the axes that sum to
+    ~1.0 by default (equal heights). We rebuild those fractions so rows with
+    more wrapped lines receive more vertical space — eliminating the
+    "one cramped row clipping multi-line text" look. We also tighten the
+    cell's internal padding (default ``PAD=0.1`` reserves 20% of cell height
+    for top+bottom margin) so wrapped text actually fits inside its row, and
+    centre-align vertically so the visual baseline of multi-line cells lines
+    up with single-line cells in the same row.
+    """
+    total = sum(line_counts)
+    if total <= 0:
+        return
+    cells = table.get_celld()
+    for (r, _c), cell in cells.items():
+        if 0 <= r < len(line_counts):
+            cell.set_height(line_counts[r] / total)
+            cell.set_text_props(verticalalignment="center")
+            # Differential padding by row type:
+            #   - Multi-line wrapped rows (risks / timeline / governance):
+            #     keep PAD tight so the wrapped text uses the full vertical
+            #     area of the cell — was 0.03, still 0.03.
+            #   - Single-line rows (numeric tables like financials, valuations,
+            #     PE sensitivity): use a slightly looser PAD so numbers don't
+            #     visually kiss the left / right cell borders. The default
+            #     matplotlib PAD is 0.1 which leaves too much; 0.06 hits a
+            #     comfortable middle.
+            cell.PAD = 0.03 if line_counts[r] > 1 else 0.06
+
+
+def _render_timeline_table(
+    excel_path: str,
+    *,
+    sheet_name: str = "Timeline",
+) -> bytes | None:
+    rows = _read_timeline_rows(excel_path, sheet_name=sheet_name)
     if not rows:
         return None
     try:
@@ -1680,20 +2225,27 @@ def _render_timeline_table(excel_path: str) -> bytes | None:
     cell_rows.extend([[y, c, d, i] for y, c, d, i in rows])
     styles = ["header"] + ["data"] * len(rows)
 
-    fig_h = max(5.6, 0.40 * len(cell_rows) + 0.2)
-    fig, ax = plt.subplots(figsize=(11.2, fig_h), facecolor="white")
+    fig_width = 11.2
+    col_widths = [0.08, 0.16, 0.42, 0.34]
+    cell_rows, line_counts = _wrap_table_cells(cell_rows, col_widths, fig_width_inches=fig_width)
+    # Slide-7 placeholder aspect is ~11×5.6. python-pptx stretches the inserted
+    # image to the placeholder bounds (ignores aspect ratio), so growing fig_h
+    # past the placeholder height squashes the text vertically. Cap the growth
+    # — the wrap helper already redistributes cell heights proportionally.
+    fig_h = min(7.5, max(5.6, 0.16 * sum(line_counts) + 0.3))
+    fig, ax = plt.subplots(figsize=(fig_width, fig_h), facecolor="white")
     ax.axis("off")
 
     table = ax.table(
         cellText=cell_rows,
         cellLoc="left",
-        colWidths=[0.08, 0.16, 0.42, 0.34],
+        colWidths=col_widths,
         loc="upper left",
         bbox=[0, 0, 1, 1],
     )
     table.auto_set_font_size(False)
     table.set_fontsize(8.3)
-    table.scale(1, 1.2)
+    _apply_row_line_heights(table, line_counts)
 
     for (r, c), cell in table.get_celld().items():
         cell.set_edgecolor("#D5DCE8")
@@ -1721,43 +2273,6 @@ def _render_timeline_table(excel_path: str) -> bytes | None:
     fig.savefig(buf, format="png", dpi=220, bbox_inches="tight", pad_inches=0.02, facecolor=fig.get_facecolor())
     plt.close(fig)
     return buf.getvalue()
-
-
-def inject_company_timeline_slide(pptx_path: str, *, excel_path: str | None = None) -> int:
-    if not excel_path:
-        return 0
-    img = _render_timeline_table(excel_path)
-    if not img:
-        return 0
-    prs = Presentation(pptx_path)
-    if len(prs.slides) < 7:
-        return 0
-    slide = prs.slides[6]
-    target = None
-    for shape in slide.shapes:
-        if hasattr(shape, "text_frame") and shape.text_frame:
-            text = shape.text_frame.text.strip()
-            if text in {"{{COMPANY_TIMELINE}}", "Timeline — see Excel model for details."}:
-                target = shape
-                break
-    if target is None:
-        text_shapes = [
-            shape for shape in slide.shapes
-            if hasattr(shape, "text_frame")
-            and shape.text_frame
-            and shape.text_frame.text.strip()
-            and "timeline" not in shape.text_frame.text.strip().lower()
-            and "sebi reg" not in shape.text_frame.text.strip().lower()
-            and "/20" not in shape.text_frame.text.strip()
-        ]
-        if text_shapes:
-            text_shapes.sort(key=lambda s: s.width * s.height, reverse=True)
-            target = text_shapes[0]
-    if target is None:
-        return 0
-    _insert_image_into_shape(slide, target, img)
-    prs.save(pptx_path)
-    return 1
 
 
 def _read_peer_compare_sections(excel_path: str) -> dict[str, dict]:
@@ -1840,20 +2355,25 @@ def _render_peer_table(excel_path: str) -> bytes | None:
             rows.append([item["company"], *vals])
             row_styles.append("data")
 
-    fig_h = max(7.2, 0.29 * len(rows))
-    fig, ax = plt.subplots(figsize=(8.2, fig_h), facecolor="white")
+    fig_width = 8.2
+    col_widths = [0.31, 0.14, 0.14, 0.14, 0.14, 0.13]
+    rows, line_counts = _wrap_table_cells(rows, col_widths, fig_width_inches=fig_width, chars_per_inch=13.0, skip_header=False)
+    # Cap fig_h growth to avoid python-pptx stretching the image into the
+    # fixed placeholder bounds (which would squash all text).
+    fig_h = min(9.0, max(7.2, 0.13 * sum(line_counts) + 0.4))
+    fig, ax = plt.subplots(figsize=(fig_width, fig_h), facecolor="white")
     ax.axis("off")
 
     table = ax.table(
         cellText=rows,
         cellLoc="center",
-        colWidths=[0.31, 0.14, 0.14, 0.14, 0.14, 0.13],
+        colWidths=col_widths,
         loc="upper left",
         bbox=[0, 0, 1, 1],
     )
     table.auto_set_font_size(False)
     table.set_fontsize(7.0)
-    table.scale(1, 1.12)
+    _apply_row_line_heights(table, line_counts)
 
     for (r, c), cell in table.get_celld().items():
         cell.set_edgecolor("#D5DCE8")
@@ -2005,6 +2525,135 @@ def inject_peer_comparison_slide(pptx_path: str, *, excel_path: str | None = Non
     return 1
 
 
+def inject_company_overview_slide(pptx_path: str, fin_model: dict) -> int:
+    revenue_mix, ebit_mix = _build_slide6_pie_data(fin_model)
+    pie_images = {
+        "{{percentage_revenue_pie_chart}}": _render_pie_chart("Revenue Mix %", revenue_mix),
+        "{{percentage_EBIT_pie_chart}}": _render_pie_chart("EBIT Mix %", ebit_mix),
+    }
+    pie_images = {token: img for token, img in pie_images.items() if img}
+    if not pie_images:
+        return 0
+
+    prs = Presentation(pptx_path)
+    if len(prs.slides) < 6:
+        return 0
+    slide = prs.slides[5]
+    injected = 0
+    for token, img_bytes in pie_images.items():
+        target_shape = None
+        for shape in slide.shapes:
+            if hasattr(shape, "text_frame") and shape.text_frame and shape.text_frame.text.strip() == token:
+                target_shape = shape
+                break
+        if target_shape is None:
+            continue
+        # preserve_aspect: pie shapes render as ovals if stretched to the
+        # template's non-square placeholder. Letterbox-fit keeps them circular.
+        _insert_image_into_shape(slide, target_shape, img_bytes, preserve_aspect=True)
+        injected += 1
+    if injected:
+        prs.save(pptx_path)
+    return injected
+
+
+def inject_company_timeline_slide(pptx_path: str, *, excel_path: str | None = None) -> int:
+    """Render the company timeline table image into the slide-7 placeholder.
+
+    Idempotent: returns 0 (no-op) if the {{company_timeline}} placeholder is
+    not present — which is the expected state after the first successful
+    injection. The "Re-inject after cleanup" pass calls this a second time;
+    without this guard, the earlier fallback ("largest text shape") was
+    stamping a tiny duplicate timeline image onto an unrelated text box at
+    the bottom-right of slide 7.
+    """
+    if not excel_path:
+        return 0
+    img = _render_timeline_table(excel_path)
+    if not img:
+        return 0
+    prs = Presentation(pptx_path)
+    if len(prs.slides) < 7:
+        return 0
+    slide = prs.slides[6]
+    target = None
+    for shape in slide.shapes:
+        if hasattr(shape, "text_frame") and shape.text_frame:
+            text = shape.text_frame.text.strip()
+            if text in {"{{company_timeline}}", "{{COMPANY_TIMELINE}}", "Timeline — see Excel model for details."}:
+                target = shape
+                break
+    if target is None:
+        return 0
+    _insert_image_into_shape(slide, target, img)
+    prs.save(pptx_path)
+    return 1
+
+
+def inject_catalyst_timeline_slide(pptx_path: str, *, excel_path: str | None = None) -> int:
+    if not excel_path:
+        return 0
+    img = _render_timeline_table(excel_path, sheet_name="Catalyst_Timeline")
+    if not img:
+        return 0
+    prs = Presentation(pptx_path)
+    if len(prs.slides) < 10:
+        return 0
+    slide = prs.slides[9]
+    target = None
+    for shape in slide.shapes:
+        if hasattr(shape, "text_frame") and shape.text_frame:
+            text = shape.text_frame.text.strip()
+            if text in {"{{catalyst_timeline_chart}}", "Catalyst timeline — see Excel model for details."}:
+                target = shape
+                break
+    if target is None:
+        return 0
+    _insert_image_into_shape(slide, target, img)
+    prs.save(pptx_path)
+    return 1
+
+
+def inject_competitive_advantage_slide(pptx_path: str, *, excel_path: str | None = None) -> int:
+    if not excel_path:
+        return 0
+    sections = _read_peer_compare_sections(excel_path)
+    revenue_rows = sections["revenue"]["rows"]
+    margin_rows = sections["ebitda_margin"]["rows"]
+    revenue_chart = _render_peer_bar_chart(
+        "Revenue FY26A (₹ Cr)",
+        [r["company"].replace("GRAVITA INDIA LTD", "Gravita") for r in revenue_rows],
+        [float(r["values"][-1]) for r in revenue_rows],
+        percent=False,
+    )
+    margin_chart = _render_peer_bar_chart(
+        "EBITDA Margin FY26A",
+        [r["company"].replace("GRAVITA INDIA LTD", "Gravita") for r in margin_rows],
+        [float(r["values"][-1]) * 100 for r in margin_rows],
+        percent=True,
+    )
+    prs = Presentation(pptx_path)
+    if len(prs.slides) < 9:
+        return 0
+    slide = prs.slides[8]
+    mapping = {
+        "{{peer_comparison_chart_1}}": revenue_chart,
+        "{{peer_comparison_chart_2}}": margin_chart,
+    }
+    injected = 0
+    for token, img in mapping.items():
+        if not img:
+            continue
+        for shape in slide.shapes:
+            if hasattr(shape, "text_frame") and shape.text_frame and shape.text_frame.text.strip() == token:
+                _insert_image_into_shape(slide, shape, img)
+                injected += 1
+                break
+    if injected:
+        prs.save(pptx_path)
+    return injected
+
+
 def _render_named_sheet_table(excel_path: str, sheet_name: str, *, max_rows: int = 60) -> bytes | None:
     from openpyxl import load_workbook
 
@@ -2062,10 +2711,15 @@ def _render_governance_table(excel_path: str) -> bytes | None:
                 else:
                     out.append("" if val is None else str(val))
             formatted.append(out)
+        # fontsize 8.1 renders at ~10 chars/inch (proportional font). The
+        # default chars_per_inch=11 was over-counting per-line capacity, so
+        # names like "Mahavir Prasad Agarwal" stayed unwrapped and clipped at
+        # the column edge. 10 is conservative — wraps anything close to width.
+        formatted, line_counts = _wrap_table_cells(formatted, widths, fig_width_inches=6.0, chars_per_inch=10.0, skip_header=False)
         table = ax.table(cellText=formatted, cellLoc="left", colWidths=widths, loc="upper left", bbox=[0, 0, 1, 0.95])
         table.auto_set_font_size(False)
         table.set_fontsize(8.1)
-        table.scale(1, 1.18)
+        _apply_row_line_heights(table, line_counts)
         for (r, c), cell in table.get_celld().items():
             cell.set_edgecolor("#D5DCE8")
             cell.set_linewidth(0.5)
@@ -2097,21 +2751,38 @@ def _render_key_risks_table(excel_path: str) -> bytes | None:
     wb = load_workbook(excel_path, data_only=True)
     ws = wb["Key_Risks"]
     rows = [[ws.cell(r, c).value for c in range(1, 9)] for r in range(4, 13)]
-    fig, ax = plt.subplots(figsize=(11.2, 5.4), facecolor="white")
+    formatted = [["" if v is None else str(v) for v in row] for row in rows]
+    fig_width = 11.2
+    # Column widths: '#' is narrow. Risk Category/Factor at 0.12/0.13 hold
+    # 2-3 word phrases comfortably. Description/Mitigation get the lion's
+    # share. Probability/Impact are single-letter chips. Overall Rating only
+    # needs to hold "MEDIUM" (~6 chars) so 0.095 is plenty — we steal the
+    # remainder back for Description/Mitigation which carry the long text.
+    # Sums to 1.0 so the table fills the figure width exactly.
+    col_widths = [0.04, 0.12, 0.13, 0.25, 0.225, 0.07, 0.07, 0.095]
+    # Bumped chars_per_inch (12 → 14) so Description/Mitigation pack more
+    # chars per line and produce fewer wrapped rows — the previous run was
+    # overflowing because there were too many lines for the placeholder.
+    formatted, line_counts = _wrap_table_cells(formatted, col_widths, fig_width_inches=fig_width, chars_per_inch=14.0, skip_header=False)
+    # Slide-18 placeholder is ~11×5.4. python-pptx stretches the image to the
+    # placeholder bounds, so a too-tall figure squashes text vertically. We
+    # allow a modest extra ~30% of height for breathing room — combined with
+    # the wider columns + slight fontsize trim below, this prevents the
+    # cell-overflow we saw previously.
+    fig_h = min(7.0, max(5.6, 0.16 * sum(line_counts) + 0.5))
+    fig, ax = plt.subplots(figsize=(fig_width, fig_h), facecolor="white")
     ax.axis("off")
-    formatted = []
-    for row in rows:
-        formatted.append(["" if v is None else str(v) for v in row])
     table = ax.table(
         cellText=formatted,
         cellLoc="center",
-        colWidths=[0.04, 0.12, 0.13, 0.21, 0.18, 0.09, 0.08, 0.11],
+        colWidths=col_widths,
         loc="upper left",
         bbox=[0, 0, 1, 1],
     )
     table.auto_set_font_size(False)
-    table.set_fontsize(7.4)
-    table.scale(1, 1.14)
+    # Slightly smaller font + wider cells = text fits cleanly within rows.
+    table.set_fontsize(7.0)
+    _apply_row_line_heights(table, line_counts)
     color_map = {"H": "#D00000", "M": "#F5A623", "L": "#0B7D20", "MEDIUM": "#F5A623", "LOW": "#0B7D20", "HIGH": "#D00000"}
     for (r, c), cell in table.get_celld().items():
         cell.set_edgecolor("#D5DCE8")
@@ -2153,10 +2824,27 @@ def _render_formula_sheet_table(
         logger.warning("matplotlib unavailable for formula sheet render %s: %s", sheet_name, exc)
         return None
 
-    use_formula_eval = sheet_name == "Financials_Table"
+    # Earnings_Forecast and Valuations_Table are formula-only sheets — every
+    # data cell is `='Financials_Table'!XN` or a derived expression. openpyxl
+    # cannot compute formulas itself, so loading with data_only=True returns
+    # None for unsaved formula cells (the workbook was never opened in Excel).
+    # We must evaluate via our local formula resolver for these sheets.
+    use_formula_eval = sheet_name in {"Financials_Table", "Earnings_Forecast", "Valuations_Table"}
     wb = load_workbook(excel_path, data_only=not use_formula_eval)
     ws = wb[sheet_name]
     cache: dict[tuple[str, str], float] = {}
+
+    def _is_pct_label(label: str) -> bool:
+        ll = label.lower()
+        return ("%" in label) or ("margin" in ll) or ("yield" in ll) or ("rate" in ll) or ("growth" in ll) or ("roe" in ll) or ("roce" in ll)
+
+    def _fmt_pct(val: float) -> str:
+        # Excel stores percentages as fractions (0.10 = 10%). But some inputs
+        # already arrive in percentage scale (15.0 meaning 15%). If the
+        # magnitude is plainly > 1.5, the value is already in % units.
+        if abs(val) > 1.5:
+            return f"{val:.1f}%"
+        return f"{val * 100:.1f}%"
 
     def display_value(r: int, c: int) -> str:
         cell = ws.cell(r, c)
@@ -2170,8 +2858,8 @@ def _render_formula_sheet_table(
             val = _evaluate_excel_formula_cell(wb, sheet_name, cell.coordinate, cache)
             if val is None:
                 return ""
-            if "%" in label or "margin" in label.lower() or "yield" in label.lower() or "rate" in label.lower():
-                return f"{float(val) * 100:.1f}%"
+            if _is_pct_label(label):
+                return _fmt_pct(float(val))
             if "(x)" in label.lower():
                 return f"{float(val):.1f}x"
             if abs(float(val)) >= 100:
@@ -2185,8 +2873,8 @@ def _render_formula_sheet_table(
             val = float(raw)
         except (TypeError, ValueError):
             return str(raw)
-        if "%" in label or "margin" in label.lower() or "yield" in label.lower() or "rate" in label.lower():
-            return f"{float(val) * 100:.1f}%"
+        if _is_pct_label(label):
+            return _fmt_pct(float(val))
         if "(x)" in label.lower():
             return f"{float(val):.1f}x"
         if abs(float(val)) >= 100:
@@ -2211,14 +2899,22 @@ def _render_formula_sheet_table(
             styles.append("data")
         rows.append(row)
 
-    fig_h = max(5.5, 0.22 * len(rows))
-    fig, ax = plt.subplots(figsize=(11.2, fig_h), facecolor="white")
+    fig_width = 11.2
+    # Slightly wider Particulars column (0.18 → 0.20) to host long section
+    # labels like "PE SENSITIVITY (Target Price)" — they were overflowing the
+    # cell on slide 15. Remaining columns shrink a hair from 0.082 → 0.080.
+    col_widths = [0.20] + [0.080] * (max_col - 1)
+    # fontsize 7.6 renders at ~12 chars/inch. Use 10 for a safety margin so
+    # long labels in the leftmost column wrap before they hit the cell edge.
+    rows, line_counts = _wrap_table_cells(rows, col_widths, fig_width_inches=fig_width, chars_per_inch=10.0)
+    # Cap fig_h growth to keep aspect close to the slide placeholder.
+    fig_h = min(7.5, max(5.5, 0.12 * sum(line_counts) + 0.4))
+    fig, ax = plt.subplots(figsize=(fig_width, fig_h), facecolor="white")
     ax.axis("off")
-    col_widths = [0.18] + [0.082] * (max_col - 1)
     table = ax.table(cellText=rows, cellLoc="center", colWidths=col_widths, loc="upper left", bbox=[0, 0, 1, 1])
     table.auto_set_font_size(False)
     table.set_fontsize(7.6)
-    table.scale(1, 1.12)
+    _apply_row_line_heights(table, line_counts)
 
     for (r, c), cell in table.get_celld().items():
         cell.set_edgecolor("#D5DCE8")
@@ -2368,15 +3064,131 @@ def inject_key_risks_slide(pptx_path: str, *, excel_path: str | None = None) -> 
     return 1
 
 
-def _insert_image_into_shape(slide, shape, img_bytes: bytes) -> None:
-    """Replace a placeholder shape with a generated chart image at the same bounds."""
+def _render_probability_weight_table(fin_model: dict) -> bytes | None:
+    try:
+        import matplotlib
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+    except Exception as exc:
+        logger.warning("matplotlib unavailable for probability table render: %s", exc)
+        return None
+
+    scenarios = fin_model.get("scenarios") or []
+    rows: list[list[str]] = [["Scenario", "Target Price", "Probability", "Weighted TP"]]
+    weighted_total = 0.0
+    added = 0
+
+    for scenario in scenarios:
+        name = str(scenario.get("name", "")).strip().title()
+        tp = _parse_number(scenario.get("target_price") or "") or 0.0
+        prob = _parse_number(scenario.get("probability_pct") or "") or 0.0
+        weighted = round(tp * prob / 100.0, 1)
+        weighted_total += weighted
+        rows.append([name or "-", f"{tp:.1f}", f"{prob:.0f}%", f"{weighted:.1f}"])
+        added += 1
+
+    if not added:
+        return None
+
+    rows.append(["Total", "", "100%", f"{weighted_total:.1f}"])
+
+    fig, ax = plt.subplots(figsize=(11.2, 2.1), facecolor="white")
+    ax.axis("off")
+    table = ax.table(
+        cellText=rows,
+        cellLoc="center",
+        colWidths=[0.30, 0.22, 0.20, 0.28],
+        loc="upper left",
+        bbox=[0, 0, 1, 1],
+    )
+    table.auto_set_font_size(False)
+    table.set_fontsize(10.5)
+    table.scale(1, 1.35)
+
+    for (r, c), cell in table.get_celld().items():
+        cell.set_edgecolor("#D5DCE8")
+        cell.set_linewidth(0.8)
+        if r == 0:
+            cell.set_facecolor("#1F4690")
+            cell.get_text().set_color("white")
+            cell.get_text().set_fontweight("bold")
+        elif r == len(rows) - 1:
+            cell.set_facecolor("#E8EEF9")
+            cell.get_text().set_fontweight("bold")
+        else:
+            cell.set_facecolor("white")
+
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", dpi=220, bbox_inches="tight", pad_inches=0.02, facecolor=fig.get_facecolor())
+    plt.close(fig)
+    return buf.getvalue()
+
+
+def inject_probability_weight_slide(pptx_path: str, fin_model: dict) -> int:
+    img = _render_probability_weight_table(fin_model)
+    if not img:
+        return 0
+    prs = Presentation(pptx_path)
+    if len(prs.slides) < 17:
+        return 0
+    slide = prs.slides[16]
+    target = None
+    for shape in slide.shapes:
+        if hasattr(shape, "text_frame") and shape.text_frame:
+            text = shape.text_frame.text.strip()
+            if text in {
+                "{{probability_weight_table}}",
+                "Probability-weighted scenario analysis — see Excel model for details.",
+            }:
+                target = shape
+                break
+    if target is None:
+        return 0
+    _insert_image_into_shape(slide, target, img)
+    prs.save(pptx_path)
+    return 1
+
+
+def _insert_image_into_shape(slide, shape, img_bytes: bytes, *, preserve_aspect: bool = False) -> None:
+    """Replace a placeholder shape with a generated image at the same bounds.
+
+    By default the picture is stretched to fill the placeholder (matches the
+    template designer's intent for charts/tables sized to fit their box).
+
+    When ``preserve_aspect=True`` we measure the actual image dimensions and
+    fit it inside the placeholder while keeping its native aspect ratio,
+    centring it within the placeholder bounds. Used for pie charts whose
+    placeholders aren't square — without this, the circle gets stretched to
+    fill the rectangle and renders as an oval.
+    """
     import io as _io
     left, top, width, height = shape.left, shape.top, shape.width, shape.height
-    # Remove the original shape from the slide XML
     sp_elem = shape._element
     sp_elem.getparent().remove(sp_elem)
-    # Insert picture at same position/size
-    slide.shapes.add_picture(_io.BytesIO(img_bytes), left, top, width, height)
+
+    new_left, new_top, new_width, new_height = left, top, width, height
+    if preserve_aspect:
+        try:
+            from PIL import Image as _Image
+            img = _Image.open(_io.BytesIO(img_bytes))
+            iw, ih = img.size
+            if iw > 0 and ih > 0 and width > 0 and height > 0:
+                img_aspect = iw / ih
+                box_aspect = width / height
+                if img_aspect > box_aspect:
+                    # Image is wider than box — fit width, shrink height, centre vertically.
+                    new_width = width
+                    new_height = int(width / img_aspect)
+                    new_top = top + (height - new_height) // 2
+                else:
+                    # Image is taller — fit height, shrink width, centre horizontally.
+                    new_height = height
+                    new_width = int(height * img_aspect)
+                    new_left = left + (width - new_width) // 2
+        except Exception as exc:
+            logger.debug("preserve_aspect fallback (PIL unavailable or read failed): %s", exc)
+
+    slide.shapes.add_picture(_io.BytesIO(img_bytes), new_left, new_top, new_width, new_height)
 
 
 def _shape_is_excel_placeholder(shape) -> bool:
@@ -2510,6 +3322,26 @@ def _evaluate_excel_formula_cell(wb, ws_name: str, cell_ref: str, cache: dict[tu
         cache[key] = float(total)
         return cache[key]
 
+    # IFERROR(formula, fallback) — return formula's evaluated value, else fallback.
+    # The financial model uses IFERROR liberally on division-style formulas so
+    # this must be handled or every margin / multiple cell silently returns 0.
+    if expr.upper().startswith("IFERROR(") and expr.endswith(")"):
+        args = _split_excel_args(expr[8:-1])
+        if len(args) == 2:
+            inner_expr, fallback_expr = args
+            try:
+                inner_eval = ref_re.sub(repl, inner_expr)
+                cache[key] = float(eval(inner_eval, {"__builtins__": {}}, {}))
+                return cache[key]
+            except Exception:
+                # Fallback: try numeric coerce; if literal like "-" or "n/a", return 0.
+                fallback_clean = fallback_expr.strip().strip('"').strip("'")
+                try:
+                    cache[key] = float(fallback_clean)
+                except (TypeError, ValueError):
+                    cache[key] = 0.0
+                return cache[key]
+
     if expr.upper().startswith("IF(") and expr.endswith(")"):
         args = _split_excel_args(expr[3:-1])
         if len(args) == 3:
@@ -2560,12 +3392,43 @@ def _extract_financial_chart_history_from_excel(excel_path: str, cmp_value: floa
     ebitda_vals = row_values(12)
     pat_vals = row_values(20)
     eps_vals = row_values(23)
+
+    # P/E: prefer the pre-computed value from the Valuations_Table sheet — its
+    # EPS is derived from the valuation model and stays smooth, whereas P&L row
+    # 23 EPS spikes anomalously (e.g. Gravita FY26 = 4.13) and turns CMP/EPS
+    # into a noisy 5-digit ratio. Fall back to CMP/EPS only if the sheet or
+    # row is missing.
     pe_vals: list[float] = []
-    for eps in eps_vals:
-        if cmp_value and eps:
-            pe_vals.append(round(cmp_value / eps, 1))
-        else:
-            pe_vals.append(0.0)
+    if "Valuations_Table" in wb.sheetnames:
+        try:
+            vt = wb["Valuations_Table"]
+            # Header row (4) labels each column with a period. Map by period.
+            vt_headers = {
+                str(vt.cell(4, c).value).strip(): c
+                for c in range(2, vt.max_column + 1)
+                if vt.cell(4, c).value
+            }
+            pe_row = None
+            for r in range(1, vt.max_row + 1):
+                label = str(vt.cell(r, 1).value or "").strip().lower()
+                if label.startswith("p/e"):
+                    pe_row = r
+                    break
+            if pe_row:
+                for period in actual_periods:
+                    col = vt_headers.get(period)
+                    val = _evaluate_excel_formula_cell(wb, "Valuations_Table", vt.cell(pe_row, col).coordinate, cache) if col else None
+                    pe_vals.append(round(float(val), 1) if val else 0.0)
+        except Exception as exc:
+            logger.debug("Valuations_Table P/E read failed: %s", exc)
+            pe_vals = []
+    if not pe_vals or not any(pe_vals):
+        pe_vals = []
+        for eps in eps_vals:
+            if cmp_value and eps:
+                pe_vals.append(round(cmp_value / eps, 1))
+            else:
+                pe_vals.append(0.0)
 
     return {
         "Revenue": (actual_periods, revenue_vals),
@@ -2820,21 +3683,26 @@ def _render_financial_summary_dashboard(excel_path: str, company_name: str) -> b
             rows.append([label, *[_fmt_summary_cell(label, v) for v in values]])
             row_styles.append("data")
 
-    n_rows = len(rows)
-    fig_h = max(6.2, 0.24 * n_rows + 0.9)
-    fig, ax = plt.subplots(figsize=(6.0, fig_h), facecolor="white")
+    fig_width = 6.0
+    col_widths = [0.34] + [0.132] * len(headers)
+    rows, line_counts = _wrap_table_cells(rows, col_widths, fig_width_inches=fig_width, chars_per_inch=13.0)
+    # The slide-1 summary placeholder is tall (~6×9), so we allow more growth
+    # here than the wide tables on slides 7/14/15/18 — but still cap it to
+    # avoid python-pptx vertical-squashing.
+    fig_h = min(10.5, max(6.2, 0.16 * sum(line_counts) + 0.9))
+    fig, ax = plt.subplots(figsize=(fig_width, fig_h), facecolor="white")
     ax.axis("off")
 
     table = ax.table(
         cellText=rows,
         cellLoc="center",
-        colWidths=[0.34] + [0.132] * len(headers),
+        colWidths=col_widths,
         loc="upper left",
         bbox=[0, 0, 1, 1],
     )
     table.auto_set_font_size(False)
     table.set_fontsize(7.2)
-    table.scale(1, 1.18)
+    _apply_row_line_heights(table, line_counts)
 
     for (r, c), cell in table.get_celld().items():
         cell.set_edgecolor("#D5DCE8")
@@ -2913,7 +3781,8 @@ def _render_story_chart_collage(
         logger.warning("matplotlib unavailable for story-chart collage: %s", exc)
         return None
 
-    fig, axes = plt.subplots(2, 2, figsize=(10.6, 5.8), facecolor="white")
+    # 3 columns × 2 rows = 6 charts per slide.
+    fig, axes = plt.subplots(2, 3, figsize=(15.0, 6.6), facecolor="white")
     fig.suptitle(
         f"{company_name} — {'Operational Charts' if operational else 'Financial Charts'}",
         fontsize=14,
@@ -2928,50 +3797,211 @@ def _render_story_chart_collage(
         for spine in ax.spines.values():
             spine.set_visible(False)
 
+    def _pad_top(ax, vals):
+        """Push the upper y-limit ~10% above the max value so plotted lines
+        don't kiss the top edge of the chart area (a common 'line getting cut'
+        complaint when the data peaks right at axis_max)."""
+        try:
+            mx = max(v for v in vals if v is not None)
+        except (TypeError, ValueError):
+            return
+        if mx <= 0:
+            return
+        ax.set_ylim(bottom=0, top=mx * 1.12)
+
+    def _style_axes(ax, title: str, xlabel: str = "Fiscal Year", ylabel: str = "") -> None:
+        ax.set_title(title, fontsize=10, color="#1F4690", fontweight="bold")
+        ax.set_xlabel(xlabel, fontsize=8, color="#5C6B82")
+        if ylabel:
+            ax.set_ylabel(ylabel, fontsize=8, color="#5C6B82")
+        ax.tick_params(axis="x", labelsize=8)
+        ax.tick_params(axis="y", labelsize=8)
+
+    def _empty(ax, title: str, msg: str = "n/a") -> None:
+        _style_axes(ax, title)
+        ax.text(0.5, 0.5, msg, ha="center", va="center", fontsize=10,
+                color="#9CA3AF", transform=ax.transAxes)
+        ax.set_xticks([])
+        ax.set_yticks([])
+
     if operational:
         op = fin_model.get("operational") or {}
-        util_years, util = _last_five_actual_operational(op, "capacity_utilisation_pct")
+
+        # Shared palette for stacked/grouped charts.
+        _PALETTE = ["#1F4690", "#FFA500", "#3A5BA0", "#16A34A", "#9CA3AF", "#7C3AED"]
+
+        def _render_pie(ax, labels, sizes, title):
+            """Donut with internal % labels and a legend BELOW the chart, so long
+            category names never overlap the wedges. labels=None on ax.pie() prevents
+            python-matplotlib from rendering them on the slices."""
+            wedges, _txts, _pct = ax.pie(
+                sizes,
+                labels=None,
+                autopct="%1.0f%%",
+                pctdistance=0.7,
+                colors=_PALETTE[:len(sizes)],
+                textprops={"fontsize": 7, "color": "white", "fontweight": "bold"},
+                wedgeprops={"width": 0.35, "edgecolor": "white"},
+                startangle=90,
+            )
+            ax.set_title(title, fontsize=10, color="#1F4690", fontweight="bold")
+            ax.legend(
+                wedges,
+                labels,
+                loc="lower center",
+                bbox_to_anchor=(0.5, -0.18),
+                ncol=2,
+                fontsize=7,
+                frameon=False,
+            )
+
+        # ── 1. Capacity (MTPA / kT) ───────────────────────────────────────
+        cap_years, cap_vals = _last_five_actual_operational(op, "capacity_mtpa")
+        if not cap_years:
+            cap_years, cap_vals = _last_five_actual_operational(op, "capacity_kt")
+        if not cap_years:
+            seg_years_all, vol_segs_all = _last_five_actual_segment_series(op)
+            if seg_years_all and vol_segs_all:
+                totals = [0.0] * len(seg_years_all)
+                for vals in vol_segs_all.values():
+                    for i, v in enumerate(vals[:len(totals)]):
+                        totals[i] += v
+                cap_years, cap_vals = seg_years_all, [t / 1000.0 for t in totals]
+
+        if cap_years and cap_vals:
+            axes[0, 0].bar(cap_years, cap_vals, color="#1F4690")
+            _style_axes(axes[0, 0], "Capacity (kT)", ylabel="kT")
+            _pad_top(axes[0, 0], cap_vals)
+        else:
+            _empty(axes[0, 0], "Capacity")
+
+        # ── 2. Volume Sold (MT) — total across segments ────────────────────
+        seg_years, volume_segments = _last_five_actual_segment_series(op)
+        if seg_years and volume_segments:
+            totals = [0.0] * len(seg_years)
+            for vals in volume_segments.values():
+                for i, v in enumerate(vals[:len(totals)]):
+                    totals[i] += v
+            axes[0, 1].bar(seg_years, totals, color="#FFA500")
+            _style_axes(axes[0, 1], "Volume Sold (MT)", ylabel="MT")
+            _pad_top(axes[0, 1], totals)
+        else:
+            _empty(axes[0, 1], "Volume Sold")
+
+        # ── 3. Volume by Metal ─────────────────────────────────────────────
+        # Prefer the time-series segments shape (volume_segments dict over years).
+        # Fall back to a single-year metal_volume_pct dict if that's all we have.
+        if seg_years and volume_segments:
+            bottoms = [0.0] * len(seg_years)
+            for idx, (name, vals) in enumerate(list(volume_segments.items())[:5]):
+                axes[0, 2].bar(seg_years, vals[:len(seg_years)], bottom=bottoms,
+                               color=_PALETTE[idx % len(_PALETTE)], label=name)
+                bottoms = [b + v for b, v in zip(bottoms, vals[:len(bottoms)])]
+            _style_axes(axes[0, 2], "Volume by Metal (MT)", ylabel="MT")
+            _pad_top(axes[0, 2], bottoms)
+            axes[0, 2].legend(fontsize=7, frameon=False, loc="upper left")
+        else:
+            # Single-year dict fallback — render as donut.
+            metal_mix = op.get("volume_by_metal") or op.get("metal_volume_pct") or {}
+            if isinstance(metal_mix, dict) and metal_mix:
+                labels_v = list(metal_mix.keys())
+                sizes_v = []
+                for v in metal_mix.values():
+                    try:
+                        fv = float(v)
+                    except (TypeError, ValueError):
+                        fv = 0.0
+                    if fv <= 1.0:
+                        fv *= 100.0
+                    sizes_v.append(fv)
+                if sum(sizes_v) > 0:
+                    _render_pie(axes[0, 2], labels_v, sizes_v, "Volume by Metal")
+                else:
+                    _empty(axes[0, 2], "Volume by Metal")
+            else:
+                _empty(axes[0, 2], "Volume by Metal")
+
+        # ── 4. Geographic Revenue Mix (India vs International) ─────────────
+        # Prefer time-series if available, else donut of geography_mix_pct.
+        geo_series = op.get("revenue_by_geography") or op.get("geographic_mix_series") or {}
+        rendered_geo = False
+        if isinstance(geo_series, dict) and geo_series and all(isinstance(v, list) for v in geo_series.values()):
+            geo_year_axis = [str(y).strip() for y in (op.get("years") or [])]
+            actual_idx = [i for i, y in enumerate(geo_year_axis) if "E" not in y.upper()][-5:]
+            geo_year_axis = [geo_year_axis[i] for i in actual_idx]
+            if geo_year_axis:
+                bottoms = [0.0] * len(geo_year_axis)
+                for idx, (name, vals) in enumerate(list(geo_series.items())[:5]):
+                    aligned = [float(vals[i]) if i < len(vals) and vals[i] is not None else 0.0 for i in actual_idx]
+                    axes[1, 0].bar(geo_year_axis, aligned, bottom=bottoms,
+                                   color=_PALETTE[idx % len(_PALETTE)], label=name)
+                    bottoms = [b + a for b, a in zip(bottoms, aligned)]
+                _style_axes(axes[1, 0], "India vs International", ylabel="%")
+                _pad_top(axes[1, 0], bottoms)
+                axes[1, 0].legend(fontsize=7, frameon=False, loc="upper left")
+                rendered_geo = True
+        if not rendered_geo:
+            geo_mix = op.get("geography_mix_pct") or op.get("geographic_mix") or {}
+            if isinstance(geo_mix, dict) and geo_mix:
+                # Collapse to India vs International when fine-grained regions are present.
+                india_share = 0.0
+                intl_share = 0.0
+                for k, v in geo_mix.items():
+                    try:
+                        fv = float(v)
+                    except (TypeError, ValueError):
+                        continue
+                    if fv <= 1.0:
+                        fv *= 100.0
+                    if "india" in str(k).lower():
+                        india_share += fv
+                    else:
+                        intl_share += fv
+                if india_share + intl_share > 0:
+                    _render_pie(axes[1, 0], ["India", "International"], [india_share, intl_share],
+                                "India vs International")
+                else:
+                    _empty(axes[1, 0], "India vs International")
+            else:
+                _empty(axes[1, 0], "India vs International")
+
+        # ── 5. Plants (India vs Overseas — grouped bars) ───────────────────
         plant_years, india = _last_five_actual_operational(op, "plants_india")
         _, overseas = _last_five_actual_operational(op, "plants_overseas")
-        country_years, countries = _last_five_actual_operational(op, "countries_of_operation")
-        seg_years, volume_segments = _last_five_actual_segment_series(op)
-        segment_names = list(volume_segments.keys())[:3]
-
-        if util_years and util:
-            axes[0, 0].plot(util_years, util, color="#1F4690", linewidth=2.5, marker="o")
-            axes[0, 0].set_title("Capacity Utilisation %", fontsize=10, color="#1F4690", fontweight="bold")
-            axes[0, 0].tick_params(axis="x", labelsize=8)
-            axes[0, 0].tick_params(axis="y", labelsize=8)
-
         if plant_years and (india or overseas):
-            axes[0, 1].bar(plant_years, india, color="#1F4690", label="India")
-            axes[0, 1].bar(plant_years, overseas, bottom=india, color="#FFA500", label="Overseas")
-            axes[0, 1].set_title("Plant Network", fontsize=10, color="#1F4690", fontweight="bold")
-            axes[0, 1].legend(fontsize=7, frameon=False, loc="upper left")
-            axes[0, 1].tick_params(axis="x", labelsize=8)
-            axes[0, 1].tick_params(axis="y", labelsize=8)
-
-        if country_years and countries:
-            axes[1, 0].bar(country_years, countries, color="#3A5BA0")
-            axes[1, 0].set_title("Countries of Operation", fontsize=10, color="#1F4690", fontweight="bold")
-            axes[1, 0].tick_params(axis="x", labelsize=8)
-            axes[1, 0].tick_params(axis="y", labelsize=8)
-
-        if seg_years and segment_names:
-            for idx, seg in enumerate(segment_names):
-                vals = volume_segments.get(seg) or []
-                if vals:
-                    axes[1, 1].plot(seg_years, vals, linewidth=2.2, marker="o", label=seg)
-            axes[1, 1].set_title("Volume by Segment (MT)", fontsize=10, color="#1F4690", fontweight="bold")
+            import numpy as _np
+            india = india or [0.0] * len(plant_years)
+            overseas = overseas or [0.0] * len(plant_years)
+            x = _np.arange(len(plant_years))
+            w = 0.38
+            axes[1, 1].bar(x - w / 2, india,    width=w, color="#1F4690", label="India")
+            axes[1, 1].bar(x + w / 2, overseas, width=w, color="#FFA500", label="Overseas")
+            axes[1, 1].set_xticks(x)
+            axes[1, 1].set_xticklabels(plant_years)
+            _style_axes(axes[1, 1], "Plants", ylabel="Count")
+            _pad_top(axes[1, 1], [max(a or 0, b or 0) for a, b in zip(india, overseas)])
             axes[1, 1].legend(fontsize=7, frameon=False, loc="upper left")
-            axes[1, 1].tick_params(axis="x", labelsize=8)
-            axes[1, 1].tick_params(axis="y", labelsize=8)
+        else:
+            _empty(axes[1, 1], "Plants")
+
+        # ── 6. Capacity Utilization % ──────────────────────────────────────
+        util_years, util_vals = _last_five_actual_operational(op, "capacity_utilisation_pct")
+        if not util_years:
+            util_years, util_vals = _last_five_actual_operational(op, "capacity_utilization_pct")
+        if not util_years:
+            util_years, util_vals = _last_five_actual_operational(op, "utilization_pct")
+        if util_years and util_vals:
+            axes[1, 2].plot(util_years, util_vals, color="#1F4690", linewidth=2.5, marker="o")
+            _style_axes(axes[1, 2], "Capacity Utilization (%)", ylabel="%")
+            _pad_top(axes[1, 2], util_vals)
+        else:
+            _empty(axes[1, 2], "Capacity Utilization")
+
     else:
         financial_history = financial_history or {}
         rev_years, rev_vals = financial_history.get("Revenue", ([], []))
         ebitda_years, ebitda_vals = financial_history.get("EBITDA", ([], []))
         pat_years, pat_vals = financial_history.get("PAT", ([], []))
-        pe_years, pe_vals = financial_history.get("P/E", ([], []))
 
         if not rev_years:
             rev_years, rev_vals = _series_values(fin_model, "Revenue")
@@ -2982,35 +4012,148 @@ def _render_story_chart_collage(
         if not pat_years:
             pat_years, pat_vals = _series_values(fin_model, "PAT")
             pat_years, pat_vals = _last_five_actual_periods(pat_years, pat_vals)
-        if not pe_years:
-            pe_years, pe_vals = _series_values(fin_model, "P/E")
-            pe_years, pe_vals = _last_five_actual_periods(pe_years, pe_vals)
 
+        # historical_ratios live on the raw JSON, not the mapped series — sniff
+        # from a few well-known shapes that _enrich and _build leave behind.
+        raw_hist = fin_model.get("historical_ratios") or {}
+        hr_years = [str(y).strip() for y in (raw_hist.get("years") or [])]
+
+        def _hr(key: str) -> tuple[list[str], list[float]]:
+            vals = raw_hist.get(key)
+            if not vals or not hr_years:
+                return [], []
+            pairs = [(y, v) for y, v in zip(hr_years, vals) if v is not None and "E" not in y.upper()]
+            pairs = pairs[-5:]
+            return [p for p, _ in pairs], [float(v) for _, v in pairs]
+
+        # 1. Revenue with 5-yr CAGR in title.
+        cagr_suffix = ""
+        if len(rev_vals) >= 2 and rev_vals[0] and rev_vals[-1]:
+            try:
+                n = len(rev_vals) - 1
+                cagr = ((rev_vals[-1] / rev_vals[0]) ** (1.0 / n) - 1.0) * 100.0
+                cagr_suffix = f"  ({n}Y CAGR {cagr:.1f}%)"
+            except (ZeroDivisionError, ValueError):
+                pass
         if rev_years and rev_vals:
             axes[0, 0].bar(rev_years, rev_vals, color="#1F4690")
-            axes[0, 0].set_title("Revenue (₹ Cr)", fontsize=10, color="#1F4690", fontweight="bold")
-            axes[0, 0].tick_params(axis="x", labelsize=8)
-            axes[0, 0].tick_params(axis="y", labelsize=8)
+            _style_axes(axes[0, 0], f"Revenue (₹ Cr){cagr_suffix}", ylabel="₹ Cr")
+            _pad_top(axes[0, 0], rev_vals)
+        else:
+            _empty(axes[0, 0], "Revenue")
 
+        # 2. EBITDA bars + margin % line overlay.
+        ebitda_margin_years, ebitda_margin = _hr("ebitda_margin_pct")
         if ebitda_years and ebitda_vals:
-            axes[0, 1].plot(ebitda_years, ebitda_vals, color="#FFA500", linewidth=2.5, marker="o")
-            axes[0, 1].set_title("EBITDA (₹ Cr)", fontsize=10, color="#1F4690", fontweight="bold")
-            axes[0, 1].tick_params(axis="x", labelsize=8)
-            axes[0, 1].tick_params(axis="y", labelsize=8)
+            axes[0, 1].bar(ebitda_years, ebitda_vals, color="#FFA500")
+            _style_axes(axes[0, 1], "EBITDA (₹ Cr)", ylabel="₹ Cr")
+            _pad_top(axes[0, 1], ebitda_vals)
+            if ebitda_margin_years and ebitda_margin:
+                ax2 = axes[0, 1].twinx()
+                # Align to displayed x-axis
+                aligned = {y: m for y, m in zip(ebitda_margin_years, ebitda_margin)}
+                m_y = [y for y in ebitda_years if y in aligned]
+                m_v = [aligned[y] for y in m_y]
+                if m_y:
+                    ax2.plot(m_y, m_v, color="#1F4690", linewidth=2.0, marker="o", label="Margin %")
+                    ax2.set_ylabel("Margin %", fontsize=8, color="#1F4690")
+                    ax2.tick_params(axis="y", labelsize=8, colors="#1F4690")
+                    for spine in ax2.spines.values():
+                        spine.set_visible(False)
+        else:
+            _empty(axes[0, 1], "EBITDA")
 
+        # 3. PAT bars + PAT margin % line overlay.
+        pat_margin_years, pat_margin = _hr("pat_margin_pct")
         if pat_years and pat_vals:
-            axes[1, 0].bar(pat_years, pat_vals, color="#3A5BA0")
-            axes[1, 0].set_title("PAT (₹ Cr)", fontsize=10, color="#1F4690", fontweight="bold")
-            axes[1, 0].tick_params(axis="x", labelsize=8)
-            axes[1, 0].tick_params(axis="y", labelsize=8)
+            axes[0, 2].bar(pat_years, pat_vals, color="#3A5BA0")
+            _style_axes(axes[0, 2], "PAT (₹ Cr)", ylabel="₹ Cr")
+            _pad_top(axes[0, 2], pat_vals)
+            if pat_margin_years and pat_margin:
+                ax2 = axes[0, 2].twinx()
+                aligned = {y: m for y, m in zip(pat_margin_years, pat_margin)}
+                m_y = [y for y in pat_years if y in aligned]
+                m_v = [aligned[y] for y in m_y]
+                if m_y:
+                    ax2.plot(m_y, m_v, color="#FFA500", linewidth=2.0, marker="o", label="Margin %")
+                    ax2.set_ylabel("Margin %", fontsize=8, color="#FFA500")
+                    ax2.tick_params(axis="y", labelsize=8, colors="#FFA500")
+                    for spine in ax2.spines.values():
+                        spine.set_visible(False)
+        else:
+            _empty(axes[0, 2], "PAT")
 
-        if pe_years and pe_vals:
-            axes[1, 1].plot(pe_years, pe_vals, color="#16A34A", linewidth=2.5, marker="o")
-            axes[1, 1].set_title("P/E (x)", fontsize=10, color="#1F4690", fontweight="bold")
-            axes[1, 1].tick_params(axis="x", labelsize=8)
-            axes[1, 1].tick_params(axis="y", labelsize=8)
+        # 4. Return Ratios — ROE & ROCE dual line.
+        roe_years, roe_vals = _hr("roe_pct")
+        roce_years, roce_vals = _hr("roce_pct")
+        if (roe_years and roe_vals) or (roce_years and roce_vals):
+            all_vals = []
+            if roe_years and roe_vals:
+                axes[1, 0].plot(roe_years, roe_vals, color="#1F4690", linewidth=2.5, marker="o", label="ROE %")
+                all_vals.extend(roe_vals)
+            if roce_years and roce_vals:
+                axes[1, 0].plot(roce_years, roce_vals, color="#FFA500", linewidth=2.5, marker="s", label="ROCE %")
+                all_vals.extend(roce_vals)
+            _style_axes(axes[1, 0], "Return Ratios (%)", ylabel="%")
+            if all_vals:
+                _pad_top(axes[1, 0], all_vals)
+            axes[1, 0].legend(fontsize=7, frameon=False, loc="upper left")
+        else:
+            _empty(axes[1, 0], "Return Ratios")
 
-    fig.tight_layout(rect=[0, 0, 1, 0.95], pad=1.2)
+        # 5. Working Capital Days — receivable + inventory − payable.
+        rec_years, rec_vals = _hr("receivable_days")
+        if not rec_years:
+            rec_years, rec_vals = _hr("debtor_days")
+        inv_years, inv_vals = _hr("inventory_days")
+        pay_years, pay_vals = _hr("payable_days")
+        if not pay_years:
+            pay_years, pay_vals = _hr("creditor_days")
+        # Choose the longest year list as anchor.
+        anchor_years = rec_years or inv_years or pay_years
+        if anchor_years:
+            def _aligned(yrs, vals):
+                m = {y: v for y, v in zip(yrs, vals)}
+                return [m.get(y, 0.0) for y in anchor_years]
+            r = _aligned(rec_years, rec_vals)
+            i = _aligned(inv_years, inv_vals)
+            p = _aligned(pay_years, pay_vals)
+            wc = [a + b - c for a, b, c in zip(r, i, p)]
+            axes[1, 1].bar(anchor_years, wc, color="#16A34A")
+            _style_axes(axes[1, 1], "Working Capital Days", ylabel="Days")
+            _pad_top(axes[1, 1], wc)
+        else:
+            _empty(axes[1, 1], "Working Capital Days")
+
+        # 6. P/E & EV/EBITDA — dual line, fall back to single-series with renamed title.
+        pe_years, pe_vals = _hr("pe")
+        if not pe_years:
+            pe_years, pe_vals = _hr("pe_ratio")
+        ev_years, ev_vals = _hr("ev_ebitda")
+        title6 = "P/E & EV/EBITDA (x)"
+        if (pe_years and pe_vals) or (ev_years and ev_vals):
+            all_vals = []
+            if pe_years and pe_vals:
+                axes[1, 2].plot(pe_years, pe_vals, color="#1F4690", linewidth=2.5, marker="o", label="P/E")
+                all_vals.extend(pe_vals)
+                if not (ev_years and ev_vals):
+                    title6 = "P/E (x)"
+            if ev_years and ev_vals:
+                axes[1, 2].plot(ev_years, ev_vals, color="#FFA500", linewidth=2.5, marker="s", label="EV/EBITDA")
+                all_vals.extend(ev_vals)
+                if not (pe_years and pe_vals):
+                    title6 = "EV/EBITDA (x)"
+            _style_axes(axes[1, 2], title6, ylabel="x")
+            if all_vals:
+                _pad_top(axes[1, 2], all_vals)
+            axes[1, 2].legend(fontsize=7, frameon=False, loc="upper left")
+        else:
+            _empty(axes[1, 2], "P/E & EV/EBITDA")
+
+    fig.tight_layout(rect=[0, 0, 1, 0.95], pad=1.0)
+    # Add extra room below for the pie/donut legends and a hair more between
+    # the two rows so the operational pies don't get clipped.
+    fig.subplots_adjust(bottom=0.10, hspace=0.55)
     buf = io.BytesIO()
     fig.savefig(buf, format="png", dpi=200, bbox_inches="tight", facecolor=fig.get_facecolor())
     plt.close(fig)
@@ -3035,23 +4178,23 @@ def inject_story_chart_slides(
 
     prs = Presentation(pptx_path)
     replacements = {
-        2: ("{{financial_model_from_excel}}", _render_story_chart_collage(
+        2: ({"{{financial_charts}}", "{{financial_model_from_excel}}", "Financial model charts — see Excel model for details."}, _render_story_chart_collage(
             fin_model,
             company_name,
             operational=False,
             financial_history=financial_history,
         )),
-        3: ("{{financial_model_from_excel_operational_sheet}}", _render_story_chart_collage(fin_model, company_name, operational=True)),
+        3: ({"{{operational_charts}}", "{{financial_model_from_excel_operational_sheet}}", "Operational data — see Excel model for details."}, _render_story_chart_collage(fin_model, company_name, operational=True)),
     }
     injected = 0
 
-    for slide_idx, (token, img_bytes) in replacements.items():
+    for slide_idx, (tokens, img_bytes) in replacements.items():
         if not img_bytes or slide_idx > len(prs.slides):
             continue
         slide = prs.slides[slide_idx - 1]
         target_shape = None
         for shape in slide.shapes:
-            if hasattr(shape, "text_frame") and shape.text_frame and shape.text_frame.text.strip() == token:
+            if hasattr(shape, "text_frame") and shape.text_frame and shape.text_frame.text.strip() in tokens:
                 target_shape = shape
                 break
         if target_shape is None:
@@ -3115,9 +4258,21 @@ def fill_master_template(
     """
     prs = Presentation(template_path)
 
+    # Stale literal strings baked into the master template that must be rewritten
+    # to the current company. These are not {{placeholder}} tokens, so the
+    # token-based replacer skips them; we patch the slide text directly.
+    literal_disclosure_subs: list[tuple[str, str]] = []
+    if company_name:
+        literal_disclosure_subs.append(
+            ("(Premier Energies Ltd.)", f"({company_name})")
+        )
+
     for slide_idx, slide in enumerate(prs.slides, start=1):
         slide_type = _detect_slide_type(slide)
         pptx_chart_data = _build_pptx_chart_data(slide_type, fin_model)
+
+        if slide_idx == 20 and literal_disclosure_subs:
+            _apply_literal_text_subs(slide, literal_disclosure_subs)
 
         if slide_idx == 4:
             _replace_slide4_thesis_shapes(slide, replacements)
@@ -3178,13 +4333,15 @@ def fill_master_template(
             elif hasattr(shape, "text_frame") and shape.text_frame:
                 if slide_idx == 4 and shape.text_frame.text.strip() in {"{{investment_thesis}}", "{{investment_thesis_heading}}"}:
                     continue
-                if slide_idx == 6 and shape.text_frame.text.strip() == "{{COMPANY_TIMELINE}}":
+                if slide_idx == 7 and shape.text_frame.text.strip() in {"{{COMPANY_TIMELINE}}", "{{company_timeline}}"}:
                     continue
                 if slide_idx == 5 and shape.text_frame.text.strip() == "{{COMPANY_OVERVIEW}}":
                     continue
                 if slide_idx == 10 and shape.text_frame.text.strip() in {"{{management_content}}", "{{management_commentry_heading}}"}:
                     continue
                 if slide_idx == 11 and shape.text_frame.text.strip() == "{{indicators}}":
+                    continue
+                if slide_idx == 10 and shape.text_frame.text.strip() == "{{catalyst_timeline_chart}}":
                     continue
                 _replace_text_in_frame(shape.text_frame, replacements)
 
@@ -3212,6 +4369,8 @@ def _cleanup_excel_placeholders(pptx_path: str, replacements: dict) -> int:
     _FALLBACK_MAP: dict[str, str] = {
         "{{financial_model_from_excel}}": "Financial model charts — see Excel model for details.",
         "{{financial_model_from_excel_operational_sheet}}": "Operational data — see Excel model for details.",
+        "{{financial_charts}}": "Financial model charts — see Excel model for details.",
+        "{{operational_charts}}": "Operational data — see Excel model for details.",
         "{{financial_summary_image}}": "Financial summary — see Excel model for details.",
         "{{earnings_forecast_table}}": "Earnings forecast — see Excel model for details.",
         "{{financials_table}}": "Financials — see Excel model for details.",
@@ -3220,10 +4379,16 @@ def _cleanup_excel_placeholders(pptx_path: str, replacements: dict) -> int:
         "{{peer_comparision}}": replacements.get("peer_comparision", "Peer comparison — see Excel model for details."),
         "{{governance_table}}": replacements.get("indicators", "Governance — see Excel model for details."),
         "{{timeline}}": "Timeline — see Excel model for details.",
+        "{{company_timeline}}": "Timeline — see Excel model for details.",
         "{{competitive_chart_1}}": "Competitive positioning chart — see Excel model for details.",
         "{{competitive_chart_2}}": "Competitive positioning chart — see Excel model for details.",
+        "{{peer_comparison_chart_1}}": "Competitive positioning chart — see Excel model for details.",
+        "{{peer_comparison_chart_2}}": "Competitive positioning chart — see Excel model for details.",
         "{{pie_chart_1}}": "Segment breakdown — see Excel model for details.",
         "{{pie_chart_2}}": "Segment breakdown — see Excel model for details.",
+        "{{percentage_revenue_pie_chart}}": "Segment breakdown — see Excel model for details.",
+        "{{percentage_EBIT_pie_chart}}": "Segment breakdown — see Excel model for details.",
+        "{{catalyst_timeline_chart}}": "Catalyst timeline — see Excel model for details.",
         "{{probability_weight_table}}": "Probability-weighted scenario analysis — see Excel model for details.",
     }
 
@@ -3316,6 +4481,36 @@ def generate_pptx_for_report(report_id: str, session_id: str, *, use_mock: bool 
 
         replacements = map_replacements(company, metadata, fin_model, sections)
 
+        # ── PPT copywriting LLM pass output (research_sessions.ppt_content_json) ──
+        # This is the dedicated per-placeholder copy produced by runPptCopywriting()
+        # in the browser before /generate-pptx is called. It supersedes the
+        # heuristic truncate-and-paste values from map_replacements() because it
+        # is the only path that gives each card / panel its own box-budgeted
+        # text. We apply it AFTER map_replacements (so atomic chips like cmp /
+        # target / KPI values still come from metadata) and BEFORE cs_ppt_data
+        # so explicit user UI overrides remain the highest-priority source.
+        ppt_copy = session.get("ppt_content_json")
+        if isinstance(ppt_copy, str):
+            try:
+                ppt_copy = json.loads(ppt_copy)
+            except Exception:
+                ppt_copy = None
+        if isinstance(ppt_copy, dict) and ppt_copy:
+            applied = 0
+            for k, v in ppt_copy.items():
+                if v is None:
+                    continue
+                value = str(v).strip()
+                if not value:
+                    continue
+                replacements[k] = value
+                applied += 1
+            logger.info("Applied %d slide-copy values from ppt_content_json", applied)
+            warnings.append(f"Slide copy fields applied: {applied}")
+        else:
+            logger.info("No ppt_content_json on session; using heuristic copy only")
+            warnings.append("Slide copy fields applied: 0 (run 'Generate slide copy' in the UI for better text)")
+
         # Apply saved PPT placeholder overrides confirmed by the user in the UI
         saved_ppt_raw = report.get("cs_ppt_data") or ""
         if saved_ppt_raw:
@@ -3323,6 +4518,12 @@ def generate_pptx_for_report(report_id: str, session_id: str, *, use_mock: bool 
                 saved_overrides = json.loads(saved_ppt_raw)
                 if isinstance(saved_overrides, dict):
                     replacements.update(saved_overrides)
+                    # Re-normalise bullet placeholders after the override merge
+                    # — overrides from the UI / LLM may bypass map_replacements'
+                    # post-processing.
+                    for _bk in _BULLET_LIST_KEYS:
+                        if _bk in replacements and isinstance(replacements[_bk], str):
+                            replacements[_bk] = _ensure_bullet_lines(replacements[_bk])
                     logger.info("Applied %d saved PPT overrides from cs_ppt_data", len(saved_overrides))
             except Exception as e:
                 logger.warning("Failed to parse cs_ppt_data overrides: %s", e)
@@ -3383,6 +4584,13 @@ def generate_pptx_for_report(report_id: str, session_id: str, *, use_mock: bool 
         )
         if timeline_injections:
             logger.info("Injected %d company timeline visuals", timeline_injections)
+
+        catalyst_timeline_injections = inject_catalyst_timeline_slide(
+            result_pptx_path,
+            excel_path=str(excel_path) if excel_path else None,
+        )
+        if catalyst_timeline_injections:
+            logger.info("Injected %d catalyst timeline visuals", catalyst_timeline_injections)
 
         competitive_injections = inject_competitive_advantage_slide(
             result_pptx_path,
@@ -3451,6 +4659,13 @@ def generate_pptx_for_report(report_id: str, session_id: str, *, use_mock: bool 
         if key_risks_table_injections:
             logger.info("Injected %d key-risks visuals", key_risks_table_injections)
 
+        probability_weight_injections = inject_probability_weight_slide(
+            result_pptx_path,
+            fin_model,
+        )
+        if probability_weight_injections:
+            logger.info("Injected %d probability-weight visuals", probability_weight_injections)
+
         # Inject Excel visuals: COM on Windows, openpyxl+matplotlib everywhere else
         logger.info("Attempting to inject Excel tables/charts into PPTX...")
         injection_count = 0
@@ -3505,6 +4720,7 @@ def generate_pptx_for_report(report_id: str, session_id: str, *, use_mock: bool 
         warnings.append(f"Financial summary slide injection count: {summary_injection_count}")
         warnings.append(f"Company overview pie injection count: {overview_injections}")
         warnings.append(f"Company timeline injection count: {timeline_injections}")
+        warnings.append(f"Catalyst timeline injection count: {catalyst_timeline_injections}")
         warnings.append(f"Competitive advantage injection count: {competitive_injections}")
         warnings.append(f"Peer comparison injection count: {peer_table_injections}")
         warnings.append(f"Governance table injection count: {governance_table_injections}")
@@ -3512,6 +4728,7 @@ def generate_pptx_for_report(report_id: str, session_id: str, *, use_mock: bool 
         warnings.append(f"Financials table injection count: {financials_table_injections}")
         warnings.append(f"Valuations table injection count: {valuations_table_injections}")
         warnings.append(f"Key risks table injection count: {key_risks_table_injections}")
+        warnings.append(f"Probability weight injection count: {probability_weight_injections}")
 
         # Cleanup pass: replace any surviving Excel injection placeholder tokens
         # with text-based fallback content so they don't appear as raw {{...}} text.
@@ -3537,6 +4754,12 @@ def generate_pptx_for_report(report_id: str, session_id: str, *, use_mock: bool 
         )
         if timeline_injections:
             logger.info("Re-injected %d company timeline visuals after cleanup", timeline_injections)
+        catalyst_timeline_injections = inject_catalyst_timeline_slide(
+            result_pptx_path,
+            excel_path=str(excel_path) if excel_path else None,
+        )
+        if catalyst_timeline_injections:
+            logger.info("Re-injected %d catalyst timeline visuals after cleanup", catalyst_timeline_injections)
         governance_table_injections = inject_governance_slide(
             result_pptx_path,
             excel_path=str(excel_path) if excel_path else None,
@@ -3585,6 +4808,12 @@ def generate_pptx_for_report(report_id: str, session_id: str, *, use_mock: bool 
         )
         if key_risks_table_injections:
             logger.info("Re-injected %d key-risks visuals after cleanup", key_risks_table_injections)
+        probability_weight_injections = inject_probability_weight_slide(
+            result_pptx_path,
+            fin_model,
+        )
+        if probability_weight_injections:
+            logger.info("Re-injected %d probability-weight visuals after cleanup", probability_weight_injections)
 
         # Upload artifacts
         ts = int(time.time())

@@ -43,3 +43,11 @@ venv/
 env/
 *.egg-info/
 .pytest_cache/
+.pycache_tmp/
+PPT-generator/**/__pycache__/
+PPT-generator/out/
+PPT-generator/scratch/
+build.log
+.claude/scheduled_tasks.lock
+report_*.pptx
+report_*.pdf

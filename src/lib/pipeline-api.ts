@@ -673,3 +673,44 @@ export async function deletePipelinePrompt(stage: PipelineStage, userEmail: stri
 
   if (error) throw new Error(`Failed to delete pipeline prompt: ${error.message}`);
 }
+
+// ========================
+// PPT copywriting content (per-placeholder JSON)
+// ========================
+
+/** Structured PPT content. Keys are master_template placeholder names. */
+export type PptContent = Record<string, string>;
+
+/**
+ * Persist the structured per-placeholder copy produced by the PPT copywriting
+ * LLM pass. The pptx generator service reads this JSON from research_sessions
+ * and injects values directly into the template, replacing the heuristic
+ * truncate-and-paste path.
+ */
+export async function savePptContent(sessionId: string, content: PptContent): Promise<void> {
+  const { error } = await supabase
+    .from('research_sessions')
+    .update({
+      ppt_content_json: content,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('session_id', sessionId);
+
+  if (error) throw new Error(`Failed to save PPT content: ${error.message}`);
+}
+
+/**
+ * Fetch the cached PPT content JSON for a session. Returns null if the
+ * copywriting pass has not been run yet.
+ */
+export async function getPptContent(sessionId: string): Promise<PptContent | null> {
+  const { data, error } = await supabase
+    .from('research_sessions')
+    .select('ppt_content_json')
+    .eq('session_id', sessionId)
+    .maybeSingle();
+
+  if (error) throw new Error(`Failed to fetch PPT content: ${error.message}`);
+  const json = data?.ppt_content_json;
+  return (json && typeof json === 'object' ? (json as PptContent) : null);
+}

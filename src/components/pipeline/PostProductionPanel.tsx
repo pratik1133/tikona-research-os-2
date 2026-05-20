@@ -17,6 +17,8 @@ import {
   generatePptx,
   PPT_SERVICE_URL,
 } from '@/lib/api';
+import { runPptCopywriting } from '@/lib/anthropic-pipeline';
+import { savePptContent, getPptContent } from '@/lib/pipeline-api';
 import { createRecommendation } from '@/lib/recommendations-api';
 import type { ResearchReport } from '@/types/database';
 import type { RecommendationRating } from '@/types/recommendations';
@@ -59,7 +61,8 @@ export default function PostProductionPanel({
   sessionId,
   companyName,
   nseSymbol,
-  // sector / vaultId / financialModelFileUrl are now resolved server-side from sessionId
+  sector,
+  // vaultId / financialModelFileUrl are now resolved server-side from sessionId
   userEmail,
   stage2Sections,
   initialReport = null,
@@ -75,6 +78,10 @@ export default function PostProductionPanel({
   const [pptxPdfFileUrl, setPptxPdfFileUrl] = useState<string | null>(null);
   const [useMock, setUseMock] = useState(false);
   const pptxTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // --- PPT copywriting pass (slide-specific copy) ---
+  const [slideCopyReady, setSlideCopyReady] = useState(false);
+  const [slideCopyGenerating, setSlideCopyGenerating] = useState(false);
 
   // --- Service health ---
   const [serviceHealth, setServiceHealth] = useState<'checking' | 'ok' | 'down'>('checking');
@@ -127,6 +134,15 @@ export default function PostProductionPanel({
   }, []);
 
   // Restore from existing report
+  // Detect whether the PPT copywriting pass has already run for this session.
+  useEffect(() => {
+    let cancelled = false;
+    getPptContent(sessionId)
+      .then((c) => { if (!cancelled) setSlideCopyReady(!!c && Object.keys(c).length > 0); })
+      .catch(() => { if (!cancelled) setSlideCopyReady(false); });
+    return () => { cancelled = true; };
+  }, [sessionId]);
+
   useEffect(() => {
     if (initialReport) {
       restoreFromReport(initialReport);
@@ -210,6 +226,60 @@ export default function PostProductionPanel({
   }, []);
 
   // ========================
+  // Step 1a: PPT copywriting pass
+  // ========================
+
+  /**
+   * Runs the dedicated PPT copywriting LLM pass and persists the result on
+   * the session row. The Python PPTX service reads this JSON and writes its
+   * values straight into the master template, replacing the heuristic
+   * truncate-and-paste path that was producing duplicate cards and mid-clause
+   * cut-offs.
+   *
+   * Returns true on success so handleGeneratePptx can decide whether to
+   * proceed with PPTX rendering after a forced regeneration.
+   */
+  const handleGenerateSlideCopy = useCallback(async (opts: { silent?: boolean } = {}): Promise<boolean> => {
+    if (slideCopyGenerating) return false;
+    if (stage2Sections.length === 0) {
+      if (!opts.silent) toast.error('Stage 2 sections not loaded yet.');
+      return false;
+    }
+    setSlideCopyGenerating(true);
+    try {
+      const report = await getReportBySession(sessionId);
+      const reportData = report as Record<string, unknown> | null;
+      const sec = (k: string) => stage2Sections.find((s) => s.key === k)?.content?.trim() ?? '';
+      const meta = {
+        cmp: (reportData?.cs_current_market_price as string) || sec('current_market_price'),
+        target: (reportData?.cs_target_price as string) || sec('target_price'),
+        upsidePct: (reportData?.cs_upside_percentage as string) || sec('upside_percentage'),
+        marketCap: (reportData?.cs_market_cap as string) || sec('market_cap'),
+        marketCapCategory: (reportData?.cs_market_cap_category as string) || sec('market_cap_category'),
+        rating: (reportData?.cs_rating as string) || sec('rating'),
+        saarthiScore: null,
+      };
+      const { content } = await runPptCopywriting(
+        companyName,
+        nseSymbol,
+        sector || '',
+        stage2Sections,
+        meta,
+      );
+      await savePptContent(sessionId, content);
+      setSlideCopyReady(true);
+      if (!opts.silent) toast.success(`Slide copy generated (${Object.keys(content).length} fields)`);
+      return true;
+    } catch (err) {
+      console.error('[PostProduction] PPT copywriting failed', err);
+      if (!opts.silent) toast.error(err instanceof Error ? err.message : 'PPT copywriting failed');
+      return false;
+    } finally {
+      setSlideCopyGenerating(false);
+    }
+  }, [slideCopyGenerating, stage2Sections, sessionId, companyName, nseSymbol, sector]);
+
+  // ========================
   // Step 1: Generate PPTX
   // ========================
 
@@ -227,6 +297,17 @@ export default function PostProductionPanel({
     );
 
     try {
+      // Run the copywriting pass first if no cached slide copy exists. The
+      // Python service still falls back to heuristic copy if this is absent,
+      // but the LLM pass is what produces non-duplicate, box-budgeted content.
+      if (!slideCopyReady && !useMock) {
+        toast.info('Generating slide-specific copy (one-time, ~30-60s)...');
+        const ok = await handleGenerateSlideCopy({ silent: true });
+        if (!ok) {
+          toast.warning('Slide copy step failed — falling back to heuristic copy.');
+        }
+      }
+
       const result = await generatePptx({
         reportId,
         sessionId,
@@ -262,7 +343,7 @@ export default function PostProductionPanel({
       }
       setPptxGenerating(false);
     }
-  }, [reportId, sessionId, useMock]);
+  }, [reportId, sessionId, useMock, slideCopyReady, handleGenerateSlideCopy]);
 
   // ========================
   // Step 2: Podcast
@@ -557,6 +638,29 @@ export default function PostProductionPanel({
                   />
                   Mock planner (skip OpenRouter)
                 </label>
+              </div>
+              {/* Slide copywriting status + refresh control */}
+              <div className="flex items-center gap-3 text-xs">
+                <span
+                  className={cn(
+                    'inline-flex items-center gap-1 rounded-full px-2 py-0.5',
+                    slideCopyReady
+                      ? 'bg-green-50 text-green-700 border border-green-200'
+                      : 'bg-neutral-50 text-neutral-500 border border-neutral-200',
+                  )}
+                  title="Per-placeholder LLM copy cached on the session"
+                >
+                  {slideCopyReady ? <Check className="h-3 w-3" /> : <FileEdit className="h-3 w-3" />}
+                  Slide copy {slideCopyReady ? 'ready' : 'not generated'}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => handleGenerateSlideCopy()}
+                  disabled={slideCopyGenerating || pptxGenerating || stage2Sections.length === 0}
+                  className="text-[11px] text-accent-600 hover:text-accent-700 underline disabled:text-neutral-400 disabled:no-underline"
+                >
+                  {slideCopyGenerating ? 'Generating…' : (slideCopyReady ? 'Refresh slide copy' : 'Generate slide copy')}
+                </button>
               </div>
               {pptxGenerating && (
                 <div className="text-[11px] text-accent-600 animate-pulse mt-2 flex items-center gap-1.5">
